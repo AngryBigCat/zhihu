@@ -18,22 +18,23 @@
                     <li class="active"><a href="#">首页<span class="sr-only">(current)</span></a></li>
                     <li><a href="#">发现</a></li>
                     <li><a href="#">话题</a></li>
-                    <form class="navbar-form navbar-left">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="搜索你感兴趣的内容">
-                        </div>
-                        <button type="submit" class="btn btn-default">提问</button>
-                    </form>
+                    <form class="navbar-form navbar-left" style=" width:600px;">
+                    <div class="form-group col-md-8">
+                        <input type="text" class="form-control" style="width:350px" placeholder="搜索你感兴趣的内容。。。">
+                    </div>
+                    <button type="submit" class="btn btn-default btn-info">提问</button>
+                </form>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#">通知</a></li>
-                    <li><a href="#">消息</a></li>
+                    <li><a href="#"><span class="fa fa-bell"></span></a></li>
+                    <li><a href="#"><span class="fa fa-comments"></a></li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                        <img src="img/avatar04.png" alt="" class="dropdown-toggle img-rounded" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="width:30px;height:30px;margin:10px">
                         <ul class="dropdown-menu">
-                            <li><a href="#">我的主页</a></li>
-                            <li><a href="#">设置</a></li>
-                            <li><a href="#">退出</a></li>
+                            <li><a href="#"><span class="fa fa-user">　</span>我的主页</a></li>
+                            <li><a href="#"><span class="fa fa-cog">　</span>设置</a></li>
+                             <li role="separator" class="divider"></li>
+                            <li><a href="#"><span class="fa fa-power-off">　</span>退出</a></li>
                         </ul>
                     </li>
                 </ul>
