@@ -17,3 +17,7 @@ Route::get('/', function () {
 Route::get('/admin', function(){
 	return 'bbbbb';
 });
+// 前台登录
+Route::get('/home/login','LoginController@login');
+Route::post('/home/login','LoginController@dologin');
+Route::get('/home/login_form2','LoginController@login_form2');
