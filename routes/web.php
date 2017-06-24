@@ -12,5 +12,9 @@
 */
 
 Route::get('/', function () {
-    return view('home.index');
+    return view('home.default');
+});
+
+Route::get('/question', function () {
+    return view('question.default');
 });
