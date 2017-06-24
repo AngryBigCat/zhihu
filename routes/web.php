@@ -11,10 +11,23 @@
 |
 */
 
+//默认首页
 Route::get('/', function () {
-    return view('home.default');
+    return view('home.index.default');
 });
 
+
+//问题页
 Route::get('/question', function () {
-    return view('question.default');
+    return view('home.question.default');
 });
+
+//登陆
+Route::get('login', function () {
+    return view('home.session.login');
+})->name('login');
+
+//注册
+Route::get('register', function () {
+    return view('home.session.register');
+})->name('register');

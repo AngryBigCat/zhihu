@@ -1,4 +1,4 @@
-@extends('layouts.default')
+@extends('home.layouts.default')
 
 @section('style')
 <style>
@@ -204,7 +204,7 @@
                 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
             </div>
             <div class="question-head-footer">
-                @component('component._footerCon')
+                @component('home.component._footerCon')
                 @endcomponent
             </div>
         </div>
@@ -245,7 +245,7 @@
                 {{-- 回答item --}}
                 <div class="question-answer-item">
                     <div class="item-box">
-                        @include('question._author')
+                        @include('home.question._author')
                     </div>
                     <div class="answer-thumbs-counts">
                         <span>1733 人赞同了该回答</span>
@@ -258,7 +258,7 @@
                         来源：知乎
                         著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
                     </div>
-                        @component('component._footerCon')
+                        @component('home.component._footerCon')
                         <li class="vote-button">
                             <a href="#">2014 <span class="fa fa-caret-up"></span></a>
                             <a href="#"><span class="fa fa-caret-down"></span></a>
@@ -269,7 +269,7 @@
         </div>
         <div class="panel panel-default answeradd">
             <div class="answeradd-header">
-                @include('question._author')
+                @include('home.question._author')
             </div>
             <div class="editable-toolbar">
                     <button class="btn btn-default btn-sm"><span class="glyphicon glyphicon-bold"></span></button>
@@ -300,7 +300,7 @@
             </div>
             <div class="panel-body" class="about-author">
                 <div class="about-author-head">
-                    @include('question._author')
+                    @include('home.question._author')
                 </div>
                 <div class="about-author-bottom">
                     <div class="about-author-counts">

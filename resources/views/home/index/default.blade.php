@@ -1,4 +1,4 @@
-@extends('layouts.default')
+@extends('home.layouts.default')
 
 @section('style')
 <style>
@@ -217,7 +217,7 @@
                                 </div>
                             </div>
                             <div class="index-topic-footer">
-                                @component('component._footerCon')
+                                @component('home.component._footerCon')
                                     <li><span class="fa fa-plus"></span> 关注问题</li>
                                 @endcomponent
                             </div>
