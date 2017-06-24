@@ -121,7 +121,7 @@
                 <h3 class="panel-title">知乎专栏</h3>
             </div>
             <ul class="list-group">
-                <a href="#" class="list-group-item">专栏・发现</a>
+                <a href="./user-Column" class="list-group-item">专栏・发现</a>
             </ul>
         </div>
         <div class="panel panel-default">
