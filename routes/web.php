@@ -11,27 +11,47 @@
 |
 */
 //主页
+
+
+
+//默认首页
 Route::get('/', function () {
-    return view('home.index');
-});
-//基本信息设置
-Route::get('/user-Settings', function(){
-	return view('home.user.Settings');
-});
-//账户密码设置
-Route::get('/user-account', function(){
-	return view('home.user.account');
-});
-//消息和邮件
-Route::get('/user-Messages', function(){
-	return view('home.user.Messages');
-});
-//屏蔽
-Route::get('/user-shield', function(){
-	return view('home.user.shield');
+    return view('home.index.default');
 });
 
-//专栏.发现
-Route::get('/user-Column', function(){
-	return view('home.Column.Column');
+//问题页
+Route::get('question', function () {
+    return view('home.question.default');
 });
+
+//登陆
+Route::get('login', function () {
+    return view('home.session.login');
+})->name('login');
+
+//注册
+Route::get('register', function () {
+    return view('home.session.register');
+})->name('register');
+
+//用户个人页
+Route::get('user', function () {
+    return view('home.user.userinfo');
+});
+
+//基本信息设置
+Route::get('settings/profile', function(){
+    return view('home.settings.settings');
+})->name('settings.profile');
+//账户密码设置
+Route::get('settings/account', function(){
+    return view('home.settings.account');
+})->name('settings.account');
+//消息和邮件
+Route::get('settings/notification', function(){
+    return view('home.settings.messages');
+})->name('settings.notification');
+//屏蔽
+Route::get('settings/filter', function(){
+    return view('home.settings.shield');
+})->name('settings.filter');
