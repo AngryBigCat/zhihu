@@ -31,3 +31,8 @@ Route::get('login', function () {
 Route::get('register', function () {
     return view('home.session.register');
 })->name('register');
+
+
+Route::get('user', function () {
+    return view('home.user.userinfo');
+});
