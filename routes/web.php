@@ -55,3 +55,18 @@ Route::get('settings/notification', function(){
 Route::get('settings/filter', function(){
     return view('home.settings.shield');
 })->name('settings.filter');
+
+// 我的收藏
+Route::get('collect/collections',function(){
+    return view('home.collect.collections');
+})->name('collect/collections');
+
+// 我关注的问题
+Route::get('collect/following', function(){
+    return view('home.collect.following');
+})->name('collect.following');
+
+// 邀请我回答的问题
+Route::get('collect/myQuestion', function(){
+    return view('home.collect.myQuestion');
+})->name('collect.myQuestion');
