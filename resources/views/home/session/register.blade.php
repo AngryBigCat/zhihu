@@ -1,6 +1,7 @@
 @extends('home.layouts.session')
 
 @section('form')
+
 <form class="form-horizontal">
 	<input type="text" name="email" class="form-control" placeholder="邮箱" required>
 	<input type="password" name="password" class="form-control" placeholder="密码" required>

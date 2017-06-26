@@ -1,5 +1,5 @@
 @extends('home.layouts.default')
-		
+
 @section('style')
 	@include('home.user.style')
 @endsection
@@ -32,7 +32,7 @@
 					<div class="clearfix"></div>
 					<!-- 提问start -->
 				   	@include('home.user.tiwen')
-				   	
+
 					<!-- 提问end -->
 					<!-- 专栏 start -->
 				   	@include('home.user.zhuanlan')

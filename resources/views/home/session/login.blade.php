@@ -12,15 +12,15 @@
 @stop
 
 @section('form')
-<form class="form-horizontal">
+<form class="form-horizontal" method="post" action="#">
 	<!-- <input type="text" name="username" class="form-control" placeholder="姓名" required> -->
 	<input type="text" name="phone" class="form-control" placeholder="手机号或邮箱" required>
 	<input type="password" name="password" class="form-control" placeholder="密码" required>
 	<br>
-	<button class="form-control btn btn-primary">登录知乎</button>		
+	<button class="form-control btn btn-primary">登录知乎</button>
 </form>
 <br><br>
-<a href="" class="text-left" id="left">手机验证码登录</a>  
+<a href="" class="text-left" id="left">手机验证码登录</a>
 <span class="text-right" href="#" id="right">无法登录？</span>
 <br><br>
 <span class="btn ">社交帐号登录</span>

@@ -40,10 +40,11 @@ Route::get('search', function () {
 });
 
 
-//基本信息设置
+//基本设置
 Route::get('settings/profile', function(){
     return view('home.settings.settings');
 })->name('settings.profile');
+
 //账户密码设置
 Route::get('settings/account', function(){
     return view('home.settings.account');
@@ -56,3 +57,13 @@ Route::get('settings/notification', function(){
 Route::get('settings/filter', function(){
     return view('home.settings.shield');
 })->name('settings.filter');
+
+//专栏首页
+Route::get('column/index', function () {
+    return view('home.column.columnIndex');
+});
+//专栏详情
+Route::get('column/details', function () {
+    return view('home.column.columndetails');
+});
+
