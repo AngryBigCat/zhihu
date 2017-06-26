@@ -67,3 +67,22 @@ Route::get('column/details', function () {
     return view('home.column.columndetails');
 });
 
+// 我的收藏
+Route::get('collect/collections',function(){
+    return view('home.collect.collections');
+})->name('collect/collections');
+
+// 我关注的问题
+Route::get('collect/following', function(){
+    return view('home.collect.following');
+})->name('collect.following');
+
+// 邀请我回答的问题
+Route::get('collect/myQuestion', function(){
+    return view('home.collect.myQuestion');
+})->name('collect.myQuestion');
+
+// 发现
+Route::get('found',function(){
+    return view('home.found.found');
+})->name('found');
