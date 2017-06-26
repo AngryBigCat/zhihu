@@ -70,3 +70,8 @@ Route::get('collect/following', function(){
 Route::get('collect/myQuestion', function(){
     return view('home.collect.myQuestion');
 })->name('collect.myQuestion');
+
+// 发现
+Route::get('found',function(){
+    return view('home.found.found');
+})->name('found');
