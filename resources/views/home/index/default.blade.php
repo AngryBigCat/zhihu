@@ -152,21 +152,21 @@
 <div class="row">
     <div class="col-md-8">
         <div class="index-entry">
-                <div class="index-entry-avatar">
-                    <img src="img/avatar04.png">
+            <div class="index-entry-avatar">
+                <img src="img/avatar04.png">
+            </div>
+            <span class="entry-box-arrow"></span>
+            <span class="entry-box-arrow-border"></span>
+            <div class="index-entry-box">
+                <ul class="entry-box-list">
+                    <li><a href="#"><span class="fa fa-question-circle-o"></span> 提问</a></li>
+                    <li><a href="#"><span class="fa fa-file-text-o"></span> 回答</a></li>
+                    <li><a href="#"><span class="fa fa-pencil-square-o"></span> 写文章</a></li>
+                </ul>
+                <div class="entry-box-after">
+                    <a href="#">草稿(2)</a>
                 </div>
-                <span class="entry-box-arrow"></span>
-                <span class="entry-box-arrow-border"></span>
-                <div class="index-entry-box">
-                    <ul class="entry-box-list">
-                        <li><a href="#"><span class="fa fa-question-circle-o"></span> 提问</a></li>
-                        <li><a href="#"><span class="fa fa-file-text-o"></span> 回答</a></li>
-                        <li><a href="#"><span class="fa fa-pencil-square-o"></span> 写文章</a></li>
-                    </ul>
-                    <div class="entry-box-after">
-                        <a href="#">草稿(2)</a>
-                    </div>
-                </div>
+            </div>
     </div>
         <div class="panel panel-default">
             <div class="panel-body">

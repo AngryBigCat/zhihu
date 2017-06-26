@@ -33,12 +33,12 @@
 </head>
 <body>
     <canvas></canvas>
-	<div class="login " >
+	<div class="login">
 		<h1 class="text-primary">知乎</h1>
 		<h4>与世界分享你的知识、经验和见解</h4>
 		<br>
 		<big><a href="{{ route('register') }}">注册</a>　
-		<a href="/login">登录</a>
+		<a href="{{ route('login') }}">登录</a>
 		</big><br>
 		 @yield('form')
 	</div>

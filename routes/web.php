@@ -18,26 +18,27 @@
 Route::get('/', function () {
     return view('home.index.default');
 });
-
 //问题页
 Route::get('question', function () {
     return view('home.question.default');
 });
-
 //登陆
 Route::get('login', function () {
     return view('home.session.login');
 })->name('login');
-
 //注册
 Route::get('register', function () {
     return view('home.session.register');
 })->name('register');
-
 //用户个人页
 Route::get('user', function () {
     return view('home.user.userinfo');
 });
+//搜索页
+Route::get('search', function () {
+    return view('home.search.default');
+});
+
 
 //基本信息设置
 Route::get('settings/profile', function(){
