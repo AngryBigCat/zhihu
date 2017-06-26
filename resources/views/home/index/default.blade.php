@@ -1,5 +1,4 @@
 @extends('home.layouts.default')
-
 @section('style')
 <style>
     .from-topic {
