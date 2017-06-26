@@ -1,6 +1,9 @@
 @extends('home.layouts.default')
 @section('style')
     <style>
+        body {
+                background-color: #FFFFFF;
+        }
         a {
             font-size: 16px;
             color: #225599;
