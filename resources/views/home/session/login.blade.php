@@ -12,10 +12,10 @@
 @stop
 
 @section('form')
-<form class="form-horizontal" method="post" action="#">
-	<!-- <input type="text" name="username" class="form-control" placeholder="姓名" required> -->
-	<input type="text" name="phone" class="form-control" placeholder="手机号或邮箱" required>
+<form class="form-horizontal" method="post" action="doLogin">
+	<input type="text" name="email" class="form-control" placeholder="手机号或邮箱" required>
 	<input type="password" name="password" class="form-control" placeholder="密码" required>
+	{{csrf_field()}}
 	<br>
 	<button class="form-control btn btn-primary">登录知乎</button>
 </form>

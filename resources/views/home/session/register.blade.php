@@ -1,13 +1,14 @@
 @extends('home.layouts.session')
 
 @section('form')
-
-<form class="form-horizontal">
+	
+<form class="form-horizontal" method="post" action="doRegister">
 	<input type="text" name="email" class="form-control" placeholder="邮箱" required>
 	<input type="password" name="password" class="form-control" placeholder="密码" required>
 	<input type="password" name="repassword" class="form-control" placeholder="确认密码" required>
+	{{csrf_field()}}
 	<br>
-	<button class="form-control btn btn-primary">注册知乎</button>
+	<button class="form-control btn btn-primary" type="submit">注册知乎</button>
 </form>
 <br><br>
 <span>点击[注册]按钮，即代表你同意

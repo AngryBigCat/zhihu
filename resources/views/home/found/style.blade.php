@@ -6,6 +6,7 @@
 		padding:0 10px;
 	}
 	h5{
+		padding:8px 0;
 		color:#225599;
 		font-weight: bold;
 	}
@@ -14,6 +15,7 @@
 		font-weight: bold;
 	}
 	#wenda h4{
+		padding:5px 0;
 		color:#333;
 		font-size: 12px
 	}

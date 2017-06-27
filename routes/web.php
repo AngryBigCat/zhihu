@@ -22,18 +22,20 @@ Route::get('/', function () {
 Route::get('question', function () {
     return view('home.question.default');
 });
+
 //登陆
-Route::get('login', function () {
-    return view('home.session.login');
-})->name('login');
+Route::get('login','LoginController@login')->name('login');
+Route::post('doLogin','LoginController@doLogin');
+
 //注册
-Route::get('register', function () {
-    return view('home.session.register');
-})->name('register');
+Route::get('register','RegisterController@register')->name('register');
+Route::post('doRegister','RegisterController@doRegister');
+
 //用户个人页
-Route::get('user', function () {
+Route::get('user', function() {
     return view('home.user.userinfo');
 });
+
 //搜索页
 Route::get('search', function () {
     return view('home.search.default');
