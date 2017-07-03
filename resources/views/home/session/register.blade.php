@@ -2,12 +2,14 @@
 
 @section('form')
 
-<form class="form-horizontal">
-	<input type="text" name="email" class="form-control" placeholder="邮箱" required>
+<form class="form-horizontal" method="POST" action="{{ route('register') }}">
+	{{ csrf_field() }}
+	<input type="text" name="name" class="form-control" value="{{ old('name') }}" placeholder="名字" required>
+	<input type="text" name="email" class="form-control" value="{{ old('email') }}" placeholder="邮箱" required>
 	<input type="password" name="password" class="form-control" placeholder="密码" required>
-	<input type="password" name="repassword" class="form-control" placeholder="确认密码" required>
+	<input type="password" name="password-confirm" class="form-control" placeholder="确认密码" required>
 	<br>
-	<button class="form-control btn btn-primary">注册知乎</button>
+	<button type="submit" class="form-control btn btn-primary">注册知乎</button>
 </form>
 <br><br>
 <span>点击[注册]按钮，即代表你同意

@@ -15,9 +15,11 @@ class CreateAnswersTable extends Migration
     {
         Schema::create('answers', function (Blueprint $table) {
             $table->increments('id')->comment('回答id');
+            $table->text('content')->comment('回答内容');
+            $table->integer('vote')->default(0)->comment('点赞');
             $table->integer('user_id')->comment('用户id');
             $table->integer('question_id')->comment('问题id');
-            $table->text('content')->comment('回答内容');
+            $table->timestamp('deleted_at')->nullable()->comment('软删除');
             $table->timestamps();
         });
     }

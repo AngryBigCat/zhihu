@@ -7,7 +7,10 @@
 
 require('./bootstrap');
 
+//Vue
 window.Vue = require('vue');
+//富文本编辑器
+window.E = require('wangeditor');
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -17,10 +20,11 @@ window.Vue = require('vue');
 //import components
 import searchView from './components/search-view/search-view.vue';
 
-
 const app = new Vue({
     components: {
-        searchView
+        searchView,
     }
 }).$mount('#app');
+
+//基础构造方法
 

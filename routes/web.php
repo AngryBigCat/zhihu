@@ -12,24 +12,30 @@
 */
 //主页
 
-
+//登录注册权限路由
+Auth::routes();
 
 //默认首页
-Route::get('/', function () {
-    return view('home.index.default');
-});
+Route::get('/', 'HomeController@index');
+
+//提交问题
+Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
 //问题页
-Route::get('question', function () {
-    return view('home.question.default');
-});
-//登陆
-Route::get('login', function () {
-    return view('home.session.login');
-})->name('login');
-//注册
-Route::get('register', function () {
-    return view('home.session.register');
-})->name('register');
+Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
+//关注问题、取消关注问题
+Route::post('question/{id}/toggleFollow', 'QuestionController@toggleFollow')->middleware('auth');
+//排序
+Route::get('question/{id}/{sortType}', 'QuestionController@toggleSort');
+
+//提交回答
+Route::post('answer', 'AnswerController@store')->middleware('auth')->name('answer.store');
+//点赞、取消点赞
+Route::post('answer/{id}/{type}', 'AnswerController@toggleVote')->middleware('auth');
+
+
+
+
+
 //用户个人页
 Route::get('user', function () {
     return view('home.user.userinfo');
@@ -86,3 +92,4 @@ Route::get('collect/myQuestion', function(){
 Route::get('found',function(){
     return view('home.found.found');
 })->name('found');
+
