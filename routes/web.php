@@ -85,6 +85,25 @@ Route::get('collect/myQuestion', function(){
 })->name('collect.myQuestion');
 
 // 发现
-Route::get('found',function(){
-    return view('home.found.found');
-})->name('found');
+// Route::get('found',function(){
+//     return view('home.found.found');
+// })->name('found');
+Route::get('found','FoundController@found')->name('found');
+Route::get('retui','FoundController@retui')->name('retui');
+Route::get('found/more','FoundController@more')->name('found/more');
+
+// 知乎草案（协议）
+Route::get('deal',function(){
+    return view('home.deal');
+})->name('deal');
+
+// 知乎举报
+Route::get('jubao',function(){
+    return view('home.jubao');
+})->name('jubao');
+
+// 联系我们
+Route::get('contact',function(){
+    return view('home.contact');
+})->name('contact');
+

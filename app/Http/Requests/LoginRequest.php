@@ -36,5 +36,6 @@ class LoginRequest extends FormRequest
             'password.required' => '密码必填',
             'password.regex' => '密码格式不正确'
         ];
+
     }
 }

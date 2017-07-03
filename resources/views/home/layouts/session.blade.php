@@ -53,13 +53,14 @@
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
-                    
                 </ol>
             </div>
         @endif
-		<big><a href="{{ route('register') }}">注册</a>　
-		<a href="{{ route('login') }}">登录</a>
-		</big><br>
+		<big>
+            <a href="{{ route('register') }}">注册</a>　
+    		<a href="{{ route('login') }}">登录</a>
+		</big>
+        <br>
 		 @yield('form')
 	</div>
     <script src="/js/app.js"></script>
