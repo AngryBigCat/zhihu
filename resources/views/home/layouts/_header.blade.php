@@ -16,7 +16,7 @@
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="/">首页<span class="sr-only">(current)</span></a></li>
                     <li><a href="#">发现</a></li>
-                    <li><a href="#">话题</a></li>
+                    <li><a href="/topic">话题</a></li>
                     <form class="navbar-form navbar-left" style=" width:600px;">
                     <div class="form-group col-md-8">
                         <input type="text" class="form-control" style="width:350px" placeholder="搜索你感兴趣的内容。。。">

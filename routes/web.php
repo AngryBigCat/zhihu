@@ -18,6 +18,20 @@
 Route::get('/', function () {
     return view('home.index.default');
 });
+//后台首页
+Route::get('/admin',function(){
+    return view('admin.index');
+});
+//话题列表
+Route::get('/admin/listtopic',function(){
+    return view('admin.topic.listtopic');
+});
+
+//话题增加
+Route::get('/admin/topiccreate',function(){
+    return view('admin.topic.topiccreate');
+});
+
 //问题页
 Route::get('question', function () {
     return view('home.question.default');
@@ -86,3 +100,8 @@ Route::get('collect/myQuestion', function(){
 Route::get('found',function(){
     return view('home.found.found');
 })->name('found');
+// 话题
+Route::get('/topic','TopicController@index');
+// 内容
+Route::get('/topic/{id}','TopicController@tag');
+
