@@ -6,9 +6,12 @@
     "type": "project",
     "require": {
         "php": ">=5.6.4",
+<<<<<<< HEAD
         "barryvdh/laravel-debugbar": "^2.4",
         "doctrine/dbal": "^2.5",
         "graham-campbell/markdown": "^7.1",
+=======
+>>>>>>> zhihu-php179
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0"
     },

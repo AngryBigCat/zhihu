@@ -165,7 +165,6 @@ return [
 
         // GrahamCampbell\Markdown\Facades\Markdown::class,
 
-
         /*
          * Package Service Providers...
          */
@@ -179,6 +178,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
         Barryvdh\Debugbar\ServiceProvider::class,
 
     ],
@@ -230,8 +230,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        //markdown编辑器门面
         'Markdown' => GrahamCampbell\Markdown\Facades\Markdown::class,
-
     ],
 
 ];
