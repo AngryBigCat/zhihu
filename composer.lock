@@ -5,10 +5,14 @@
         "This file is @generated automatically"
     ],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "7d2e102a718e48b89bad0f45243e975b",
 =======
     "content-hash": "f85bcdf8e8905aedafbcbb0fd7cb7735",
 >>>>>>> e4f52a8a5699e0f27b8b31a78a6c3d8899ae05aa
+=======
+    "content-hash": "f85bcdf8e8905aedafbcbb0fd7cb7735",
+>>>>>>> c5391bb04520d3746c4a30921d4778064b361817
     "packages": [
         {
             "name": "caouecs/laravel-lang",

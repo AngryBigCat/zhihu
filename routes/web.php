@@ -20,6 +20,21 @@ Route::get('/', 'HomeController@index');
 
 //提交问题
 Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
+
+//后台首页
+Route::get('/admin',function(){
+    return view('admin.index');
+});
+//话题列表
+Route::get('/admin/listtopic',function(){
+    return view('admin.topic.listtopic');
+});
+
+//话题增加
+Route::get('/admin/topiccreate',function(){
+    return view('admin.topic.topiccreate');
+});
+
 //问题页
 
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
@@ -103,8 +118,12 @@ Route::get('deal',function(){
 Route::get('jubao',function(){
     return view('home.jubao');
 })->name('jubao');
-
 // 联系我们
 Route::get('contact',function(){
     return view('home.contact');
 })->name('contact');
+
+// 话题
+Route::get('topic','TopicController@index')->name('topic');
+// 内容
+Route::get('topic/{id}','TopicController@tag');

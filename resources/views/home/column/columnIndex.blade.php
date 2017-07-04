@@ -2,6 +2,9 @@
 
 @section('column')
 	<style type="text/css">
+		body{
+			padding:0px;
+		}
 		.logo-zhihu {
 			width:129px;
 			height:129px;
