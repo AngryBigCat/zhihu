@@ -12,28 +12,50 @@
 */
 //主页
 
-
+//登录注册权限路由
+Auth::routes();
 
 //默认首页
-Route::get('/', function () {
-    return view('home.index.default');
+Route::get('/', 'HomeController@index');
+
+//提交问题
+Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
+
+//后台首页
+Route::get('/admin',function(){
+    return view('admin.index');
 });
+//话题列表
+Route::get('/admin/listtopic',function(){
+    return view('admin.topic.listtopic');
+});
+
+//话题增加
+Route::get('/admin/topiccreate',function(){
+    return view('admin.topic.topiccreate');
+});
+
 //问题页
-Route::get('question', function () {
-    return view('home.question.default');
-});
-//登陆
-Route::get('login', function () {
-    return view('home.session.login');
-})->name('login');
-//注册
-Route::get('register', function () {
-    return view('home.session.register');
-})->name('register');
+
+Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
+//关注问题、取消关注问题
+Route::post('question/{id}/toggleFollow', 'QuestionController@toggleFollow')->middleware('auth');
+//排序
+Route::get('question/{id}/{sortType}', 'QuestionController@toggleSort');
+
+//提交回答
+Route::post('answer', 'AnswerController@store')->middleware('auth')->name('answer.store');
+//点赞、取消点赞
+Route::post('answer/{id}/{type}', 'AnswerController@toggleVote')->middleware('auth');
+
+
+
+
 //用户个人页
-Route::get('user', function () {
+Route::get('user', function() {
     return view('home.user.userinfo');
 });
+
 //搜索页
 Route::get('search', function () {
     return view('home.search.default');
@@ -100,3 +122,27 @@ Route::group(['prefix' => 'people'], function () {
     // 修改头像
     Route::post('edit_headPic', 'PeopleController@edit_headPic');
 });
+
+
+Route::get('found','FoundController@found')->name('found');
+Route::get('retui','FoundController@retui')->name('retui');
+Route::get('found/more','FoundController@more')->name('found/more');
+
+// 知乎草案（协议）
+Route::get('deal',function(){
+    return view('home.deal');
+})->name('deal');
+
+// 知乎举报
+Route::get('jubao',function(){
+    return view('home.jubao');
+})->name('jubao');
+// 联系我们
+Route::get('contact',function(){
+    return view('home.contact');
+})->name('contact');
+
+// 话题
+Route::get('topic','TopicController@index')->name('topic');
+// 内容
+Route::get('topic/{id}','TopicController@tag');

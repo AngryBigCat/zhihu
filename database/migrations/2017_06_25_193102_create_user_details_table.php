@@ -12,6 +12,7 @@ class CreateUserDetailsTable extends Migration
      * @return void
      */
     public function up()
+
     {   
         if (!Schema::hasTable('user_details')) {
             Schema::create('user_details', function (Blueprint $table) {
@@ -29,7 +30,7 @@ class CreateUserDetailsTable extends Migration
             Schema::table('user_details', function ($table) {
                 // 添加的字段
                 // if (Schema::hasColumn('user_details', 'headpic')) {
-                      $table->char('headpic',255)->comment('头像')->default('boxed-bg.png')->change();
+                      // $table->char('headpic',255)->comment('头像')->default('boxed-bg.png')->change();
                 // }
                 // if (Schema::hasColumn('user_details', 'b')) {
                 //     //
@@ -38,6 +39,7 @@ class CreateUserDetailsTable extends Migration
                 
             });
         }
+
     }
 
     /**

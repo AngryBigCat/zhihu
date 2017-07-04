@@ -29,6 +29,9 @@
     form{
     	margin-top: 30px;
     }
+    .error li{
+        list-style: none;
+    }
     </style>
 </head>
 <body>
@@ -37,9 +40,27 @@
 		<h1 class="text-primary">知乎</h1>
 		<h4>与世界分享你的知识、经验和见解</h4>
 		<br>
-		<big><a href="{{ route('register') }}">注册</a>　
-		<a href="{{ route('login') }}">登录</a>
-		</big><br>
+        @if (!empty(Session::get('info')))
+            <div class="alert {{Session::get('info')=='success'? 'alert-success' : 'alert-danger'}} alert-dismissible error" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            {{Session::get('info')=='success' ? "恭喜您，注册成功，请登录！！" : Session::get('info')}}
+        </div>
+        @endif
+        @if (count($errors) > 0)
+            <div class="alert alert-danger alert-dismissible error" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <ol>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ol>
+            </div>
+        @endif
+		<big>
+            <a href="{{ route('register') }}">注册</a>　
+    		<a href="{{ route('login') }}">登录</a>
+		</big>
+        <br>
 		 @yield('form')
 	</div>
     <script src="/js/app.js"></script>
