@@ -20,5 +20,6 @@
     </div>
     <script src="{{ asset('js/app.js') }}"></script>
     @yield('script')
+    @yield("js")
 </body>
 </html>

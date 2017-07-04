@@ -21,6 +21,7 @@ Route::get('/', 'HomeController@index');
 //提交问题
 Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
 //问题页
+
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
 //关注问题、取消关注问题
 Route::post('question/{id}/toggleFollow', 'QuestionController@toggleFollow')->middleware('auth');
@@ -35,11 +36,11 @@ Route::post('answer/{id}/{type}', 'AnswerController@toggleVote')->middleware('au
 
 
 
-
 //用户个人页
-Route::get('user', function () {
+Route::get('user', function() {
     return view('home.user.userinfo');
 });
+
 //搜索页
 Route::get('search', function () {
     return view('home.search.default');
@@ -89,7 +90,21 @@ Route::get('collect/myQuestion', function(){
 })->name('collect.myQuestion');
 
 // 发现
-Route::get('found',function(){
-    return view('home.found.found');
-})->name('found');
+Route::get('found','FoundController@found')->name('found');
+Route::get('retui','FoundController@retui')->name('retui');
+Route::get('found/more','FoundController@more')->name('found/more');
 
+// 知乎草案（协议）
+Route::get('deal',function(){
+    return view('home.deal');
+})->name('deal');
+
+// 知乎举报
+Route::get('jubao',function(){
+    return view('home.jubao');
+})->name('jubao');
+
+// 联系我们
+Route::get('contact',function(){
+    return view('home.contact');
+})->name('contact');

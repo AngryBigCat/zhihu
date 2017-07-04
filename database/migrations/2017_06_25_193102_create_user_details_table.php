@@ -17,7 +17,7 @@ class CreateUserDetailsTable extends Migration
             $table->increments('user_id')->comment('用户id');
             $table->char('introduction',255)->nullable()->comment('个人简介');
             $table->char('address',255)->nullable()->comment('个人住址');
-            $table->char('jog',100)->nullable()->comment('工作');
+            $table->char('job',100)->nullable()->comment('工作');
             $table->char('headpic',255)->nullable()->comment('头像');
             $table->enum('sex',['0','1','2'])->default('2')->comment('性别:0为女1为男2为保密');
             $table->timestamps();
