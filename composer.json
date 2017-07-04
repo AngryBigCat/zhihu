@@ -1,6 +1,6 @@
 {
     "name": "laravel/laravel",
-    "description": "The Laravel Framework",
+    "description": "The Laravel Framework.",
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "type": "project",
@@ -12,7 +12,12 @@
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
         "overtrue/laravel-follow": "^1.1",
-        "mews/captcha": "~2.0"
+        "mews/captcha": "~2.0",
+        "barryvdh/laravel-debugbar": "^2.4",
+        "doctrine/dbal": "^2.5",
+        "graham-campbell/markdown": "^7.1",
+        "laravel/framework": "5.4.*",
+        "laravel/tinker": "~1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

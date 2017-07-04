@@ -21,22 +21,7 @@ Route::get('/', 'HomeController@index');
 //提交问题
 Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
 
-//后台首页
-Route::get('/admin',function(){
-    return view('admin.index');
-});
-//话题列表
-Route::get('/admin/listtopic',function(){
-    return view('admin.topic.listtopic');
-});
-
-//话题增加
-Route::get('/admin/topiccreate',function(){
-    return view('admin.topic.topiccreate');
-});
-
 //问题页
-
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
 //关注问题、取消关注问题
 Route::post('question/{id}/toggleFollow', 'QuestionController@toggleFollow')->middleware('auth');
@@ -49,12 +34,24 @@ Route::post('answer', 'AnswerController@store')->middleware('auth')->name('answe
 Route::post('answer/{id}/{type}', 'AnswerController@toggleVote')->middleware('auth');
 
 
-
+//后台首页
+Route::get('/admin',function(){
+    return view('admin.index');
+});
+//话题列表
+Route::get('/admin/listtopic',function(){
+    return view('admin.topic.listtopic');
+});
+//话题增加
+Route::get('/admin/topiccreate',function(){
+    return view('admin.topic.topiccreate');
+});
 
 //用户个人页
 Route::get('user', function() {
     return view('home.user.userinfo');
 });
+
 
 //搜索页
 Route::get('search', function () {
@@ -127,3 +124,16 @@ Route::get('contact',function(){
 Route::get('topic','TopicController@index')->name('topic');
 // 内容
 Route::get('topic/{id}','TopicController@tag');
+
+// 我的主页
+Route::group(['prefix' => 'people'], function () {
+    Route::get('activities', 'PeopleController@activities');
+    Route::get('answers', 'PeopleController@answers');
+    Route::get('asks', 'PeopleController@asks');
+    Route::get('columns', 'PeopleController@columns');
+    Route::get('collections', 'PeopleController@collections');
+    // 修改个人信息
+    Route::post('edit', 'PeopleController@edit');
+    // 修改头像
+    Route::post('edit_headPic', 'PeopleController@edit_headPic');
+});

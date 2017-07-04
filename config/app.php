@@ -51,7 +51,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://homestead.com'),
+    'url' => env('APP_URL', 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------
@@ -163,6 +163,8 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
+        // GrahamCampbell\Markdown\Facades\Markdown::class,
+
         /*
          * Package Service Providers...
          */
@@ -177,12 +179,15 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        //点赞、关注
+        //关注、点赞
         Overtrue\LaravelFollow\FollowServiceProvider::class,
         Jcc\LaravelVote\VoteServiceProvider::class,
 
         //验证码
         Mews\Captcha\CaptchaServiceProvider::class,
+
+        //
+        Barryvdh\Debugbar\ServiceProvider::class,
 
     ],
 
@@ -232,9 +237,6 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-
-        //马克当
-        'Markdown' => GrahamCampbell\Markdown\Facades\Markdown::class,
 
         //验证码
         'Captcha' => Mews\Captcha\Facades\Captcha::class,

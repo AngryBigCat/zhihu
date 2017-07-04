@@ -8,7 +8,11 @@ class CreateQuestionsTable extends Migration
 {
     /**
      * Run the migrations.
+<<<<<<< HEAD
      *
+=======
+     * 问题表
+>>>>>>> gaoju
      * @return void
      */
     public function up()

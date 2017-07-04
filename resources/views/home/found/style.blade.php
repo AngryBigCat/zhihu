@@ -6,17 +6,27 @@
 		padding:0 10px;
 	}
 	h5{
+<<<<<<< HEAD
 		padding:8px 0;
+=======
+>>>>>>> gaoju
 		color:#225599;
 		font-weight: bold;
 	}
 	#wenda h4>a{
+<<<<<<< HEAD
 		/*color:#000;*/
 		font-weight: bold;
 		text-decoration: none;
 	}
 	#wenda h4{
 		padding:5px 0;
+=======
+		color:#000;
+		font-weight: bold;
+	}
+	#wenda h4{
+>>>>>>> gaoju
 		color:#333;
 		font-size: 12px
 	}
@@ -39,8 +49,11 @@
 		padding:10px;
 	}
 	.lizi{
+<<<<<<< HEAD
 		/*border:1px solid red;*/
 		margin-bottom: 20px;
+=======
+>>>>>>> gaoju
 		font-size: 12px;
 	}
 	.lizi>div{
@@ -58,6 +71,7 @@
 	}
 	.lizi p{
 		padding:12px 5px;
+<<<<<<< HEAD
 		height: 5.6em;
 		line-height:1.4em;
 		overflow: hidden;
@@ -65,6 +79,14 @@
 	.lizi_hide{
 		display: inline-block;
 		display:none;
+=======
+		height: 80px;
+		overflow: hidden;
+		text-overflow:ellipsis;
+	}
+	.a{
+		display: inline-block;
+>>>>>>> gaoju
 	}
 	.right{
 		font-size: 12px;
@@ -135,6 +157,7 @@
 	#dibu ul{
 		height:40px;
 	}
+<<<<<<< HEAD
 	.guanggao{
 		border-radius:7%;
 		width:350px;
@@ -172,5 +195,9 @@
 	}
 	.ca{
 		color:#bbb;
+=======
+	h5{
+		padding:8px 0;
+>>>>>>> gaoju
 	}
 </style>

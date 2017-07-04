@@ -2,6 +2,14 @@
 
 @section('style')
 <style>
+    body {
+        background: #f7f8fa;
+        padding-top: 50px;
+    }
+    h1 {
+        padding: 0;
+        margin: 0;
+    }
     #toolbar {
         background: #f7f8fa;
         border-bottom: 1px solid #e7eaf1;
@@ -17,9 +25,6 @@
     #editor2 .w-e-text:empty:before {
         content: '|';
         color:#bbb;
-    }
-    body {
-        padding-top: 50px;
     }
     .navbar, .navbar-default {
         margin-bottom: 0;
@@ -447,80 +452,5 @@
                 });
             });
         })();
-
-
-/*
-        function Base() {
-            this.editor2 = new E('#toolbar', '#editor2');
-            this.editorLoad();
-            this.answerLoad();
-        };
-
-        Base.prototype.editorLoad = function () {
-            // 富文本自定义菜单配置
-            this.editor2.customConfig.menus = [
-                'bold',  // 粗体
-                'italic',  // 斜体
-                'head',  // 标题
-                'quote',  // 引用
-                'code',  // 插入代码
-                'list',  // 列表
-                'emoticon',  // 表情
-                'image',  // 插入图片
-                'video',  // 插入视频
-            ];
-            this.editor2.create();
-        };
-
-        Base.prototype.answerLoad = function () {
-            var base = this;
-
-            /!*
-            提交问题
-             *!/
-            $('.addAnswer').on('click', function (event) {
-                event.preventDefault();
-                axios.post(this.href, {
-                    question_id: {{ $question->id }},
-                    content: base.editor2.txt.text()
-                }).then(function (res) {
-                    window.location.reload();
-                }).catch(function (err) {
-                    console.log(err);
-                });
-            });
-
-            /!*
-            点赞、取消点赞
-             *!/
-            $('.vote').on('click', function (event) {
-                var url = event.currentTarget.dataset.href;
-                var curl = url.split('/');
-                if (curl[curl.length - 1] === 'upVote') {
-                    curl.splice(-1, 1, 'cancelVote');
-                } else if (curl[curl.length - 1] === 'cancelVote') {
-                    curl.splice(-1, 1, 'upVote');
-                }
-                $(this).attr('data-href', curl.join('/'));
-                url = curl.join('/');
-                var _this = this;
-                axios.post(url).then(function (res) {
-                    var old = $(_this).find('.num').text();
-                    if (res.data === 'up') {
-                        var add = parseInt(old) + 1;
-                        $(_this).addClass('vote-active');
-                        $(_this).find('.num').text(add);
-                        $(_this).parent().parent().parent().find('.text-count').text(add);
-                    } else if (res.data === 'cancel') {
-                        var sub = parseInt(old) - 1;
-                        $(_this).removeClass('vote-active');
-                        $(_this).find('.num').text(sub);
-                        $(_this).parent().parent().parent().find('.text-count').text(sub);
-                    }
-                });
-            });
-        };*/
-
-
 </script>
 @endsection
