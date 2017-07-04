@@ -269,7 +269,7 @@
                         <span>人赞同了该回答</span>
                     </div>
                     <div class="answer-main-box">
-                        <div class="answer-main-content">{{ $answer->content }}</div>
+                        <div class="answer-main-content">{!! $answer->content !!}</div>
                     </div>
                         @component('home.component._footerCon')
                         <li class="vote-button">
