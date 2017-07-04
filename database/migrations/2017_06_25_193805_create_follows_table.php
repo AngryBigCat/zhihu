@@ -8,16 +8,26 @@ class CreateFollowsTable extends Migration
 {
     /**
      * Run the migrations.
-     *
+     * 关注和粉丝表
      * @return void
      */
     public function up()
     {
-        Schema::create('follows', function (Blueprint $table) {
-            $table->unsignedInteger('user_id')->comment('用户id');
-            $table->char('follow_id',50)->cooment('关注者id');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('follows')) {
+            Schema::create('follows', function (Blueprint $table) {
+                $table->unsignedInteger('user_id')->comment('用户id');
+                $table->char('follow_id',50)->cooment('关注者id');
+                $table->timestamps();
+            });
+        } else {
+            Schema::table('follows', function ($table) {
+                // 添加的字段
+                // if (!Schema::hasColumn('users', 'b')) {
+                //     //
+                //     $table->string('b');
+                // }
+            });
+        }
     }
 
     /**
@@ -27,6 +37,6 @@ class CreateFollowsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('follows');
+        // Schema::dropIfExists('follows');
     }
 }

@@ -86,3 +86,17 @@ Route::get('collect/myQuestion', function(){
 Route::get('found',function(){
     return view('home.found.found');
 })->name('found');
+
+
+// 我的主页
+Route::group(['prefix' => 'people'], function () {
+    Route::get('activities', 'PeopleController@activities');
+    Route::get('answers', 'PeopleController@answers');
+    Route::get('asks', 'PeopleController@asks');
+    Route::get('columns', 'PeopleController@columns');
+    Route::get('collections', 'PeopleController@collections');
+    // 修改个人信息
+    Route::post('edit', 'PeopleController@edit');
+    // 修改头像
+    Route::post('edit_headPic', 'PeopleController@edit_headPic');
+});
