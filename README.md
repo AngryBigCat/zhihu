@@ -17,12 +17,12 @@ And package static resource file:
 $ npm install
 ```
 
-If you are in China,and have `cnpm` command is installed on your computer:
+Or,if you are in China,and have `cnpm` command is installed on your computer:
 ```bash
 $ cnpm install
 ```
 
-And then, create tables
+And then, create tables:
 ```bash
 $ php artisan migrate
 ```
