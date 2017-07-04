@@ -43,6 +43,7 @@
                                     <label>
                                         <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}> 记住我
                                     </label>
+                                    {!! captcha_img('flat')  !!}}
                                 </div>
                             </div>
                         </div>
@@ -52,7 +53,6 @@
                                 <button type="submit" class="btn btn-primary">
                                     登陆
                                 </button>
-
                                 <a class="btn btn-link" href="{{ route('password.request') }}">
                                     忘记密码？
                                 </a>

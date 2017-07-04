@@ -15,7 +15,6 @@ class CreateQuestionsTable extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->increments('id')->comment('问题id');
-            tag_id
             $table->integer('user_id')->comment('用户id');
             $table->char('title',50)->comment('问题标题');
             $table->char('topic')->comment('话题，用逗号分割');

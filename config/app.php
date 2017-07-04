@@ -177,8 +177,12 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        //点赞、关注
         Overtrue\LaravelFollow\FollowServiceProvider::class,
-        Jcc\LaravelVote\VoteServiceProvider::class
+        Jcc\LaravelVote\VoteServiceProvider::class,
+
+        //验证码
+        Mews\Captcha\CaptchaServiceProvider::class,
 
     ],
 
@@ -229,8 +233,11 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
-        //
+        //马克当
         'Markdown' => GrahamCampbell\Markdown\Facades\Markdown::class,
+
+        //验证码
+        'Captcha' => Mews\Captcha\Facades\Captcha::class,
     ],
 
 ];

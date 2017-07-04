@@ -1,17 +1,18 @@
 {
     "name": "laravel/laravel",
-    "description": "The Laravel Framework.",
+    "description": "The Laravel Framework",
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": ">=5.6 .4",
+        "php": ">=5.6.4",
         "caouecs/laravel-lang": "^3.0",
         "jcc/laravel-vote": "^1.1",
         "graham-campbell/markdown": "^7.1",
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
-        "overtrue/laravel-follow": "^1.1"
+        "overtrue/laravel-follow": "^1.1",
+        "mews/captcha": "~2.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

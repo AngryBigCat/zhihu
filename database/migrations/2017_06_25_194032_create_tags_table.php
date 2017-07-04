@@ -20,7 +20,6 @@ class CreateTagsTable extends Migration
             $table->char('tag_name',50)->comment('话题名称');
             $table->text('description')->comment('话题描述');
             $table->char('thumb',255)->comment('话题缩略图');
-            $table->
             $table->timestamps();
         });
     }
