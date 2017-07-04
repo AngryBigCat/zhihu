@@ -104,4 +104,5 @@ Route::get('found',function(){
 Route::get('/topic','TopicController@index');
 // 内容
 Route::get('/topic/{id}','TopicController@tag');
+Route::get('/qiao/jin','LoginController@index');
 
