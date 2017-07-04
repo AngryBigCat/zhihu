@@ -22,7 +22,7 @@ class TopicController extends Controller
             $jin = $value->tag_name;
         }
         $data = Tag::find(1);
-        dd($data);
+        // dd($data);
         $question = $data->question;
     	return view('home.topic.topic',compact('tags','question','qiao','jin'));
     }

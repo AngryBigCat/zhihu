@@ -21,6 +21,7 @@
       <table width="100%" class="am-table am-table-compact am-table-striped tpl-table-black " id="example-r"> 
        <thead> 
         <tr> 
+         <th>ID</th> 
          <th>话题名称</th> 
          <th>话题描述</th> 
          <th>话题图像</th> 
@@ -30,6 +31,7 @@
        </thead> 
        <tbody> 
         <tr class="gradeX"> 
+         <td>1</td>
          <td>Amaze UI 模式窗口</td> 
          <td>张鹏飞</td> 
          <td>2016-09-26</td> 

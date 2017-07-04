@@ -21,20 +21,6 @@ Route::get('/', 'HomeController@index');
 //提交问题
 Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
 
-//后台首页
-Route::get('/admin',function(){
-    return view('admin.index');
-});
-//话题列表
-Route::get('/admin/listtopic',function(){
-    return view('admin.topic.listtopic');
-});
-
-//话题增加
-Route::get('/admin/topiccreate',function(){
-    return view('admin.topic.topiccreate');
-});
-
 //问题页
 
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
@@ -127,3 +113,13 @@ Route::get('contact',function(){
 Route::get('topic','TopicController@index')->name('topic');
 // 内容
 Route::get('topic/{id}','TopicController@tag');
+
+
+
+
+//后台首页
+Route::get('/admin','admin\AdminController@index');
+//话题列表
+Route::get('/admin/listtopic','admin\AdminController@listtopic');
+//话题增加
+Route::get('/admin/topiccreate','admin\AdminController@topiccreate');
