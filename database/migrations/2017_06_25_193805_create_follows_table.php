@@ -4,19 +4,18 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateQuestionTagsTable extends Migration
+class CreateFollowsTable extends Migration
 {
     /**
      * Run the migrations.
      *
      * @return void
-     *话题问题表
      */
     public function up()
     {
-        Schema::create('question_tags', function (Blueprint $table) {
-            $table->integer('question_id')->comment('问题id');
-            $table->integer('tag_id')->comment('话题id');
+        Schema::create('follows', function (Blueprint $table) {
+            $table->unsignedInteger('user_id')->comment('用户id');
+            $table->char('follow_id',50)->cooment('关注者id');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ class CreateQuestionTagsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('question_tags');
+        Schema::dropIfExists('follows');
     }
 }
