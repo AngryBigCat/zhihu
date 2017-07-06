@@ -22,7 +22,6 @@ Route::get('/', 'HomeController@index');
 Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
 
 //问题页
-
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
 //关注问题、取消关注问题
 Route::post('question/{id}/toggleFollow', 'QuestionController@toggleFollow')->middleware('auth');
@@ -34,13 +33,11 @@ Route::post('answer', 'AnswerController@store')->middleware('auth')->name('answe
 //点赞、取消点赞
 Route::post('answer/{id}/{type}', 'AnswerController@toggleVote')->middleware('auth');
 
-
-
-
 //用户个人页
 Route::get('user', function() {
     return view('home.user.userinfo');
 });
+
 
 //搜索页
 Route::get('search', function () {
@@ -115,11 +112,34 @@ Route::get('topic','TopicController@index')->name('topic');
 Route::get('topic/{id}','TopicController@tag');
 
 
-
+// 我的主页
+Route::group(['prefix' => 'people'], function () {
+    Route::get('activities', 'PeopleController@activities');
+    Route::get('answers', 'PeopleController@answers');
+    Route::get('asks', 'PeopleController@asks');
+    Route::get('columns', 'PeopleController@columns');
+    Route::get('collections', 'PeopleController@collections');
+    // 修改个人信息
+    Route::post('edit', 'PeopleController@edit');
+    // 修改头像
+    Route::post('edit_headPic', 'PeopleController@edit_headPic');
+});
 
 //后台首页
 Route::get('/admin','admin\AdminController@index');
-//话题列表
-Route::get('/admin/listtopic','admin\AdminController@listtopic');
-//话题增加
-Route::get('/admin/topiccreate','admin\AdminController@topiccreate');
+
+// 后台话题增删改查
+Route::group([], function(){
+    //话题列表
+    Route::get('/admin/listtopic','admin\TopicController@listtopic');
+        //话题删除
+    Route::get('/admin/topicdelete','admin\TopicController@delete');
+    //话题增加get页面
+    Route::get('/admin/topiccreate','admin\TopicController@topiccreate');
+    //话题添加post操作
+    Route::post('/admin/topiccreate','admin\TopicController@create');
+    // 话题编辑get页面
+    Route::get('/admin/topicupdate','admin\TopicController@topicupdate');
+    //话题更新post操作
+    Route::post('/admin/topicupdate','admin\TopicController@update');
+});

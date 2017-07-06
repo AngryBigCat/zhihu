@@ -2,44 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use DB;
 use App\Tag;
+use DB;
 
 class TopicController extends Controller
 {
     public function index()
     {
+        // 获得话题
     	$tags = DB::table('tags')->whereIn('id',[1,2,3])->get();
-        // $data = Tag::find($id);
-        // $question = $data->question;
-        // dd($question);die;
         $topic = DB::table('tags')->where('id',1)->get();
         foreach ($topic as $key => $value) {
-            $qiao=$value->img;
+            $img=$value->img;
         }
         foreach ($topic as $key => $value) {
-            $jin = $value->tag_name;
+            $tag_name = $value->tag_name;
         }
+        //连表查询 多对多
         $data = Tag::find(1);
-        // dd($data);
         $question = $data->question;
-    	return view('home.topic.topic',compact('tags','question','qiao','jin'));
+        //其他人关注的话题
+        $huati = DB::table('tags')->where('id','<=',5)->get();
+
+    	return view('home.topic.topic',compact('tags','question','img','tag_name','huati'));
     }
 
     public function tag($id)
     {
-
+        //获得话题
     	$tags = DB::table('tags')->whereIn('id',[1,2,3])->get();
         $topic = DB::table('tags')->where('id',$id)->get();
         foreach ($topic as $key => $value) {
-            $qiao=$value->img;
+            $img=$value->img;
         }
         foreach ($topic as $key => $value) {
-            $jin = $value->tag_name;
+            $tag_name = $value->tag_name;
         }
+        //连表查询 多对多
     	$data = Tag::find($id);
         $question = $data->question;
-    	return view('home.topic.content',compact('tags','question','qiao','jin'));
+         //其他人关注的话题
+        $huati = DB::table('tags')->where('id','<=',5)->get();
+
+    	return view('home.topic.content',compact('tags','question','img','tag_name','huati'));
     }
 }

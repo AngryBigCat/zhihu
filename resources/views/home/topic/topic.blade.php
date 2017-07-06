@@ -332,7 +332,7 @@
 			<div class="tab-pane active" id="商业">
 				<div class="huati-paixu">
 			  		<div class="huati-aa">
-			  			<img src="{{$qiao}}" style="width:50px">&nbsp;&nbsp;&nbsp;<a href="">{{$jin}}</a>
+			  			<img src="{{$img}}" style="width:50px;height:50px">&nbsp;&nbsp;&nbsp;<a href="">{{$tag_name}}</a>
 			  		</div>
 			  		<div class="huati-bb">
 			  			<span>热门排序&nbsp;|&nbsp;</span><a href="">时间排序</a>
@@ -413,14 +413,12 @@
 					<div class="huati-guanzhu-you"><a href="">换一换</a></div>
 				</div>
 				<!-- 内容 -->
+                        @foreach($huati as $v)
 				<div class="huati-guanzhuneirong">
-					<div class="huati-guanzhuneirong-zuo"><img src="holder.js/40x40">&nbsp;&nbsp;&nbsp;<a href="">略读</a></div>
+					<div class="huati-guanzhuneirong-zuo"><img src="{{$v->img}}" style="width:40px;height:40px">&nbsp;&nbsp;&nbsp;<a href="">{{$v->tag_name}}</a></div>
 					<div class="huati-guanzhuneirong-you"><a href=""><i class="z-icon-follow"></i><span>关注</span></a></div>
 				</div>
-				<div class="huati-guanzhuneirong">
-					<div class="huati-guanzhuneirong-zuo"><img src="holder.js/40x40">&nbsp;&nbsp;&nbsp;<a href="">略读</a></div>
-					<div class="huati-guanzhuneirong-you"><a href=""><i class="z-icon-follow"></i><span>关注</span></a></div>
-				</div>
+                         @endforeach
 			</div>
 		</div>
 	</div>

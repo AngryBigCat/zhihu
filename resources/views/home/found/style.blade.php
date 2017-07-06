@@ -6,17 +6,26 @@
 		padding:0 10px;
 	}
 	h5{
+
 		padding:8px 0;
+
 		color:#225599;
 		font-weight: bold;
 	}
 	#wenda h4>a{
+
 		/*color:#000;*/
 		font-weight: bold;
 		text-decoration: none;
 	}
 	#wenda h4{
 		padding:5px 0;
+
+		color:#000;
+		font-weight: bold;
+	}
+	#wenda h4{
+
 		color:#333;
 		font-size: 12px
 	}
@@ -39,8 +48,10 @@
 		padding:10px;
 	}
 	.lizi{
+
 		/*border:1px solid red;*/
 		margin-bottom: 20px;
+
 		font-size: 12px;
 	}
 	.lizi>div{
@@ -65,6 +76,12 @@
 	.lizi_hide{
 		display: inline-block;
 		display:none;
+		height: 80px;
+		overflow: hidden;
+		text-overflow:ellipsis;
+	}
+	.a{
+		display: inline-block;
 	}
 	.right{
 		font-size: 12px;

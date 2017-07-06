@@ -43,6 +43,7 @@ class Answer extends Model
     }
 
     //以下两个方法，可考虑放入控制器里面
+
     /**
      * 点赞
      */
