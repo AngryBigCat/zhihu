@@ -18,7 +18,7 @@
            </div>
     		</div>
     		<div class="user-title">
-    			<h2>你管我 <span class="yiju">{{ $user->a_word }}</span></h2>
+    			<h2>{{ $user->name }} <span class="yiju">{{ $user->a_word }}</span></h2>
           <div class="ProfileHeader-infoItem">
             <span class="icon glyphicon glyphicon-lock" aria-hidden="true"></span>&nbsp;&nbsp;
             <span>互联网</span>

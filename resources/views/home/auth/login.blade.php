@@ -23,7 +23,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
+                        <div class=" -group{{ $errors->has('password') ? ' has-error' : '' }}">
                             <label for="password" class="col-md-4 control-label">密码</label>
 
                             <div class="col-md-6">
@@ -34,6 +34,23 @@
                                         <strong>{{ $errors->first('password') }}</strong>
                                     </span>
                                 @endif
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="captcha" class="col-md-4 control-label">验证码</label>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <input id="captcha"  class="form-control" type="captcha" name="captcha" value="{{ old('captcha')  }}" required>
+                                    @if ($errors->has('captcha'))
+                                        <span class="help-block">
+                                            <strong>验证码输入错误</strong>
+                                        </span>
+                                    @endif
+                                </div>
+                                <span class="col-md-1 refereshrecapcha">
+                                    {!! captcha_img('flat') !!}
+                                </span>
                             </div>
                         </div>
 
@@ -52,7 +69,6 @@
                                 <button type="submit" class="btn btn-primary">
                                     登陆
                                 </button>
-
                                 <a class="btn btn-link" href="{{ route('password.request') }}">
                                     忘记密码？
                                 </a>

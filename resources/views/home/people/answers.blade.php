@@ -27,15 +27,12 @@
 	</div>
 	<div class="dongtai-content">
 
-		<div class="dongtai-content-first">
-			<span>赞同了回答</span>
-			<span class="pull-right">20分钟前</span>
-		</div>
+		
 		<div class="dongtai-content-title">
 			<a href="">淘宝上有屎？？？</a>
 		</div>
 		<div class="dongtai-content-info col-md-12">
-			<div class="dongtai-content-img pull-left"><a href=""><img src="holder.js/50x50?text=头像"></a></div>
+			<div class="dongtai-content-img pull-left"><a href=""><img style="width:50px;height:50px" src="{{ asset('uploads/headPic/boxed-bg.png') }}"></a></div>
 			<div class="dongtai-content-name">
 	    		<div class="col-md-12">
 					<a href="">闻佳</a>

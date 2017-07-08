@@ -11,7 +11,10 @@
         "graham-campbell/markdown": "^7.1",
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
-        "overtrue/laravel-follow": "^1.1"
+        "overtrue/laravel-follow": "^1.1",
+        "mews/captcha": "~2.0",
+        "barryvdh/laravel-debugbar": "^2.4",
+        "doctrine/dbal": "^2.5"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

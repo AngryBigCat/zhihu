@@ -30,8 +30,8 @@
     	</div>
     	<div class="zhuan-right">
     		<h4><a href="">不被发布</a></h4>
-    		哈哈哈
-    		<div>发表 <span>24</span> 篇文章 • 共 <span> 14 </span>
+    		<span class="zhuan-desc">自己的专栏</span>
+    		<div class="zhuan-bottom">发表 <span>24</span> 篇文章 • 共 <span> 14 </span>
     		篇文章 • <span> 70421 </span>人关注
     		</div>
     	</div>

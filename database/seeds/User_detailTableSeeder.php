@@ -17,7 +17,7 @@ class User_detailTableSeeder extends Seeder
         $data=[];
         for ($i=0; $i <20 ; $i++) { 
         	$tmp=[];
-        	$tmp['introduction']='俺是个好人';
+        	$tmp['intro']='俺是个好人';
         	$tmp['address'] = $address[rand(0,5)];
         	$tmp['job'] = $job[rand(0,7)];
         	$tmp['headpic'] = '/img/user'.rand(1,8).'-128x128.jpg';

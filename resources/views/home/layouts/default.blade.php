@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ asset('img/icon1.png') }}" type="image/x-icon" />
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>知乎</title>
 
     <title>{{ config('app.name', 'Laravel') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
     <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/amazeui/css/font-awesome.4.6.0.css">
@@ -41,5 +41,7 @@
 
     @yield('script')
 
+    <script src="/amazeui/js/amazeui.min.js" charset="utf-8"></script>
+    <script src="/amazeui/js/cropper.min.js" charset="utf-8"></script>
 </body>
 </html>

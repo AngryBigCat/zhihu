@@ -51918,7 +51918,6 @@ module.exports = function(module) {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_search_view_search_view_vue__ = __webpack_require__("./resources/assets/js/components/search-view/search-view.vue");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_search_view_search_view_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__components_search_view_search_view_vue__);
-
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when

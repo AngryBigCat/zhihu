@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\User_detail;
+use App\User;
 use DB;
+use Illuminate\Support\Facades\Auth;
 
 class PeopleController extends Controller
 {
@@ -13,11 +15,8 @@ class PeopleController extends Controller
      */
     public function activities()
     {
-        $id = 4;
-        $user = User_detail::findOrFail($id);
+        $user = $this -> getUser();
     	return view('home.people.activities',['user'=>$user]);
-
-        
     }
 
     /**
@@ -25,47 +24,40 @@ class PeopleController extends Controller
      */
     public function answers()
     {
-        $id = 4;
-        $user = User_detail::findOrFail($id);
-    	return view('home.people.answers',['user'=>$user]);
+        $user = $this -> getUser();
+        return view('home.people.answers',['user'=>$user]);
     }
     /**
      * 我的主页 -- 提问
      */
     public function asks()
     {
-        $id = 4;
-        $user = User_detail::findOrFail($id);
-
-    	return view('home.people.asks',['user'=>$user]);
+        $user = $this -> getUser();
+        return view('home.people.asks',['user'=>$user]);
     }
     /**
      * 我的主页 -- 专栏
      */
     public function columns()
     {
-        $id = 4;
-        $user = User_detail::findOrFail($id);
-
-    	return view('home.people.columns',['user'=>$user]);
+        $user = $this -> getUser();
+        return view('home.people.columns',['user'=>$user]);
     }
     /**
      * 我的主页 -- 收藏
      */
     public function collections()
     {
-        $id = 4;
-        $user = User_detail::findOrFail($id);
-
-    	return view('home.people.collections',['user'=>$user]);
+        $user = $this -> getUser();
+        return view('home.people.collections',['user'=>$user]);
     }
 
     /**
-     * 修改个人信息
+     * 修改个人信息页面
      */
     public function edit(Request $request)
     {
-        $id = 4;
+        $id = Auth::user()->id;
         $data = [
             'a_word' => $request->a_word,
             'sex' => $request->sex,
@@ -89,16 +81,16 @@ class PeopleController extends Controller
      */
     public function edit_headPic(Request $request)
     {
-        $id = 4;
+        $id = Auth::user()->id;
         $imgstr = $request->image;
         $dirname = './uploads/headPic/';
         $headpic = DB::table('user_details')->where('user_id',$id)->select('headpic')->first();
         if (!empty($imgstr)) {
 
-            if (file_exists($dirname.$headpic->headpic)) {
+            if (file_exists($dirname.$headpic->headpic) && $headpic->headpic != 'boxed-bg.png') {
                 unlink($dirname.$headpic->headpic);
             }
-
+            // 转换为图片流
             $imgdata = substr($imgstr,strpos($imgstr,",") + 1);
             $decodedData = base64_decode($imgdata);
 
@@ -115,5 +107,23 @@ class PeopleController extends Controller
             }
 
         }
+    }
+
+    /**
+     * 获取用户和用户信息
+     */
+    private function getUser()
+    {
+        $id = Auth::user()->id;
+        $user_d = User_detail::find($id);
+        if (empty($user_d)) {
+            User_detail::create(['user_id'=>$id]);
+        }
+        $user = DB::table('users')
+            ->join('user_details','users.id','=','user_details.user_id')
+            ->where('users.id',$id)
+            ->whereNull('users.deleted_at')
+            ->first();
+        return $user;
     }
 }

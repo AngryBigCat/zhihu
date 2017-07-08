@@ -4,7 +4,9 @@
 		border-radius: 10px;
 		/*border:1px solid red;*/
 	}
-
+	.nav-pills{
+		border-bottom: 1px solid #F0F2F7;
+	}
 	.Button{
 	    display: inline-block;
 	    padding: 0 16px;
@@ -113,6 +115,7 @@
 		display: block;
 		padding:5px 0px;
 		font-weight: bold;
+		font-size:16px;
 	}
 	.tab-pane{
 		padding-bottom:10px;
@@ -209,18 +212,44 @@
 		display: inline-block;
 		margin-top:20px;
 		text-decoration: none;
+		cursor: pointer;
 	}
 	.zhuan-item{
 		padding-bottom: 15px;
+		position: relative;
 	}
 	.zhuan-item > .zhuan-right{
 		margin-left:85px;
+	}
+	.zhuan-item .zhuan-right{
+		width:340px;
+	}
+	.zhuan-item .btn-guanzhu{
+		width:96px;
+		position: absolute;
+		right: 10px;
+		top:8px;
 	}
 	.zhuan-right a{
 		display:inline-block;
 		font-weight: bold;
 		color:black;
 		text-decoration: none;
+	}
+	.zhuan-right .xianghu{
+		display: inline-block;
+		background: #F7F8FA;
+		font-size:12px;
+		padding:3px;
+		margin-left:10px;
+	}
+	.zhuan-right .zhuan-desc{
+		display: inline-block;
+		margin-top: 6px;
+	}
+	.zhuan-right .zhuan-bottom{
+		/*border:1px solid red;*/
+		margin-top:3px;
 	}
 	#message-text{
 		resize:none;

@@ -13,7 +13,6 @@ class CreateTagsTable extends Migration
      */
     public function up()
     {
-
         if (!Schema::hasTable('tags')) {
             Schema::create('tags', function (Blueprint $table) {
                 $table->increments('id')->comment('话题id');
@@ -33,7 +32,6 @@ class CreateTagsTable extends Migration
                 // }
             });
         }
-
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-Use Hash;
+// Use Hash;
 
 class UserTableSeeder extends Seeder
 {
@@ -14,10 +14,10 @@ class UserTableSeeder extends Seeder
     {
         //
         $data=[];
-        for ($i=0; $i <20 ; $i++) { 
+        for ($i=0; $i<20; $i++) { 
         	$tmp=[];
         	$tmp['name']=str_random(10);
-        	$tmp['password'] = Hash::make('lijiaqi');
+        	$tmp['password'] = Hash::make('lamp179');
         	$tmp['email'] = rand(100000,999999).'@qq.com';
         	
         	$data[] = $tmp;

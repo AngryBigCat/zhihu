@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="/admins/css/amazeui.datatables.min.css" /> 
   <link rel="stylesheet" href="/admins/css/app.css" /> 
   <script src="/admins/js/jquery.min.js"></script> 
+  <meta name="_token" content="{{ csrf_token() }}"/>
+  @yield('css')
  </head> 
  <body data-type="index"> 
   <script src="/admins/js/theme.js"></script> 
@@ -44,7 +46,7 @@
      <div class="am-fr tpl-header-navbar"> 
       <ul> 
        <!-- 欢迎语 --> 
-       <li class="am-text-sm tpl-header-navbar-welcome"> <a href="javascript:;">欢迎你, <span>Amaze UI</span> </a> </li> 
+       <li class="am-text-sm tpl-header-navbar-welcome"> <a href="javascript:;">欢迎你, <span>要你管</span> </a> </li> 
        <!-- 新邮件 --> 
        <li class="am-dropdown tpl-dropdown" data-am-dropdown=""> <a href="javascript:;" class="am-dropdown-toggle tpl-dropdown-toggle" data-am-dropdown-toggle=""> <i class="am-icon-envelope"></i> <span class="am-badge am-badge-success am-round item-feed-badge">4</span> </a> 
         <!-- 弹出列表 --> 
@@ -120,7 +122,7 @@
          <li class="tpl-dropdown-menu-notifications"> <a href="javascript:;" class="tpl-dropdown-menu-notifications-item am-cf"> <i class="am-icon-bell"></i> 进入列表… </a> </li> 
         </ul> </li> 
        <!-- 退出 --> 
-       <li class="am-text-sm"> <a href="javascript:;"> <span class="am-icon-sign-out"></span> 退出 </a> </li> 
+       <li class="am-text-sm"> <a href="{{ route('admin.logout') }}"> <span class="am-icon-sign-out"></span> 退出 </a> </li> 
       </ul> 
      </div> 
     </div> 
@@ -147,24 +149,27 @@
       <div class="tpl-user-panel-profile-picture"> 
        <img src="/admins/img/user04.png" alt="" /> 
       </div> 
-      <span class="user-panel-logged-in-text"> <i class="am-icon-circle-o am-text-success tpl-user-panel-status-icon"></i> 禁言小张 </span> 
+      <span class="user-panel-logged-in-text"> <i class="am-icon-circle-o am-text-success tpl-user-panel-status-icon"></i> 禁言小张</span> 
       <a href="javascript:;" class="tpl-user-panel-action-link"> <span class="am-icon-pencil"></span> 账号设置</a> 
      </div> 
     </div> 
     <!-- 菜单 --> 
     <ul class="sidebar-nav"> 
     <li class="sidebar-nav-link">
-                    <a href="/admin" class="active">
-                        <i class="am-icon-home sidebar-nav-link-logo"></i> 首页
-                    </a>
-                </li>
+        <a href="/admin" >
+            <i class="am-icon-home sidebar-nav-link-logo"></i> 首页
+        </a>
+    </li>
     
-    <li class="sidebar-nav-link"> <a href="javascript:;" class="sidebar-nav-sub-title"> <i class="am-icon-table sidebar-nav-link-logo"></i>  用户管理 </a> 
+    <li class="sidebar-nav-link"> <a href="javascript:;" class="sidebar-nav-sub-title active"> <i class="am-icon-table sidebar-nav-link-logo"></i>  用户管理 </a> 
       	<ul class="sidebar-nav sidebar-nav-sub"> 
-	       <li class="sidebar-nav-link"> <a href="table-list.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户列表 </a> </li> 
-	       <li class="sidebar-nav-link"> <a href="table-list-img.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户增加 </a> </li> 
-	       <li class="sidebar-nav-link"> <a href="table-list-img.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户登录 </a> </li> 
-     	</ul> 
+         <li class="sidebar-nav-link"> <a class="sub-active" href="{{ url('admin/user') }}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户列表 </a> </li> 
+	       <li class="sidebar-nav-link"> 
+          <a class="sub-active" href="{{ route('user.delList') }}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 删除的用户 </a> 
+         </li> 
+	       <li class="sidebar-nav-link">
+         <a href="{{ url('admin/user/create') }}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户增加 </a> </li> 
+     	  </ul> 
     </li> 
 
     <li class="sidebar-nav-link"> <a href="javascript:;" class="sidebar-nav-sub-title"> <i class="am-icon-wpforms sidebar-nav-link-logo"></i>  话题管理  </a> 
@@ -193,12 +198,13 @@
    </div> 
    <!-- 内容区域 --> 
    <div class="tpl-content-wrapper">
-   		 @yield('container')
+   		 @yield('content')
    </div>
     
   <script src="/admins/js/amazeui.min.js"></script> 
   <script src="/admins/js/amazeui.datatables.min.js"></script> 
   <script src="/admins/js/dataTables.responsive.min.js"></script> 
-  <script src="/admins/js/app.js"></script>  
+  <script src="/admins/js/app.js"></script>
+  @yield('script')
  </body>
 </html>

@@ -157,7 +157,6 @@
         margin-right: 20px;
         color: #aaa;
     }
-
     /* 提问框 */
     .modal-title {
         text-align: center;
@@ -199,7 +198,6 @@
     .model-question-descripe-input {
         min-height: 100px;
     }
-
 </style>
 @endsection
 
