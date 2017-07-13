@@ -43,7 +43,8 @@ class TopicController extends Controller
                 $data['path'] = $info->path.','.$info->id;
             }
             // 执行添加
-            $res = DB::table('tags')->insert($data);
+            // $res = DB::table('tags')->insert($data);
+            $res = \App\Tag::create($data);
             if($res){
                 return redirect('/admin/listtopic')->with('info','添加成功');
             } else {
@@ -122,8 +123,7 @@ class TopicController extends Controller
                     $request->file('img')->move($dirname,$file);
                     $data['img']=trim($dirname.$file,'.');
             }
-            $res = DB::table('tags')->where('id','=',$request->input('id'))->update($data);
-
+            $res =\App\Tag::where('id','=',$request->input('id'))->update($data);
             if($res){
                 return redirect('/admin/listtopic')->with('info','更新成功');
             } else {

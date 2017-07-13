@@ -304,127 +304,222 @@
             .Hidelink {
                   display:none;
             }
+            .content{
+                  width:380px;
+            }
+            .con-top{
+                  padding:15px;
+                  height:50px;
+                  margin-bottom: 30px;
+            }
+            .con-img{
+                  float:left;
+            }
+            .con-img img{
+                  border-radius: 5px;
+                  width:50px;
+                  height:50px;
+            }
+            .con-name{
+                  width:200px;
+                  float:left;
+                  margin-left:20px;
+                  height:50px;
+            }
+            .con-name-info{
+                  margin-top:5px;
+            }
+            .con-down{
+                  height:75px;
+                  padding:10px;
+                  background: #fafafa;
+            }
+            .con-down-item{
+                  text-decoration: none;
+                  float: left;
+                  padding: 0 16px;
+                  border-right: 1px solid #eee;
+            }
+            .con-down-count a{
+                  text-decoration: none;
+            }
+            .con-down-value{
+                  display: block;
+                  font-weight: bold;
+                  text-align: center;
+            }
+            .con-down-key{
+                  font-size: 14px;
+                  color: #999;
+            }
+            .btn-follow{
+                 margin-left:30px;
+                 margin-top:7px;
+            }
 	</style>
 @endsection
 @section('content')
-	<div class="col-md-8" >
-		<div class="huati-biaoti">
-			<!-- <img src="holder.js/16x16" class="biaoti-yangshi"> -->
-			<div class="huati-tubiao">
-				<i class="zg-icon zg-icon-feedlist"></i>
-				<span>已关注的话题动态</span>
-			</div>
-			<div class="huati-shuliang">
-				<a href="" class="huati-shula">共关注6个话题</a>
-			</div>
-		</div>
-		<hr>
-		<!-- <br> -->
-		<div class="qiao">
-			<ul class="zm-topic-cat-main js-topic-cat-main clearfix" style="border-bottom:1px solid #CCCCCC;">
-                        @foreach($tags as $value)
-				<li class="zm-topic-cat-item"><a href="/topic/{{$value->id}}">{{$value->tag_name}}</a></li>
-                        @endforeach
-			</ul>
-		</div>
-		<!-- <hr> -->
-		<div class="tab-content">
-			<div class="tab-pane active" id="商业">
-				<div class="huati-paixu">
-			  		<div class="huati-aa">
-			  			<img src="{{$img}}" style="width:50px;height:50px">&nbsp;&nbsp;&nbsp;<a href="">{{$tag_name}}</a>
-			  		</div>
-			  		<div class="huati-bb">
-			  			<span>热门排序&nbsp;|&nbsp;</span><a href="">时间排序</a>
-			  		</div>
-			  	</div>
+	<div class="huati-topic">
+            <div class="huati-content" >
+                  <div class="huati-biaoti">
+                        <!-- <img src="holder.js/16x16" class="biaoti-yangshi"> -->
+                        <div class="huati-tubiao">
+                              <i class="zg-icon zg-icon-feedlist"></i>
+                              <span>已关注的话题动态</span>
+                        </div>
+                        <div class="huati-shuliang">
+                              <a href="" class="huati-shula">共关注{{$count}}个话题</a>
+                        </div>
+                  </div>
+                  <hr>
+                  <!-- <br> -->
+                  <div class="qiao">
+                        <ul class="zm-topic-cat-main js-topic-cat-main clearfix" style="border-bottom:1px solid #CCCCCC;">
+                              @foreach($tags as $value)
+                              <li class="zm-topic-cat-item"><a href="/topic/{{$value->id}}">{{$value->tag_name}}</a></li>
+                              @endforeach
+                        </ul>
+                  </div>
+                  <!-- <hr> -->
+                  <div class="tab-content">
+                        <div class="tab-pane active" id="商业">
+                              <div class="huati-paixu">
+                                    <div class="huati-aa">
+                                          <a href="/topicDetails/{{$id}}"  target="_blank"><img src="{{$img}}" style="width:50px;height:50px"></a>&nbsp;&nbsp;&nbsp;<a href="/topicDetails/{{$id}}"  target="_blank" >{{$tag_name}}</a>
+                                    </div>
+                                    <div class="huati-bb">
+                                          <span>热门排序&nbsp;|&nbsp;</span><a href="">时间排序</a>
+                                    </div>
+                              </div>
 
-				<div class="clearfix"></div>
-						<!-- 内容 -->
-				<div class="tab-content">
-                              <!-- <div role="tabpanel" class="tab-pane active" id="商业"> -->
-                              <!-- 内容 -->
-                               @foreach($question as $value)
-                                    <div class="huati-neirong">
-                                          <a href="" class="huati-content-a">{{$value->title}}</a><br>
-                                          <a href="" class="huati-content-b">{{$value->count}}</a>&nbsp;
-                                          <a href="" class="huati-content-c">Monsieur</a>&nbsp;&nbsp;
-                                          <span class="huati-content-d">法国攻城师/VBA/Exec:poisonxiu</span>
+                              <div class="clearfix"></div>
+                                          <!-- 内容 -->
+                              <div class="tab-content">
+                                    <!-- <div role="tabpanel" class="tab-pane active" id="商业"> -->
+                                    <!-- 内容 -->
+                                     @foreach($res as $value)
+                                          <div class="huati-neirong">
+                                                <a href="" class="huati-content-a"  target="_blank">{{$value->title}}</a><br>
+                                                <a href="" class="huati-content-b">{{$value->count}}</a>&nbsp;
+                                                <a href="" class="huati-content-c"  target="_blank">{{$value->name}}</a>&nbsp;&nbsp;
+                                                <span class="huati-content-d">{{$value->a_word}}</span>
 
-                                          <div class="huati-wenzahng">
-                                                <img src="{{$value->qs_img}}" style="width:120px">
-                                                <div class="huati-wenzahng-a">
-                                                      <p>{{$value->content}}<a href="">显示全部</a></p>
+                                                <div class="huati-wenzahng">
+                                                      <img src="{{$value->qs_img}}" style="width:120px">
+                                                      <div class="huati-wenzahng-a">
+                                                            <p>{{$value->content}}&nbsp;&nbsp;<a href="">显示全部</a></p>
+                                                      </div>
+                                                </div>
+                                                <div class="huati-wenzhang-lianjie">
+                                                      <a href="" class="Attention">
+                                                            <i class="z-icon-follow"></i>
+                                                            <span class="topicAttention">关注问题</span>
+                                                      
+                                                      </a>&nbsp;
+                                                      <a href="">
+                                                            <i class="z-icon-comment"></i>
+                                                            <span>666条评论</span>
+                                                            <span></span>
+                                                      </a>&nbsp;
+                                                      <a href="" class="Hidelink">
+                                                            <i class="z-icon-thank"></i>
+                                                            <span>感谢</span>
+                                                            <span></span>
+                                                      </a>&nbsp;
+                                                      <a href="" class="Hidelink">
+                                                            <i class="z-icon-share"></i>
+                                                            <span>分享</span>
+                                                            <span></span>
+                                                      </a>&nbsp;
+                                                      <a href="" class="Hidelink">
+                                                            <i class="z-icon-collect"></i>
+                                                            <span>收藏</span>
+                                                            <span></span>
+                                                      </a>
+                                                      <a href="" class="Hidelink">
+                                                            <span class="zg-bull">•&nbsp;</span>
+                                                            <span>举报</span>
+                                                            <span></span>
+                                                      </a>
+                                                      <a href="">
+                                                            <span class="zg-bull">•&nbsp;</span>
+                                                            <span>禁止转载</span>
+                                                            <span></span>
+                                                      </a>
                                                 </div>
                                           </div>
-                                          <div class="huati-wenzhang-lianjie">
-                                                <a href="">
-                                                      <i class="z-icon-follow"></i>
-                                                      <span>关注问题</span>
-                                                      <span></span>
-                                                </a>&nbsp;
-                                                <a href="">
-                                                      <i class="z-icon-comment"></i>
-                                                      <span>666条评论</span>
-                                                      <span></span>
-                                                </a>&nbsp;
-                                                <a href="" class="Hidelink">
-                                                      <i class="z-icon-thank"></i>
-                                                      <span>感谢</span>
-                                                      <span></span>
-                                                </a>&nbsp;
-                                                <a href="" class="Hidelink">
-                                                      <i class="z-icon-share"></i>
-                                                      <span>分享</span>
-                                                      <span></span>
-                                                </a>&nbsp;
-                                                <a href="" class="Hidelink">
-                                                      <i class="z-icon-collect"></i>
-                                                      <span>收藏</span>
-                                                      <span></span>
-                                                </a>
-                                                <a href="" class="Hidelink">
-                                                      <span class="zg-bull">•&nbsp;</span>
-                                                      <span>举报</span>
-                                                      <span></span>
-                                                </a>
-                                                <a href="">
-                                                      <span class="zg-bull">•&nbsp;</span>
-                                                      <span>禁止转载</span>
-                                                      <span></span>
-                                                </a>
-                                          </div>
-                                    </div>
-                               @endforeach
-                              <!-- </div> -->
+                                     @endforeach
+                                    <!-- </div> -->
+                              </div>
                         </div>
-			</div>
-		</div>
-	</div>
-	<div class="col-md-4">
-		<div class="huati-guangchang">
-			<div class="huati-Topicplaza">
-				<button class="btn btn-primary huati-tijiao">进入话题广场</button>
-				<div class="huati-faxian"><a href="">来这里发现更多的话题</a></div>
-			</div>
-			<div class="huati-huanyihuan">
-				<div class="huati-guanzhu">
-					<div class="huati-guanzhu-zuo"><span>其他人关注的话题</span></div>
-					<div class="huati-guanzhu-you"><a href="">换一换</a></div>
-				</div>
-				<!-- 内容 -->
+                  </div>
+            </div>
+      
+            <div class="huati-guangchang">
+                  <div class="huati-Topicplaza">
+                        <a  href="/topicSquare/1" class="btn btn-primary huati-tijiao"  target="_blank">进入话题广场</a>
+                        <div class="huati-faxian"><a href="/topicSquare/1"  target="_blank" >来这里发现更多的话题</a></div>
+                  </div>
+                  <div class="huati-huanyihuan">
+                        <div class="huati-guanzhu">
+                              <div class="huati-guanzhu-zuo"><span>其他人关注的话题</span></div>
+                              <div class="huati-guanzhu-you"><a href=""></a></div>
+                        </div>
+                        <!-- 内容 -->
                         @foreach($huati as $v)
-				<div class="huati-guanzhuneirong">
-					<div class="huati-guanzhuneirong-zuo"><img src="{{$v->img}}" style="width:40px;height:40px">&nbsp;&nbsp;&nbsp;<a href="">{{$v->tag_name}}</a></div>
-					<div class="huati-guanzhuneirong-you"><a href=""><i class="z-icon-follow"></i><span>关注</span></a></div>
-				</div>
+                        <div class="huati-guanzhuneirong">
+                              <div class="huati-guanzhuneirong-zuo"><a href="/topicDetails/{{$v->id}}"  target="_blank" ><img src="{{$v->img}}" style="width:40px;height:40px"></a>&nbsp;&nbsp;&nbsp;<a href="/topicDetails/{{$v->id}}"  target="_blank" >{{$v->tag_name}}</a></div>
+                              <div class="huati-guanzhuneirong-you"><a href=""><i class="z-icon-follow"></i><span>关注</span></a></div>
+                        </div>
                          @endforeach
-			</div>
-		</div>
-	</div>
+                  </div>
+                  {!!$huati->links() !!}
+            </div>
+      </div>
+
+
+
+<div id="tan" class="content" style="display:none">
+      <div class="con-top">
+            <div class="con-img">
+                  <a href=""><img src="/uploads/headPic/1499096092.png"></a>
+            </div>
+            <div class="con-name">
+                  <a href="">名字</a>
+                  <div class="con-name-info"><span>哈哈哈</span> | <span>嘻嘻嘻</span> </div>
+            </div>
+      </div>
+      <div class="con-down">
+            <div class="con-down-count">
+                  <a class="con-down-item" href="">
+                        <span class="con-down-value">34</span>
+                        <span class="con-down-key">回答</span>
+                  </a>
+                  <a class="con-down-item" href="">
+                        <span class="con-down-value">34</span>
+                        <span class="con-down-key">文章</span>
+                  </a>
+                  <a class="con-down-item" href="">
+                        <span class="con-down-value">34K</span>
+                        <span class="con-down-key">关注者</span>
+                  </a>
+            </div>
+            <div class="">
+                  <button class="btn-follow btn btn-success">关注他</button>
+            </div>
+      </div>
+</div>
 @stop
 @section('script')
 	<script type="text/javascript">
+            // $('.huati-content-c').mouseover(function() {
+                 var con = $('#tan').clone(true).css('display','block');
+                 $('.huati-content-c').pinwheel({content: con});
+                 $.get('/');
+            // });      
+                 
+                
+
             $('.huati-neirong').each(function() {
                   var th = $(this);
                   $(this).hover(
@@ -437,13 +532,13 @@
                   );
 
             });
-		$('.zm-topic-cat-main li').click(function () {
-			$(this).siblings().find('a').css('color','#259');
-			$(this).siblings().css('background','#fff');
-			$(this).css('background','#259');
-			$(this).find('a').css('color','#fff');
+      	$('.zm-topic-cat-main li').click(function () {
+      		$(this).siblings().find('a').css('color','#259');
+      		$(this).siblings().css('background','#fff');
+      		$(this).css('background','#259');
+      		$(this).find('a').css('color','#fff');
 
-		});
-
+      	});
+          
 	</script>
 @endsection

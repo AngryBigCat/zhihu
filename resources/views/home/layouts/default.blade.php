@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="/amazeui/css/amazeui.min.css">
     <link rel="stylesheet" href="/amazeui/css/amazeui.cropper.css">
     <link rel="stylesheet" href="/amazeui/css/custom_up_img.css">
+    <link rel="stylesheet" type="text/css" href="/css/jquery.pinwheel-0.1.0.css">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @yield('style')
 </head>
@@ -24,6 +25,8 @@
         </div>
     </div>
     <script src="{{ asset('js/app.js') }}"></script>
+    <script type="text/javascript" src="/js/jquery.pinwheel-0.1.0.js"></script>
+    
     @yield('script')
     <script src="/amazeui/js/amazeui.min.js" charset="utf-8"></script>
     <script src="/amazeui/js/cropper.min.js" charset="utf-8"></script>

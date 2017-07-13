@@ -9,4 +9,14 @@
 
 		return $info->tag_name;
 	}
+
+	function getTagNameByIds($id)
+	{
+		if($id =='0'){
+			return '';
+		}
+		$info = DB::table('tags')->where('id','=',$id)->first();
+
+		return $info->tag_name;
+	}
 ?>

@@ -106,10 +106,7 @@ Route::get('contact',function(){
     return view('home.contact');
 })->name('contact');
 
-// 话题
-Route::get('topic','TopicController@index')->name('topic');
-// 内容
-Route::get('topic/{id}','TopicController@tag');
+
 
 
 // 我的主页
@@ -128,7 +125,7 @@ Route::group(['prefix' => 'people'], function () {
 //后台首页
 Route::get('/admin','admin\AdminController@index');
 
-// 后台话题增删改查
+// 后台话题
 Route::group([], function(){
     //话题列表
     Route::get('/admin/listtopic','admin\TopicController@listtopic');
@@ -142,4 +139,16 @@ Route::group([], function(){
     Route::get('/admin/topicupdate','admin\TopicController@topicupdate');
     //话题更新post操作
     Route::post('/admin/topicupdate','admin\TopicController@update');
+});
+//前台话题
+Route::group([], function(){
+    // 话题
+    Route::get('topic/{id}','TopicController@index')->name('topic');
+    //话题广场分类
+    Route::get('/topicSquare/{id}','TopicController@topicClassify');
+    //话题详情
+    Route::get('/topicDetails/{id}','TopicController@topicHot');
+    //关注发送ajax
+    Route::get('/ajaxd','TopicController@ajaxd');
+    
 });
