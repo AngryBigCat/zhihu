@@ -4,6 +4,7 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 class questions extends Model
 {
     //获取发现页面中的热门问题
@@ -11,4 +12,5 @@ class questions extends Model
     {
     	return $this->hasMany('App\Model\questions');
     }
+
 }

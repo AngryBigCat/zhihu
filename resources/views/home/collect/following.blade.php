@@ -58,49 +58,57 @@
 		 	<span>（3）</span>
 		 </div>
 		 <!-- 标题 END -->
+		@foreach($qus as $v)
 		<div class="section-item">
 		 	<!-- 浏览数 start -->
 		 	<span class="section-brower">
-		 		<div class="font-weight">777K</div>
+		 		<div class="font-weight">{{$v->visit_count}}</div>
 		 		<div class="">浏览</div>
 		 	</span>
 		 	<!-- 浏览数 end -->
 			<div class="section-main">
-				<span class="font-weight"><a href="">苏联解体的时候，为什么不发射所有的核弹？</a></span>
+				<span class="font-weight"><a href="">{{$v->title}}</a></span>
 				<div class="section-gongneng">
-					  <a href="#" name="focus" class="" id="">取消关注</a>
+					  <a href="#" name="focus" class="attent" qus_id="{{$v->id}}">取消关注</a>
 					  <span class="#">•</span>
                         <a class="#" href="#">182 人回答</a>
 
 
                         <span class="zg-bull">•</span>
 
-                        <span>581人关注</span>
+                        <span>{{ \App\Question::find($v->id)->followers()->count() }}人关注</span>
 				</div>
 			</div>
 		</div>
-		<div class="section-item">
-		 	<!-- 浏览数 start -->
-		 	<span class="section-brower">
-		 		<div class="font-weight">777K</div>
-		 		<div class="">浏览</div>
-		 	</span>
-		 	<!-- 浏览数 end -->
-			<div class="section-main">
-				<span class="font-weight"><a href="">苏联解体的时候，为什么不发射所有的核弹？</a></span>
-				<div class="section-gongneng">
-					  <a href="#" name="focus" class="" id="">取消关注</a>
-					  <span class="#">•</span>
-                        <a class="#" href="#">182 人回答</a>
-
-
-                        <span class="zg-bull">•</span>
-
-                        <span>581人关注</span>
-				</div>
-			</div>
-		</div>
+		@endforeach
 	</div>
 	@include('home.collect._rightTool')
 	@include('home.layouts._footer')
+@endsection
+@section('script')
+	<script>
+		$('.attent').click(function() {
+			var qus_id = $(this).attr('qus_id');
+			var qus = $(this);
+			console.log(qus_id);
+			$.ajax({
+	            url: "/found/follow",
+	            type: 'GET',
+	            data: { date :qus_id },
+	            dataType: 'json',
+	            success: function (data) {
+	            	if (data.status==0) {
+	            		qus.html('<i class="fa fa-plus" aria-hidden="true"></i> 关注问题');
+	            	}else{
+	            		qus.html('取消关注');
+	            	}
+	                // console.log(data);
+	            },
+	            error: function (data) {
+	                console.log(data);
+	            }
+        	});
+        	return false;
+		});	
+	</script>
 @endsection

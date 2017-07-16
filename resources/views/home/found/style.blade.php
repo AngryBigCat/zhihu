@@ -42,6 +42,7 @@
 		/*border:1px solid red;*/
 		margin-bottom: 20px;
 		font-size: 12px;
+		height:188px;
 	}
 	.lizi>div{
 		border-bottom:1px solid #ddd;

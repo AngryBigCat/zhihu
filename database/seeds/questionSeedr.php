@@ -16,10 +16,10 @@ class questionSeedr extends Seeder
         for($i=0;$i<50;$i++){
         	$tmp = [];
         	$tmp['user_id'] = rand(1,20);
-        	$tmp['title'] = '神回复';
+        	$tmp['title'] = '神回复'.$i;
         	$tmp['content'] = '额监考老师按时吃阿达额驸案件案发啊啊放假阿卡发咖啡机啊积分卡积分加快分解开关机';
         	$tmp['qs_img'] = '/img/avatar04.png';
-        	$tmp['count'] = rand(100,1000);
+        	$tmp['visit_count'] = rand(100,1000);
         	$data[]=$tmp;
         }
         DB::table('questions')->insert($data);

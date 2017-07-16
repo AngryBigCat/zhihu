@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/admins/css/amazeui.datatables.min.css" /> 
   <link rel="stylesheet" href="/admins/css/app.css" /> 
   <script src="/admins/js/jquery.min.js"></script> 
+  @yield('style')
  </head> 
  <body data-type="index"> 
   <script src="/admins/js/theme.js"></script> 
@@ -153,11 +154,11 @@
     </div> 
     <!-- 菜单 --> 
     <ul class="sidebar-nav"> 
-    <li class="sidebar-nav-link">
-                    <a href="/admin" class="active">
-                        <i class="am-icon-home sidebar-nav-link-logo"></i> 首页
-                    </a>
-                </li>
+    <li id="home_page" class="sidebar-nav-link">
+        <a href="/admin" class="active">
+            <i class="am-icon-home sidebar-nav-link-logo"></i> 首页
+        </a>
+    </li>
     
     <li class="sidebar-nav-link"> <a href="javascript:;" class="sidebar-nav-sub-title"> <i class="am-icon-table sidebar-nav-link-logo"></i>  用户管理 </a> 
       	<ul class="sidebar-nav sidebar-nav-sub"> 
@@ -181,9 +182,12 @@
      	</ul> 
     </li> 
 
-    <li class="sidebar-nav-link"> <a href="javascript:;" class="sidebar-nav-sub-title"> <i class="am-icon-key sidebar-nav-link-logo"></i> 发现管理  </a> 
+    <li id="found" class="sidebar-nav-link"> 
+    <a href="javascript:;" class="sidebar-nav-sub-title"> 
+    <i class="am-icon-key sidebar-nav-link-logo"></i> 发现管理  
+    </a> 
       	<ul class="sidebar-nav sidebar-nav-sub"> 
-	       <li class="sidebar-nav-link"> <a href="table-list.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现列表 </a> </li> 
+	       <li id="listFound" class="sidebar-nav-link"> <a href="{{route('listFound')}}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现列表 </a> </li> 
 	       <li class="sidebar-nav-link"> <a href="table-list-img.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现增加 </a> </li> 
      	</ul> 
     </li> 

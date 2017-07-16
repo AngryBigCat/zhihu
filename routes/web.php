@@ -35,8 +35,21 @@ Route::get('/admin/topiccreate',function(){
     return view('admin.topic.topiccreate');
 });
 
-//问题页
+// 发现列表页面
+Route::any('/admin/listFound','admin\ListFoundController@index')->name('listFound');
+// ajax更新数据
+// Route::get('/amin/listAjax','admin\ListFoundController@index_ajax');
 
+// 发现列表编辑
+Route::any('/admin/edit/{id}','admin\ListFoundController@edit')->name('found_edit');
+Route::post('/admin/edit','admin\ListFoundController@do_edit')->name('edit');
+
+// 发现列表删除
+Route::any('admin/del/{id}','admin\ListFoundController@del');
+// ajax更新图片
+Route::any('admin/found/ajax','admin\ListFoundController@ajax')->name('found_ajax');
+
+//问题页
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
 //关注问题、取消关注问题
 Route::post('question/{id}/toggleFollow', 'QuestionController@toggleFollow')->middleware('auth');
@@ -90,14 +103,12 @@ Route::get('column/details', function () {
 });
 
 // 我的收藏
-Route::get('collect/collections',function(){
-    return view('home.collect.collections');
-})->name('collect/collections');
+Route::get('collect/collections','CollectController@index')->name('collect.collections');
+// 创建收藏夹
+Route::post('collect/collectAdd','CollectController@collectAdd');
 
 // 我关注的问题
-Route::get('collect/following', function(){
-    return view('home.collect.following');
-})->name('collect.following');
+Route::get('collect/following', 'CollectController@follow')->name('collect.following');
 
 // 邀请我回答的问题
 Route::get('collect/myQuestion', function(){
@@ -105,9 +116,14 @@ Route::get('collect/myQuestion', function(){
 })->name('collect.myQuestion');
 
 // 发现
-Route::get('found','FoundController@found')->name('found');
+// Route::get('found','FoundController@found')->name('found');
 Route::get('retui','FoundController@retui')->name('retui');
 Route::get('found/more','FoundController@more')->name('found/more');
+Route::get('found/follow','FoundController@follow');
+Route::post('found/collect','FoundController@collect');
+Route::get('found/ritui','FoundController@ritui');
+Route::get('found/yuetui','FoundController@yuetui');
+
 
 // 知乎草案（协议）
 Route::get('deal',function(){
@@ -127,3 +143,4 @@ Route::get('contact',function(){
 Route::get('topic','TopicController@index')->name('topic');
 // 内容
 Route::get('topic/{id}','TopicController@tag');
+
