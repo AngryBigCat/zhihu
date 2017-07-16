@@ -140,15 +140,25 @@ Route::group([], function(){
     //话题更新post操作
     Route::post('/admin/topicupdate','admin\TopicController@update');
 });
+
 //前台话题
 Route::group([], function(){
-    // 话题
-    Route::get('topic/{id}','TopicController@index')->name('topic');
+    //热门排序话题页面
+    Route::get('/topic/{id}','TopicController@index')->name('topic');
+    //时间排序话题页面
+    Route::get('/topicTimeTag/{id}','TopicController@topicTimeTag');
+    //用户没关注话题的时间跳这个
+    Route::get('topic','TopicController@topicConcern');
     //话题广场分类
     Route::get('/topicSquare/{id}','TopicController@topicClassify');
-    //话题详情
+    //热门排序话题详情
     Route::get('/topicDetails/{id}','TopicController@topicHot');
+    //时间排序话题详情
+    Route::get('topicTime/{id}','TopicController@topicTime');
+    //精华排序话题详情
+    Route::get('/topicRefined/{id}','TopicController@topicRefined');
     //关注发送ajax
     Route::get('/ajaxd','TopicController@ajaxd');
+    Route::POST('/ajaxs','TopicController@ajaxs');
     
 });

@@ -381,13 +381,6 @@
           </div>    
         </div>
         <div class="tab-content">
-        
-            <div class="huati-paixu">
-                
-                <div class="huati-bb">
-                  <a href="/topicDetails/{{$ids}}">热门排序</a><span>&nbsp;|&nbsp;</span><a href="/topicTime/{{$ids}}">时间排序</a>
-                </div>
-              </div>
 
             <div class="clearfix"></div>
                 <!-- 内容 -->

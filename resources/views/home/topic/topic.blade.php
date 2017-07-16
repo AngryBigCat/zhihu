@@ -1,6 +1,23 @@
 @extends('home.layouts.default')
 @section('style')
 	<style>
+             .foot{
+                color:#bbb;
+                margin:100px 40px 0;
+                border-top:1px solid #ccc;
+                padding:20px 10px 80px;
+              }
+              .foot a{
+                color:#bbb;
+              }
+              .foot>ul{
+                list-style: none;
+                font-size: 12px;
+              }
+              .foot li{
+                float: left;
+                margin:0 10px;
+              }
 		.zm-topic-cat-main li {
 		  float: left;
 		  margin: 0 10px 10px 0;
@@ -21,12 +38,13 @@
 
 		}
 		 body {
+            font-size:15px;
     		background:#FFFFFF;
-    	}
-    	.huati-topic {
-    		width:960px;
-    		margin:0 auto;
-    	}
+    	      }
+          	.huati-topic {
+          		width:960px;
+          		margin:0 auto;
+          	}
       	.huati-content {
       		width:631px;
       		height:500px; 
@@ -356,9 +374,13 @@
                  margin-left:30px;
                  margin-top:7px;
             }
+            .page{
+                  margin-left:130px;
+            }
 	</style>
 @endsection
 @section('content')
+
 	<div class="huati-topic">
             <div class="huati-content" >
                   <div class="huati-biaoti">
@@ -388,7 +410,7 @@
                                           <a href="/topicDetails/{{$id}}"  target="_blank"><img src="{{$img}}" style="width:50px;height:50px"></a>&nbsp;&nbsp;&nbsp;<a href="/topicDetails/{{$id}}"  target="_blank" >{{$tag_name}}</a>
                                     </div>
                                     <div class="huati-bb">
-                                          <span>热门排序&nbsp;|&nbsp;</span><a href="">时间排序</a>
+                                          <a href="/topic/{{$id}}">热门排序</a><span>&nbsp;|&nbsp;</span><a href="/topicTimeTag/{{$id}}">时间排序</a>
                                     </div>
                               </div>
 
@@ -400,21 +422,29 @@
                                      @foreach($res as $value)
                                           <div class="huati-neirong">
                                                 <a href="" class="huati-content-a"  target="_blank">{{$value->title}}</a><br>
-                                                <a href="" class="huati-content-b">{{$value->count}}</a>&nbsp;
-                                                <a href="" class="huati-content-c"  target="_blank">{{$value->name}}</a>&nbsp;&nbsp;
-                                                <span class="huati-content-d">{{$value->a_word}}</span>
+                                                <a href="" class="huati-content-b">
+                                                {{$data[$value->id]['vote_count']}}
+                                                </a>&nbsp;
+                                                <a href="" class="huati-content-c"  target="_blank">{{$data[$value->id]['name']}}</a>&nbsp;&nbsp;
+                                                <span class="huati-content-d">{{$data[$value->id]['a_word']}}</span>
 
                                                 <div class="huati-wenzahng">
-                                                      <img src="{{$value->qs_img}}" style="width:120px">
+                                                      <img src="{{$data[$value->id]['img']}}" style="width:120px">
                                                       <div class="huati-wenzahng-a">
-                                                            <p>{{$value->content}}&nbsp;&nbsp;<a href="">显示全部</a></p>
+                                                      {{$data[$value->id]['content']}}
+                                                            <p>&nbsp;&nbsp;<a href="">显示全部</a></p>
                                                       </div>
                                                 </div>
                                                 <div class="huati-wenzhang-lianjie">
-                                                      <a href="" class="Attention">
+                                                     <a style="cursor:pointer" class="Attention" >
                                                             <i class="z-icon-follow"></i>
-                                                            <span class="topicAttention">关注问题</span>
-                                                      
+                                                            <span class="follow_que" que_id="{{$value->id}}">
+                                                            @if(in_array($value->id, $question_ids))
+                                                            取消关注
+                                                            @else
+                                                            关注
+                                                            @endif
+                                                            </span>
                                                       </a>&nbsp;
                                                       <a href="">
                                                             <i class="z-icon-comment"></i>
@@ -469,11 +499,19 @@
                         @foreach($huati as $v)
                         <div class="huati-guanzhuneirong">
                               <div class="huati-guanzhuneirong-zuo"><a href="/topicDetails/{{$v->id}}"  target="_blank" ><img src="{{$v->img}}" style="width:40px;height:40px"></a>&nbsp;&nbsp;&nbsp;<a href="/topicDetails/{{$v->id}}"  target="_blank" >{{$v->tag_name}}</a></div>
-                              <div class="huati-guanzhuneirong-you"><a href=""><i class="z-icon-follow"></i><span>关注</span></a></div>
+                              <div class="huati-guanzhuneirong-you"><a href=""><i class="z-icon-follow"></i><span class="topic-guanzhu" tag_id="{{$v->id}}">
+                                     @if(in_array($v->id, $tag_ids))
+                                    取消关注
+                                    @else
+                                    关注
+                                    @endif
+                              </span></a></div>
                         </div>
                          @endforeach
                   </div>
+                  <div class="page">
                   {!!$huati->links() !!}
+                  </div>
             </div>
       </div>
 
@@ -509,6 +547,7 @@
             </div>
       </div>
 </div>
+
 @stop
 @section('script')
 	<script type="text/javascript">
@@ -518,7 +557,6 @@
                  $.get('/');
             // });      
                  
-                
 
             $('.huati-neirong').each(function() {
                   var th = $(this);
@@ -539,6 +577,48 @@
       		$(this).find('a').css('color','#fff');
 
       	});
-          
+            $.ajaxSetup({
+                   headers: { 'X-CSRF-TOKEN' : '{{ csrf_token() }}' }
+             });
+            //关注问题
+            $('.follow_que').click(function() {
+                  // alert($);ss
+                  var que_id = $(this).attr('que_id');
+
+                  var th = $(this);
+                  $.ajax({
+                        url: "/ajaxs",
+                        type: 'POST',
+                        data: { data :que_id, '_token':'{{ csrf_token() }}' },
+                        dataType: 'json',
+                        success: function (data) {
+                            th.html(data.msg);
+                        },
+                        error: function (data) {
+                            alert('error');
+                        }
+                  });
+            });
+
+            //关注话题
+            $('.topic-guanzhu').click(function() {
+
+                  var tag_id = $(this).attr('tag_id');
+                  var th = $(this);
+                  $.ajax({
+                          url: "/ajaxd",
+                          type: 'GET',
+                          data: { date :tag_id },
+                          dataType: 'json',
+                          success: function (data) {
+                              th.html(data.msg);
+                              // console.log(data);
+                          },
+                          error: function (data) {
+                              console.log(data);
+                          }
+                      });
+                      return false;
+          }); 
 	</script>
 @endsection
