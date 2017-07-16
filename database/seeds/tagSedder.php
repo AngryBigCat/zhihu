@@ -19,6 +19,7 @@ class tagSedder extends Seeder
             $tmp['tag_name'] = '什么都不想说了';
             $tmp['description'] = '飒飒积分身份及积分非法';
             $tmp['thumb'] = '/img/user6-128x128.jpg';
+            $tmp['Concern'] = rand(10,200);
             $data[]=$tmp;
         }
          DB::table('tags')->insert($data);

@@ -12,7 +12,7 @@ return [
     | any other location as required by the application or its packages.
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', '知乎'),
 
     /*
     |--------------------------------------------------------------------------
@@ -77,7 +77,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'zh-CN',
 
     /*
     |--------------------------------------------------------------------------
@@ -163,6 +163,8 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
 
+        // GrahamCampbell\Markdown\Facades\Markdown::class,
+
         /*
          * Package Service Providers...
          */
@@ -176,6 +178,16 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+
+        //关注、点赞
+        Overtrue\LaravelFollow\FollowServiceProvider::class,
+        Jcc\LaravelVote\VoteServiceProvider::class,
+
+        //验证码
+        Mews\Captcha\CaptchaServiceProvider::class,
+
+        //
+        Barryvdh\Debugbar\ServiceProvider::class,
 
     ],
 
@@ -225,7 +237,9 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        'Markdown' => GrahamCampbell\Markdown\Facades\Markdown::class,
+
+        //验证码
+        'Captcha' => Mews\Captcha\Facades\Captcha::class,
     ],
 
 ];

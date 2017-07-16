@@ -25,7 +25,7 @@
 	}
 	.DynamicColorButton--white{
 		color: hsla(0,0%,100%,.7);
-		    border-color: hsla(0,0%,100%,.24);
+        border-color: hsla(0,0%,100%,.24);
 	}
 	.head-pic{
 		margin-left:30px;
@@ -141,5 +141,8 @@
 		font-weight: bold;
 		color:black;
 		text-decoration: none;
+	}
+	#message-text{
+		resize:none;
 	}
 </style>

@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/admins/css/amazeui.datatables.min.css" /> 
   <link rel="stylesheet" href="/admins/css/app.css" /> 
   <script src="/admins/js/jquery.min.js"></script> 
+  <!-- @yield('style'); -->
  </head> 
  <body data-type="index"> 
   <script src="/admins/js/theme.js"></script> 
@@ -199,6 +200,7 @@
   <script src="/admins/js/amazeui.min.js"></script> 
   <script src="/admins/js/amazeui.datatables.min.js"></script> 
   <script src="/admins/js/dataTables.responsive.min.js"></script> 
-  <script src="/admins/js/app.js"></script>  
+  <script src="/admins/js/app.js"></script> 
+   @yield('script') 
  </body>
 </html>
