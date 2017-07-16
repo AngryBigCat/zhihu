@@ -15,6 +15,7 @@ class CreateUserDetailsTable extends Migration
     {
         Schema::create('user_details', function (Blueprint $table) {
             $table->increments('user_id')->comment('用户id');
+            $table->char('a_word')->nullable()->comment('用户签名');
             $table->char('introduction',255)->nullable()->comment('个人简介');
             $table->char('address',255)->nullable()->comment('个人住址');
             $table->char('jog',100)->nullable()->comment('工作');
