@@ -5,22 +5,71 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Overtrue\LaravelFollow\Traits\CanBeFollowed;
+use Overtrue\LaravelFollow\Traits\CanBeSubscribed;
 
 class Question extends Model
 {
     //第三方包
-    use CanBeFollowed;
+    use CanBeFollowed, CanBeSubscribed;
 
     //可写入的字段
     protected $fillable = ['user_id', 'title', 'topic', 'describe'];
 
     /**
-     * 关联问题下的回答
+     * 问题关联的评论
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function comments()
+    {
+        return $this->morphMany('App\Comment', 'commentable');
+    }
+
+    /**
+     * 问题关联的回答
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function answers()
     {
         return $this->hasMany('App\Answer');
+    }
+
+    public function filterAppointAnswers($answers, $id)
+    {
+        return $answers->filter(function ($item, $key) use ($id){
+            return $item->id != $id;
+        });
+    }
+
+    /**
+     * 获取已登陆对该问题的回答，如果没有就返回false
+     * @param $answers
+     * @return bool|mixed
+     */
+    public function getLoggedAnswer($answers)
+    {
+        $user = Auth::user();
+        if ($this->isSubscribedBy($user)) {
+            return $this->getAnswer($answers, $user->id, 'User');
+        }
+        return false;
+    }
+
+    /**
+     * 获取问题下的某个回答
+     * @param $answers
+     * @param string $id
+     * @param string $type
+     * @return mixed
+     */
+    public function getAnswer($answers, $id = '', $type = 'Answer')
+    {
+        return $answers->first(function ($item, $key) use ($id, $type) {
+            if ($type == 'User') {
+                return $item->user->id == $id;
+            } else if ($type == 'Answer') {
+                return $item->id == $id;
+            }
+        });
     }
 
     /**
@@ -31,6 +80,16 @@ class Question extends Model
     {
         $user = Auth::user();
         return $this->isFollowedBy($user);
+    }
+
+    /**
+     * 判断当前登陆的用户是否回答了该问题
+     * @return bool
+     */
+    public function isSubscribe()
+    {
+        $user = Auth::user();
+        return $this->isSubscribedBy($user);
     }
 
     /**

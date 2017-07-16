@@ -3,16 +3,19 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Jcc\LaravelVote\CanBeVoted;
 
 class Answer extends Model
 {
     //第三方包
-    use CanBeVoted;
+    use CanBeVoted, SoftDeletes;
 
     //第三方包属性 与User关联
     protected $vote = User::class;
+
+    protected $dates = ['deleted_at'];
 
     //可写入的字段
     protected $fillable = ['content', 'question_id', 'user_id'];
@@ -31,6 +34,14 @@ class Answer extends Model
     public function countVote()
     {
         return $this->countUpVoters();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function comments()
+    {
+        return $this->morphMany('App\Comment', 'commentable');
     }
 
     /**

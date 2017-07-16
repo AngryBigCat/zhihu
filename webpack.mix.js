@@ -28,4 +28,5 @@ mix.webpackConfig({
     }
 });
 
-mix.browserSync('homestead.app');
+
+// mix.browserSync('homestead.app');

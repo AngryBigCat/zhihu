@@ -270,9 +270,9 @@
                                 </div>
                             </div>
                             <div class="index-topic-footer">
-                                @component('home.component._footerCon')
-                                    <li><span class="fa fa-plus"></span> 关注问题</li>
-                                @endcomponent
+                                {{--@component('home.component._footerCon', ['key' => 1])--}}
+                                    {{--<li><span class="fa fa-plus"></span> 关注问题</li>--}}
+                                {{--@endcomponent--}}
                             </div>
                         </div>
                     </div>
@@ -297,36 +297,6 @@
             </div>
             <ul class="list-group">
                 <a href="#" class="list-group-item">专栏・发现</a>
-            </ul>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">知乎 Live ⚡</h3>
-            </div>
-            <ul class="list-group">
-                <a href="#" class="list-group-item">如何恰当地给出自己的意见</a>
-                <a href="#" class="list-group-item">如何恰当地给出自己的意见</a>
-                <a href="#" class="list-group-item">如何恰当地给出自己的意见</a>
-            </ul>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">知乎圆桌</h3>
-            </div>
-            <ul class="list-group">
-                <a href="#" class="list-group-item">科学健身入门</a>
-                <a href="#" class="list-group-item">科学健身入门</a>
-                <a href="#" class="list-group-item">科学健身入门</a>
-            </ul>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">知乎圆桌</h3>
-            </div>
-            <ul class="list-group">
-                <a href="#" class="list-group-item">烘焙的美好时光</a>
-                <a href="#" class="list-group-item">烘焙的美好时光</a>
-                <a href="#" class="list-group-item">烘焙的美好时光</a>
             </ul>
         </div>
     </div>

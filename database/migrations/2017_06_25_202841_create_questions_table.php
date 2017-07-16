@@ -8,11 +8,6 @@ class CreateQuestionsTable extends Migration
 {
     /**
      * Run the migrations.
-<<<<<<< HEAD
-     *
-=======
-     * 问题表
->>>>>>> gaoju
      * @return void
      */
     public function up()
@@ -24,7 +19,7 @@ class CreateQuestionsTable extends Migration
             $table->char('topic')->comment('话题，用逗号分割');
             $table->text('describe')->nullable()->comment('问题描述');
             $table->integer('visit_count')->default(0)->comment('问题浏览数');
-            $table->timestamp('deleted_at')->nullable()->comment('软删除');
+            $table->softDeletes()->comment('软删除');
             $table->timestamps();
         });
     }

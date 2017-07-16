@@ -23,7 +23,7 @@
                             </div>
                         </div>
 
-                        <div class=" -group{{ $errors->has('password') ? ' has-error' : '' }}">
+                        <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
                             <label for="password" class="col-md-4 control-label">密码</label>
 
                             <div class="col-md-6">
@@ -37,18 +37,18 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group{{ $errors->has('captcha') ? ' has-error' : ''  }}">
                             <label for="captcha" class="col-md-4 control-label">验证码</label>
                             <div class="form-group">
                                 <div class="col-md-3">
-                                    <input id="captcha"  class="form-control" type="captcha" name="captcha" value="{{ old('captcha')  }}" required>
+                                    <input id="captcha" class="form-control" type="captcha" name="captcha" value="{{ old('captcha')  }}" required>
                                     @if ($errors->has('captcha'))
                                         <span class="help-block">
                                             <strong>验证码输入错误</strong>
                                         </span>
                                     @endif
                                 </div>
-                                <span class="col-md-1 refereshrecapcha">
+                                <span class="col-md-1 refereshrecapcha" onclick="refreshCaptcha()">
                                     {!! captcha_img('flat') !!}
                                 </span>
                             </div>
@@ -79,4 +79,22 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script>
+        function refreshCaptcha(){
+            $.ajax({
+                url: "/login/refereshcapcha",
+                type: 'get',
+                dataType: 'html',
+                success: function(json) {
+                    $('.refereshrecapcha').html(json);
+                },
+                error: function(data) {
+                    alert('Try Again.');
+                }
+            });
+        }
+    </script>
 @endsection

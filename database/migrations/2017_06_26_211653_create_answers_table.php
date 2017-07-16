@@ -23,6 +23,7 @@ class CreateAnswersTable extends Migration
                 $table->integer('user_id')->comment('用户id');
                 $table->integer('question_id')->comment('问题id');
                 $table->text('content')->comment('回答内容');
+                $table->softDeletes()->comment('软删除');
                 $table->timestamps();
             });
         } else {

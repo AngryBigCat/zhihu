@@ -20,18 +20,52 @@ Route::get('/', 'HomeController@index');
 
 //提交问题
 Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
-
+//删除问题
+Route::delete('question/{id}', 'QuestionController@delete')->middleware('auth');
 //问题页
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
 //关注问题、取消关注问题
 Route::post('question/{id}/toggleFollow', 'QuestionController@toggleFollow')->middleware('auth');
-//排序
-Route::get('question/{id}/{sortType}', 'QuestionController@toggleSort');
+//问题下的获取评论，必须写在 “回答排序”路由 的上面
+Route::get('question/{id}/comment', 'QuestionController@indexCommentByQuestionID');
+//问题下的提交评论，必须写在 “回答排序”路由 的上面
+Route::post('question/{id}/comment', 'QuestionController@storeCommentByQuestionID')->middleware('auth');
+//获取该问题的回答
+Route::get('question/{id}/answer/{aid}', 'QuestionController@showContainAuthor');
+//获取该问题的关注用户
+Route::get('question/{id}/followers', 'QuestionController@getFollowersByQuestionID');
+//回答排序
+Route::get('question/{id}/mostthumb', 'QuestionController@mostThumbSort');
+Route::get('question/{id}/latest', 'QuestionController@latestSort');
+Route::get('question/{id}/oldest', 'QuestionController@oldestSort');
+
+
+
 
 //提交回答
 Route::post('answer', 'AnswerController@store')->middleware('auth')->name('answer.store');
+//更新回答
+Route::put('answer/{id}', 'AnswerController@update')->middleware('auth')->name('answer.update');
+//删除回答
+Route::delete('answer/{id}', 'AnswerController@delete')->middleware('auth');
+//
+Route::patch('answer/{id}/restore', 'AnswerController@restore')->middleware('auth');
+//获取评论，这条路由必须放在 “点赞、取消点赞” 这条路由的前面
+Route::get('answer/{id}/comment', 'AnswerController@indexCommentByAnswerID');
+//提交评论，这条路由必须放在 “点赞、取消点赞” 这条路由的前面
+Route::post('answer/{id}/comment', 'AnswerController@storeCommentByAnswerID')->middleware('auth');
 //点赞、取消点赞
 Route::post('answer/{id}/{type}', 'AnswerController@toggleVote')->middleware('auth');
+
+
+
+//刷新验证码
+Route::get('login/refereshcapcha', 'Auth\LoginController@refereshcapcha');
+
+//关注用户、取消用户
+Route::post('user/{id}/toggleFollow', 'UserController@toggleFollow')->middleware('auth');
+
+Route::get('user/{id}/followers', 'UserController@getFollowersByAuthorID');
 
 
 //后台首页
@@ -51,7 +85,6 @@ Route::get('/admin/topiccreate',function(){
 Route::get('user', function() {
     return view('home.user.userinfo');
 });
-
 
 //搜索页
 Route::get('search', function () {

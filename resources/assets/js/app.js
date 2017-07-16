@@ -18,12 +18,39 @@ window.E = require('wangeditor');
 
 //import components
 import searchView from './components/search-view/search-view.vue';
+import commentList from './components/comment-list.vue';
+import followerList from './components/follower-list.vue';
+
 
 const app = new Vue({
+    mounted() {
+        $('#author-follower').on('hidden.bs.modal', (event) => {
+            this.$refs.authorFollower.followerList = [];
+        });
+    },
+    methods: {
+        onToggleComment(key) {
+            if (key instanceof Object) {
+                this.$refs.question.toggleShow('question');
+            } else if (key === 'topAnswer') {
+                this.$refs.topAnswer.toggleShow('answer');
+            } else {
+                this.$refs[key].toggleShow('answer');
+            }
+        },
+        onGetFollower(type) {
+            if (type === 'question') {
+                this.$refs.questionFollower.onGetFollower('question');
+            }  else {
+                this.$refs.authorFollower.onGetFollower('user');
+            }
+        }
+    },
     components: {
         searchView,
+        commentList,
+        followerList
     }
 }).$mount('#app');
 
 //基础构造方法
-

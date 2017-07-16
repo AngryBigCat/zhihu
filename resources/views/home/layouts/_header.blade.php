@@ -56,6 +56,8 @@
                 </ul>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
+        <!-- 快闪提示框 -->
+        <div class="alert-info-box alert"></div>
     </nav>
     @yield('question-head')
 </header>
