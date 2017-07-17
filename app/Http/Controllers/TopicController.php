@@ -172,7 +172,7 @@ class TopicController extends Controller
             ->join('user_details as userinfo', 'ans.user_id', '=', 'userinfo.user_id')
             ->where('ans.question_id',$qs_id)
             ->select('ans.*', 'users.name', 'userinfo.a_word')
-            ->orderBy('vote_count', 'desc')
+            ->orderBy('vote_count', 'acs')
             ->first();
         return (array)$res;
      }
@@ -206,7 +206,8 @@ class TopicController extends Controller
             $pid = $topic[0]->pid;
             $img = $topic[0]->img;
             $ids = $topic[0]->id;
-            
+            $count=\App\Tag::find($ids)->followers()->count();
+            // dd($count);
             //多个话题有多个问题 多对多
             $data = Tag::find($id);
             $question = $data->question;
@@ -227,11 +228,6 @@ class TopicController extends Controller
             for($i = 0; $i<count($qs_id); $i++){
                 $data[$qs_id[$i]] =  self::browseAnswer($qs_id[$i]);
             }
-            // dd($data);
-            // 父话题
-            $tag= DB::table('tags')
-             ->where('pid','=',0)
-             ->get();
              // 子话题
             $sonTag = $this->getClassify($id);
             //子话题的数量
@@ -242,6 +238,7 @@ class TopicController extends Controller
             foreach($tags as $v) {
                 $tag_ids[] = $v->id;
             }
+           
             //用户关注的问题
             $ques = \App\User::find($user)->followings(\App\Question::class)->get();
             $question_ids = [];
@@ -250,7 +247,7 @@ class TopicController extends Controller
             }
             
         }
-        return view('home.topic.topicDetails',compact('data','tag_name','res','description','sonTag','tag','pid','img','tag_ids','ids','question_ids','numsonTag'));
+        return view('home.topic.topicDetails',compact('data','tag_name','res','description','sonTag','pid','img','tag_ids','ids','question_ids','numsonTag','count'));
      }
     //时间排序话题详情
     public function topicTime($id)
@@ -270,7 +267,7 @@ class TopicController extends Controller
             $pid = $topic[0]->pid;
             $img = $topic[0]->img;
             $ids = $topic[0]->id;
-            
+            $count=\App\Tag::find($ids)->followers()->count();
             //多个话题有多个问题 多对多
             $data = Tag::find($id);
             $question = $data->question;
@@ -314,7 +311,7 @@ class TopicController extends Controller
             }
             
         }
-        return view('home.topic.topicDetails',compact('data','tag_name','res','description','sonTag','tag','pid','img','tag_ids','ids','question_ids','numsonTag'));
+        return view('home.topic.topicDetails',compact('data','tag_name','res','description','sonTag','tag','pid','img','tag_ids','ids','question_ids','numsonTag','count'));
 
      }
     //精华排序话题详情
@@ -335,7 +332,7 @@ class TopicController extends Controller
             $pid = $topic[0]->pid;
             $img = $topic[0]->img;
             $ids = $topic[0]->id;
-            
+            $count=\App\Tag::find($ids)->followers()->count();
             //多个话题有多个问题 多对多
             $data = Tag::find($id);
             $question = $data->question;
@@ -379,7 +376,7 @@ class TopicController extends Controller
             }
             
         }
-        return view('home.topic.topicRefined',compact('data','tag_name','res','description','sonTag','tag','pid','img','tag_ids','ids','question_ids','numsonTag'));  
+        return view('home.topic.topicRefined',compact('data','tag_name','res','description','sonTag','tag','pid','img','tag_ids','ids','question_ids','numsonTag','count'));  
      } 
     //话题广场
     public function topicClassify($id)
@@ -434,6 +431,8 @@ class TopicController extends Controller
         foreach($tagsId as $v) {
             $tag_ids[] = $v->id;
         }
+        $count = count($tag_ids);
+        // dd($count);
         //取出第一个
         $id = reset($tag_ids);
         // 判断此用户是否关注了话题 无关注则跳话题页面
@@ -441,7 +440,7 @@ class TopicController extends Controller
             return redirect('/topic/'.$id);
         }
 
-        return view('home.topic.topicConcern',compact('tags','tag_ids'));
+        return view('home.topic.topicConcern',compact('tags','tag_ids','count'));
      }
     //分类函数 获取子话题
     public function getClassify($pid)

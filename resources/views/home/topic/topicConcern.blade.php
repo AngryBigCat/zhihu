@@ -163,6 +163,9 @@
       		margin-top:20px;
 
       	}
+            .newtag{
+                  display:none;
+            }
 	</style>
 @endsection
 @section('content')
@@ -177,8 +180,8 @@
 			</div>
 		</div>
 		<div class="huati-lianjie">
-			<div class="huati-lianjie-a">
-				<a href="">您有<span>66</span>新话题,请点击查看</a>
+			<div class="huati-lianjie-a newtag">
+				<a href="">您有<span class="count">{{$count}}</span>新话题,请点击查看</a>
 			</div>
 		</div>
 		<!-- 内容 -->
@@ -224,20 +227,27 @@
 
                   var tag_id = $(this).attr('tag_id');
                   var th = $(this);
-                  var link = $('.huati-lianjie-a');
                   $.ajax({
                           url: "/ajaxd",
                           type: 'GET',
                           data: { date :tag_id },
                           dataType: 'json',
                           success: function (data) {
+
                               th.html(data.msg);
-                              if(data.status == 1){
-                                    // th.html(data.msg);
-                                    link.css('display','block');
-                                    // alert(123);
-                              }else if (data.status == 0){
-                                    link.css('display','none');
+                              var newtag = $('.newtag');
+                              var count = $('.count');
+                              var tt = parseInt($('.count').html());
+                              if(data.status == '1'){
+                                    count.html(tt+1);
+                                    if(count.html()> '0'){
+                                          newtag.css('display','block');
+                                    }
+                              } else{
+                                     count.html(tt-1);
+                                     if(count.html()=='0'){
+                                          newtag.css('display','none');
+                                     }
                               }
 
                           },

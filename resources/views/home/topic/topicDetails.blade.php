@@ -372,7 +372,6 @@
               <div class="huati-yinzi-title">
                 <a href="/topicDetails/{{$ids}}">动态</a>&nbsp;&nbsp;|&nbsp;&nbsp;
                 <a href="/topicRefined/{{$ids}}">精华</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-                <a href="">等待回答</a>
               </div>
             </div>
             <div class="huati-fenxiang">
@@ -385,7 +384,7 @@
             <div class="huati-paixu">
                 
                 <div class="huati-bb">
-                  <a href="/topicDetails/{{$ids}}">热门排序</a><span>&nbsp;|&nbsp;</span><a href="/topicTime/{{$ids}}">时间排序</a>
+                  <a href="/topicDetails/{{$ids}}"><span class="topicDetails">热门排序</span></a><span>&nbsp;|&nbsp;</span><a href="/topicTime/{{$ids}}" class="topicTime">时间排序</a>
                 </div>
               </div>
 
@@ -464,7 +463,7 @@
                   关注
                   @endif
             </button>&nbsp;&nbsp;
-            <a href="">{{\App\Tag::find($ids)->followers()->count()}}</a><span>人关注了该话题</span>
+            <a href=""><span class="count">{{$count}}</span>人关注了该话题</a>
             <div class="guangchang-guanli">
             <span>组织</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span>管理</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span>日志</span>
             </div>
@@ -481,7 +480,10 @@
               <div class="qiao">
                 <ul class="zm-topic-cat-main js-topic-cat-main clearfix">
                      
-                  <li class="zm-topic-cat-item"><a href="/topicSquare/hot/">{{getTagNameByIds($pid)}}</a></li>
+                  <li class="zm-topic-cat-item">
+                
+                  <a href="/topicDetails/{{$pid}}">{{getTagNameByIds($pid)}}</a
+                  </li>
                        
                 </ul>
               </div>
@@ -494,7 +496,7 @@
               <div class="qiao">
                 <ul class="zm-topic-cat-main js-topic-cat-main clearfix">
                   @foreach($sonTag as $v)    
-                  <li class="zm-topic-cat-item"><a href="/topicSquare/hot/{{$v->id}}">{{ $v->tag_name }}</a></li>
+                  <li class="zm-topic-cat-item"><a href="/topicDetails/{{$v->id}}">{{ $v->tag_name }}</a></li>
                   @endforeach
                 </ul>
               </div>
@@ -546,8 +548,15 @@
                     data: { date :tag_id },
                     dataType: 'json',
                     success: function (data) {
+                        var count = $('.count');
+                        var tt = parseInt($('.count').html());
                         th.html(data.msg);
                         // console.log(data);
+                        if(data.status == '1'){
+                              count.html(tt+1);
+                        } else {
+                              count.html(tt-1);
+                        }
                     },
                     error: function (data) {
                         console.log(data);
@@ -573,6 +582,12 @@
                             alert('error');
                         }
                   });
+            });
+            $('.topicTime').click(function(){
+                $(this).css('color','red');
+            });
+            $('.topicDetails').click(function(){
+              $(this).css('color','red');
             });
   </script>
 @endsection

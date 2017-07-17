@@ -377,6 +377,9 @@
             .page{
                   margin-left:130px;
             }
+            .biaoyanse{
+                  color:red;
+            }
 	</style>
 @endsection
 @section('content')
@@ -410,7 +413,7 @@
                                           <a href="/topicDetails/{{$id}}"  target="_blank"><img src="{{$img}}" style="width:50px;height:50px"></a>&nbsp;&nbsp;&nbsp;<a href="/topicDetails/{{$id}}"  target="_blank" >{{$tag_name}}</a>
                                     </div>
                                     <div class="huati-bb">
-                                          <a href="/topic/{{$id}}">热门排序</a><span>&nbsp;|&nbsp;</span><a href="/topicTimeTag/{{$id}}">时间排序</a>
+                                          <a href="/topic/{{$id}}"><span class="topicDetails">热门排序</span></a><span>&nbsp;|&nbsp;</span><a href="/topicTimeTag/{{$id}}"  class="topicTime">时间排序</a>
                                     </div>
                               </div>
 
@@ -620,5 +623,12 @@
                       });
                       return false;
           }); 
+
+            $('.topicTime').click(function(){
+                $(this).css('color','red');
+            });
+            $('.topicDetails').click(function(){
+              $(this).css('color','red');
+            });
 	</script>
 @endsection

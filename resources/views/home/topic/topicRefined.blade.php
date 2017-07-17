@@ -372,7 +372,6 @@
               <div class="huati-yinzi-title">
                 <a href="/topicDetails/{{$ids}}">动态</a>&nbsp;&nbsp;|&nbsp;&nbsp;
                 <a href="/topicRefined/{{$ids}}">精华</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-                <a href="">等待回答</a>
               </div>
             </div>
             <div class="huati-fenxiang">
@@ -487,7 +486,7 @@
               <div class="qiao">
                 <ul class="zm-topic-cat-main js-topic-cat-main clearfix">
                   @foreach($sonTag as $v)    
-                  <li class="zm-topic-cat-item"><a href="/topicSquare/hot/{{$v->id}}">{{ $v->tag_name }}</a></li>
+                  <li class="zm-topic-cat-item"><a href="/topicDetails/{{$v->id}}">{{ $v->tag_name }}</a></li>
                   @endforeach
                 </ul>
               </div>
