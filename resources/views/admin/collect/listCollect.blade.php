@@ -49,21 +49,28 @@
                         </form>
                         </div>
                         <div class="am-u-sm-12">
-                            <table width="100%" class="am-table am-table-compact am-table-striped tpl-table-black " id="example-r">
+                            <table width="100%" class="am-table am-table-compact am-table-striped tpl-table-black " id="">
                                 <thead>
                                     <tr>
-                                        <th width="400px">问题标题</th>
-                                        <th>提问者</th>
-                                        <th>浏览量</th>
+                                        <th width="100px">收藏夹ID</th>
+                                        <th>收藏夹</th>
+                                        <th>创建者</th>
+                                        <th>收藏夹描述</th>
                                         <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($res as $v)
                                     <tr class="gradeX">
-                                        <td>{{$v->title}}</td>
+                                        <td>{{$v->id}}</td>
                                         <td>{{$v->name}}</td>
-                                        <td>{{$v->visit_count}}</td>
+                                        <td>{{DB::table('users')->where('id',$v->user_id)->first()->name}}</td>
+                                        <td>@if(empty($v->intro))
+                                                这个人太懒了，神马都么写
+                                            @else
+                                                {{$v->intro}}
+                                            @endif
+                                        </td>
                                         <td>
                                             <div class="tpl-table-black-operation">
                                                 <!-- <a href="javascript:;">
@@ -72,7 +79,7 @@
                                                 <a href="javascript:;" class="tpl-table-black-operation-del">
                                                     <i class="am-icon-arrow-circle-up"></i> 置顶
                                                 </a> -->
-                                                <a href="/admin/edit/{{$v->id}}/fon">
+                                                <a href="/admin/colEdit/{{$v->id}}">
                                                     <i class="am-icon-pencil"></i> 编辑
                                                 </a>
                                                 <a href="/admin/del/{{$v->id}}/fon" class="tpl-table-black-operation-del" onClick="delcfm()" type="submit">
@@ -98,27 +105,6 @@
         </div>
     </div>
     <script>
-    // {{-- ajax更新页面显示数据 --}}
-    //  $.ajaxSetup({
-    //     headers: { 'X-CSRF-TOKEN' : '{{ csrf_token() }}' }
-    // });
-
-    // $('#select').change(function(){
-    //     var num = $(this).children('option:selected').val();
-    //     console.log(num);
-    //     $.ajax({
-    //         url: "/amin/listAjax",
-    //         type: 'GET',
-    //         data:{'num':num},
-    //         // dataType:'json',
-    //         success: function (data) {
-    //             console.log(data);
-    //         },
-    //         error: function (data) {
-    //             alert(data);
-    //         }
-    //     });
-    // });
 
     {{-- 删除按钮弹框 --}}
     function delcfm() { 
@@ -129,9 +115,9 @@
 
     {{-- 左侧导航栏选中 --}}
     $('#home_page').find('a').removeAttr('class');
-    $('#found a:eq(0)').attr('class','active');
-    $('#found').find('ul').attr('style','display:block');
-    $('#listFound').find('a').attr('class','sub-active');
+    $('#collect a:eq(0)').attr('class','active');
+    $('#collect').find('ul').attr('style','display:block');
+    $('#listCollect').find('a').attr('class','sub-active');
     
     $('#info').fadeOut(3000);
     </script>

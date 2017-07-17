@@ -127,19 +127,18 @@
 			    text: qrcode
 			});
 		})
-		
-
-		$(document).pjax('a[data-pjax]', '#home');	
-	    $(document).on("pjax:timeout", function(event) {
-	        // 阻止超时导致链接跳转事件发生
-	        event.preventDefault();
-	    });
-
-	    $()
 		//检测变量
 		$('#myModal').on('shown.bs.modal', function () {
 		  	$('#myInput').focus()
 		})
+
+		// $(document).pjax('a[data-pjax]', '#home');	
+	    // $(document).on("pjax:timeout", function(event) {
+	    //     // 阻止超时导致链接跳转事件发生
+	    //     event.preventDefault();
+	    // });
+
+		
 		{{-- 热推下的内容的字数限制 --}}
 	    //限制字符个数
 	    $("p").each(function(){
@@ -251,6 +250,10 @@
 
 		//消息返回
 		$('#info').fadeOut(3000);
+		// 广告删除
+		$('.close').click(function(){
+			$('.guanggao').css('display','none');
+		})
 	</script>
 		
 @endsection	

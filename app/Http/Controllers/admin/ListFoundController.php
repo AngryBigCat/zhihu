@@ -4,7 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Request\admin\ListFoundEditRequest;
+use App\Http\Requests\admin\ListFoundEditRequest;
 use Illuminate\Support\Facades\DB;
 use App\Model\questions;
 
@@ -50,7 +50,7 @@ class ListFoundController extends Controller
      *  
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id,$pag)
     {
         // 查找要编辑id的内容
         $res = DB::table('questions')
@@ -59,8 +59,8 @@ class ListFoundController extends Controller
         ->where('questions.id',$id)
         ->get();
         // 将查找到的内容返回页面
-        // dd($res[0]);
-        return view('admin.found.found_edit',compact('res'));
+        // dd($pag);
+        return view('admin.found.found_edit',compact('res','pag'));
     }
 
      /**
@@ -74,8 +74,9 @@ class ListFoundController extends Controller
         $id=$request->id;
         $qus = questions::find($id);
         // echo $qus->qs_img;die;
-        if(($qus->qs_img) !='/img/avatar04.png'){
-        unlink($qus->qs_img);
+        if(!(empty($qus->qs_img) || $qus->qs_img=='/img/avatar04.png')){
+        unlink('./'.$qus->qs_img);
+            // echo '222';
         }
 
         if($request->hasFile('qs_img')) {
@@ -106,39 +107,34 @@ class ListFoundController extends Controller
      *  
      * @return \Illuminate\Http\Response
      */
-    public function do_edit(ListFoundEditRequest $request)
+    public function do_edit(Request $request)
     {
+        //表单验证  unique唯一
+        $this->validate($request, [
+            'title' => 'required',
+            'created_at' => 'required',
+            'topic' =>'required',
+            ],[
+            'title.required' => 'sorry！您还未写下您的问题',
+            'title.unique' => 'sorry！您的问题已存在',
+            'create_at.required' => 'sorry！您需要给定一个提问时间',
+            'topic.required' => 'sorry！您需要给您的问题选一个类别'
+            ]);
+
         $questions = questions::findOrFail($request->id);
-        // var_dump($_FILES);die();
         $questions -> title = $request->title;
         $questions -> updated_at = time();
         $questions -> created_at = $request->created_at;
         $questions -> topic = $request->topic;
         $questions -> describe = $request->describe;
-        // 删除旧得图片
-        // $id=$request->id;
-        // $qus = questions::find($id);
-        // if($qus->qs_img!=='/img/avatar04.png'||$qus->qs_img==''){
-        // unlink('.'.$qus->qs_img);
-        // }
-        // // 将上传的图片起名然后保存数据库
-        // if($request->hasFile('qs_img')) {
-        //     //创建文件的名字
-        //     $filename = time().rand(10000,99999);
-        //     //获取文件的后缀
-        //     $suffix = $request->file('qs_img')->getClientOriginalExtension();
-        //     //文件夹
-        //     $dirname = './uploads/qs/';
-        //     //文件名
-        //     $file = $filename .'.'. $suffix;
-        //     //移动
-        //     $request->file('qs_img')->move($dirname,$file);
-        //     //修改图片属性
-        //     $questions->qs_img = $dirname.$file;
-        // }
         // 更新数据库
+        // dd($request->pag);
         if($questions->save()) {
-            return redirect(route('listFound'))->with('info','更新成功');
+            if ($request->pag=='qus') {
+                return redirect(route('listQuestion'))->with('info','更新成功');
+            }else{
+                return redirect(route('listFound'))->with('info','更新成功');
+            }
         }else{
             return back()->with('info','更新失败');
         }
@@ -149,11 +145,15 @@ class ListFoundController extends Controller
      *  
      * @return \Illuminate\Http\Response
      */
-    public function del(Request $request,$id)
+    public function del(Request $request,$id,$pag)
     {
         $res = questions::find($id);
         if($res->delete()) {
-            return redirect(route('listFound'))->with('info','删除成功');
+            if ($request->pag=='qus') {
+                return redirect(route('listQuestion'))->with('info','删除成功');
+            }else{
+                return redirect(route('listFound'))->with('info','删除成功');
+            }
         }else{
             return back()->with('info','删除失败!!!');
         }

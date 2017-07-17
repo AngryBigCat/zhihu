@@ -37,32 +37,31 @@
     <div class="col-md-8">
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">我创建的收藏</a></li>
+            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">我关注的收藏</a></li>
         </ul>
         <div id="info" class="bg-info well-sm" style="padding:0;margin-top: 10px;text-align: center">
             {{Session::get('info')}}
         </div>
         <!-- Tab panes -->
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="profile">
-                <div id="#" class="">
-                @foreach($myCollects as $v)
-                    <div class="" id="">
-                        <h4 class="font-weight">
-    
-                    <a href="/collect/colQus/{{$v->id}}">{{$v->name}}</a>
-
-                    </h4>
+            <div role="tabpanel" class="tab-pane active" id="home">
+                @foreach($col as $v)
+                <div class="#" id="#">
+                    <h4 class="font-weight">
+                <a href="/collect/colQus/{{$v->id}}">{{$v->name}}</a>
+                </h4>
+                    <div class="#">
                         <div class="down-tool">
-                            <div class="#">
-                                <span style="padding-left: 15px">{{ \App\Collect::find($v->id)->question->count()}}条内容</span>
-                                <span class="#">•</span>
-                                <span class="#" href="#">{{\App\Collect::find($v->id)->followers()->count()}} 人关注</span>
-                            </div>
+                            由 <a data-hovercard="p$b$gaia-agul" href="#" target="_blank" class="#" data-original_title="愚者">{{DB::table('users')->where('id',202)->get()[0]->name}}</a> 创建<span class="#l">•</span>
+                            <span >{{\App\Collect::find($v->id)->question->count()}} 条内容</span>
+                            <span class="#">•</span>
+                            <a class="#">{{\App\Collect::find($v->id)->followers()->count()}} 人关注</a>
+                            <span class="zg-bull">•</span>
+                            <a class="follow" col_id="{{$v->id}}" style="cursor:pointer;"> 取消关注 </a>
                         </div>
                     </div>
-                @endforeach
                 </div>
+                @endforeach
             </div>
         </div>
     </div>

@@ -72,10 +72,10 @@
                                                 <a href="javascript:;" class="tpl-table-black-operation-del">
                                                     <i class="am-icon-arrow-circle-up"></i> 置顶
                                                 </a> -->
-                                                <a href="/admin/edit/{{$v->id}}/fon">
+                                                <a href="/admin/edit/{{$v->id}}/qus">
                                                     <i class="am-icon-pencil"></i> 编辑
                                                 </a>
-                                                <a href="/admin/del/{{$v->id}}/fon" class="tpl-table-black-operation-del" onClick="delcfm()" type="submit">
+                                                <a href="/admin/del/{{$v->id}}/qus" class="tpl-table-black-operation-del" onClick="delcfm()" type="submit">
                                                     <i class="am-icon-trash"></i> 删除
                                                 </a>
                                             </div>
@@ -98,27 +98,6 @@
         </div>
     </div>
     <script>
-    // {{-- ajax更新页面显示数据 --}}
-    //  $.ajaxSetup({
-    //     headers: { 'X-CSRF-TOKEN' : '{{ csrf_token() }}' }
-    // });
-
-    // $('#select').change(function(){
-    //     var num = $(this).children('option:selected').val();
-    //     console.log(num);
-    //     $.ajax({
-    //         url: "/amin/listAjax",
-    //         type: 'GET',
-    //         data:{'num':num},
-    //         // dataType:'json',
-    //         success: function (data) {
-    //             console.log(data);
-    //         },
-    //         error: function (data) {
-    //             alert(data);
-    //         }
-    //     });
-    // });
 
     {{-- 删除按钮弹框 --}}
     function delcfm() { 
@@ -129,9 +108,9 @@
 
     {{-- 左侧导航栏选中 --}}
     $('#home_page').find('a').removeAttr('class');
-    $('#found a:eq(0)').attr('class','active');
-    $('#found').find('ul').attr('style','display:block');
-    $('#listFound').find('a').attr('class','sub-active');
+    $('#question a:eq(0)').attr('class','active');
+    $('#question').find('ul').attr('style','display:block');
+    $('#listQuestion').find('a').attr('class','sub-active');
     
     $('#info').fadeOut(3000);
     </script>

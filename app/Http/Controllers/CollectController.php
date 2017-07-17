@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Collect;
@@ -16,21 +17,61 @@ class CollectController extends Controller
 	public function index()
 	{
 		$collect = new Collect;
-		$myCollects = $collect->pluck('name');
+        $authId= Auth::user()->id;
+		$myCollects = DB::table('collects')->where('user_id',$authId)->get();
+// dd($myCollects);
         // 登录用户已经关注的收藏夹id
         $authId= Auth::user()->id;
-        $collect = \App\User::find($authId)->followings(\App\Collect::class)->get();
-            dd($collect);
-		return view('home.collect.collections',compact('myCollects'));
+        $col = \App\User::find($authId)->followings(\App\Collect::class)->get();
+        
+		return view('home.collect.collections',compact('myCollects','col'));
 	}
+
+    /**
+     * 我关注的问题
+     * @return 
+     */
     public function follow()
     {
         // 关注的问题
         $authId= Auth::user()->id;
         $qus = \App\User::find($authId)->followings(\App\Question::class)->get();
-
         return view('home.collect.following',compact('qus'));
     }
+
+    /**
+     * 我关注的收藏
+     * @return 
+     */
+    public function myFollow()
+    {
+        $authId= Auth::user()->id;
+        $col = \App\User::find($authId)->followings(\App\Collect::class)->get();
+        return view('home.collect.myFollow',compact('col'));
+    }
+
+    /**
+     * 收藏的关注取消
+     * @return 
+     */
+    public function followAjax(Request $request)
+    {
+         if(Auth::check()){
+            $auth= Auth::user();
+            $col_id = $request->data;
+            $user = \App\User::find($auth->id);
+            $col = \App\Collect::find($col_id);
+            // echo $user;
+            if ($user->isFollowing($col)) {
+                $user->unfollow($col);
+                echo json_encode(['status'=>0, 'msg'=>'关注']);
+            } else {
+                $user->follow($col);
+                echo json_encode(['status'=>1, 'msg'=>'取消关注']);
+            }
+        }
+    }
+
 	/**
      * 创建收藏夹
      * @return 
@@ -54,5 +95,21 @@ class CollectController extends Controller
     		return back()->with('info','收藏夹添加失败');
     	}
     	
+    }
+
+    /**
+     * 收藏夹下的问题
+     * @return 
+     */
+    public function collectQus(Request $request)
+    {
+        $collect=Collect::find($request->id);
+        // dd($collect->name);
+        $res = $collect->question;
+        $collect_ids = [];
+        foreach($res as $v) {
+            $collect_ids[] = $v->id;
+        }
+        return view('home.collect.detail',compact('collect','res','collect_ids'));
     }
 }

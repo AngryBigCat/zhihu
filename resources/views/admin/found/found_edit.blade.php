@@ -91,6 +91,7 @@
                     </div>
                     {{csrf_field()}}
                     <input type="hidden" name="id" value="{{$res[0]->id}}">
+                    <input type="hidden" name="pag" value="{{$pag}}">
                     <div class="am-form-group">
                         <div class="am-u-sm-9 am-u-sm-push-3">
                             <button type="submit" class="am-btn am-btn-primary tpl-btn-bg-color-success ">提交</button>
@@ -121,7 +122,7 @@
                 // console.log(returndata);
             },
             error: function (returndata) {
-                alert(returndata);
+                alert('上传失败');
             }
         });
     }

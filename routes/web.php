@@ -41,13 +41,23 @@ Route::any('/admin/listFound','admin\ListFoundController@index')->name('listFoun
 // Route::get('/amin/listAjax','admin\ListFoundController@index_ajax');
 
 // 发现列表编辑
-Route::any('/admin/edit/{id}','admin\ListFoundController@edit')->name('found_edit');
+Route::any('/admin/edit/{id}/{pag}','admin\ListFoundController@edit')->name('found_edit');
 Route::post('/admin/edit','admin\ListFoundController@do_edit')->name('edit');
 
 // 发现列表删除
-Route::any('admin/del/{id}','admin\ListFoundController@del');
+Route::any('admin/del/{id}/{pag}','admin\ListFoundController@del');
 // ajax更新图片
 Route::any('admin/found/ajax','admin\ListFoundController@ajax')->name('found_ajax');
+
+// 后台问题
+Route::get('admin/listQuestion','admin\ListQuestionController@index')->name('listQuestion');
+// 后台收藏
+Route::get('admin/listCollect','admin\ListCollectController@index')->name('listCollect');
+// 收藏修改
+Route::get('admin/colEdit/{id}','admin\ListCollectController@edit');
+Route::post('admin/colEdit','admin\ListCollectController@do_edit')->name('colEdit');
+// 后台广告
+Route::get('admin/listAD','admin\ListAdvertisementController@index')->name('listAD');
 
 //问题页
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
@@ -106,25 +116,27 @@ Route::get('column/details', function () {
 Route::get('collect/collections','CollectController@index')->name('collect.collections');
 // 创建收藏夹
 Route::post('collect/collectAdd','CollectController@collectAdd');
+// 关注收藏夹
+Route::get('collect/followAjax','CollectController@followAjax');
+// 收藏夹内容
+Route::get('collect/colQus/{id}','CollectController@collectQus');
 
 // 我关注的问题
 Route::get('collect/following', 'CollectController@follow')->name('collect.following');
 
 // 邀请我回答的问题
-Route::get('collect/myQuestion', function(){
-    return view('home.collect.myQuestion');
-})->name('collect.myQuestion');
+Route::get('collect/myFollow', 'CollectController@myFollow')->name('collect.myFollow');
 
 // 发现
 // Route::get('found','FoundController@found')->name('found');
-Route::get('retui','FoundController@retui')->name('retui');
+Route::get('collect','FoundController@collects')->name('found/collects');
 Route::get('found/more','FoundController@more')->name('found/more');
-Route::get('found/follow','FoundController@follow');
-Route::post('found/collect','FoundController@collect');
+Route::get('found/follow','FoundController@follow'); //ajax获取关注
+Route::post('found/collect','FoundController@collect'); //获取收藏
 Route::get('found/ritui','FoundController@ritui');
 Route::get('found/yuetui','FoundController@yuetui');
 
-
+Route::post('suggest','SuggestController@suggest');
 // 知乎草案（协议）
 Route::get('deal',function(){
     return view('home.deal');

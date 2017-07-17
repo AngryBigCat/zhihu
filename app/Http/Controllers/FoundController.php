@@ -53,13 +53,18 @@ class FoundController extends Controller
             foreach($tagss as $v) {
                 $question_ids[] = $v->id;
             }
-
+        // 热门收藏
+            // SELECT * FROM table_name ORDER BY rand() LIMIT 5;
+            $aa=rand(1,$collect->count()-5);
+            $collects = $collect->select('name','id')->where('id','>',$aa)->take(5)->get();
+            // dd($res);
         // 返回发现页面
    		return view('home.found.ritui',[
             'questions' => $questions,
             'titles' => $titles,
             'dayHot' => $dayHot,
             'question_ids' => $question_ids,
+            'collects' => $collects,
             'myCollects'=>$myCollects
             ]);
     }
@@ -113,15 +118,12 @@ class FoundController extends Controller
      * 遍历发现页面的ajax发送热推问题
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function retui()
+    public function collects()
     {
-        $dayHot = DB::table('questions')
-        ->join('user_details','.questions.user_id','=','user_details.user_id')
-        ->join('users','questions.user_id','=','users.id')
-        ->select('users.name','user_details.*','questions.*')
-        ->orderBy('questions.visit_count','desc')
-        ->simplePaginate(5);
-        echo json_encode($dayHot);
+        $collect = new Collect;
+        $aa=rand(1,$collect->count()-5);
+        $collects = $collect->select('name','id')->where('id','>',$aa)->take(5)->get();
+        return view('home.found.collects',compact('collects'));
     }
 
     /**

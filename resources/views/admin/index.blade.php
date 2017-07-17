@@ -175,10 +175,9 @@
      	</ul> 
     </li> 
 
-    <li class="sidebar-nav-link"> <a href="javascript:;" class="sidebar-nav-sub-title"> <i class="am-icon-clone sidebar-nav-link-logo"></i>  问题管理  </a> 
+    <li id="question" class="sidebar-nav-link"> <a href="javascript:;" class="sidebar-nav-sub-title"> <i class="am-icon-clone sidebar-nav-link-logo"></i>  问题管理  </a> 
       	<ul class="sidebar-nav sidebar-nav-sub"> 
-	       <li class="sidebar-nav-link"> <a href="table-list.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 问题列表 </a> </li> 
-	       <li class="sidebar-nav-link"> <a href="table-list-img.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 问题增加 </a> </li> 
+	       <li id="listQuestion" class="sidebar-nav-link"> <a href="{{route('listQuestion')}}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 问题列表 </a> </li> 
      	</ul> 
     </li> 
 
@@ -186,10 +185,25 @@
     <a href="javascript:;" class="sidebar-nav-sub-title"> 
     <i class="am-icon-key sidebar-nav-link-logo"></i> 发现管理  
     </a> 
-      	<ul class="sidebar-nav sidebar-nav-sub"> 
-	       <li id="listFound" class="sidebar-nav-link"> <a href="{{route('listFound')}}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现列表 </a> </li> 
-	       <li class="sidebar-nav-link"> <a href="table-list-img.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现增加 </a> </li> 
-     	</ul> 
+        <ul class="sidebar-nav sidebar-nav-sub"> 
+         <li id="listFound" class="sidebar-nav-link"> <a href="{{route('listFound')}}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现列表 </a> </li> 
+      </ul> 
+    </li>
+    <li id="collect" class="sidebar-nav-link"> 
+    <a href="javascript:;" class="sidebar-nav-sub-title"> 
+    <i class="am-icon-star sidebar-nav-link-logo"></i> 收藏管理  
+    </a> 
+        <ul class="sidebar-nav sidebar-nav-sub"> 
+         <li id="listCollect" class="sidebar-nav-link"> <a href="{{route('listCollect')}}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 收藏列表 </a> </li> 
+      </ul> 
+    </li>
+    <li id="AD" class="sidebar-nav-link"> 
+    <a href="javascript:;" class="sidebar-nav-sub-title"> 
+    <i class="am-icon-envira sidebar-nav-link-logo"></i> 广告管理  
+    </a> 
+        <ul class="sidebar-nav sidebar-nav-sub"> 
+         <li id="listAD" class="sidebar-nav-link"> <a href="{{route('listAD')}}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 广告列表 </a> </li> 
+      </ul> 
     </li> 
 
     </ul> 

@@ -71,7 +71,7 @@
 				<div class="section-gongneng">
 					  <a href="#" name="focus" class="attent" qus_id="{{$v->id}}">取消关注</a>
 					  <span class="#">•</span>
-                        <a class="#" href="#">182 人回答</a>
+                        <span class="#">182 人回答</span>
 
 
                         <span class="zg-bull">•</span>

@@ -11,13 +11,9 @@ class Collect extends Model
     //第三方包
     use CanBeFollowed;
 
-    /**
-     * 关注问题下的问题
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
     public function question()
     {
-        return $this->hasMany('App\Question');
+    	return $this->belongsToMany('\App\Question','question_collects','collect_id','question_id');
     }
 
     /**

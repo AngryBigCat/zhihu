@@ -137,9 +137,16 @@
 		height:40px;
 	}
 	.guanggao{
+		display: block;
 		border-radius:7%;
 		width:350px;
-		height:350px;
+		height:250px;
+	}
+	.guanggao>div{
+		margin:0 35px;
+		width:270px;
+		height:225px;
+		border-radius:7%;
 	}
 	.list_retui a{
 		cursor:pointer;
