@@ -1,4 +1,7 @@
 @extends('home.layouts.default')
+
+@section('title', '哈哈哈')
+
 @section('style')
 	<style>
              .foot{
