@@ -198,6 +198,27 @@
     .model-question-descripe-input {
         min-height: 100px;
     }
+    .tags-list {
+        margin-bottom: 5px;
+    }
+    .tags-list > li {
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .topicList {
+        list-style: none;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 150px;
+        overflow-y: scroll;
+    }
+    .topicList > li {
+        padding: 10px;
+    }
+    .topicList > li:hover {
+        background: #eee;
+        cursor: pointer;
+    }
 </style>
 @endsection
 

@@ -8,11 +8,6 @@ class CreateCommentsTable extends Migration
 {
     /**
      * Run the migrations.
-<<<<<<< HEAD
-     *
-=======
-     * 评论表
->>>>>>> gaoju
      * @return void
      */
     public function up()

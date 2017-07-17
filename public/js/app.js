@@ -52434,15 +52434,59 @@ window.E = __webpack_require__("./node_modules/_wangeditor@3.0.3@wangeditor/rele
 
 
 var app = new Vue({
+    data: {
+        modelTopic: '',
+        searchResult: [],
+        topicList: []
+    },
+    watch: {
+        modelTopic: function modelTopic(nV) {
+            this.getTopics(nV);
+        }
+    },
     mounted: function mounted() {
         var _this = this;
 
         $('#author-follower').on('hidden.bs.modal', function (event) {
             _this.$refs.authorFollower.followerList = [];
-        });
+        }, 1000);
     },
 
     methods: {
+        onRemoveTopic: function onRemoveTopic(event) {
+            conosole.log(event);
+        },
+        onInsertTopic: function onInsertTopic(event) {
+            var id = event.target.dataset.id,
+                text = event.target.innerText,
+                isTopic = this._isExsisTopicList(id);
+            if (!(this.topicList.length >= 5) && isTopic) {
+                var topic = { text: text, id: id };
+                this.topicList.push(topic);
+            }
+        },
+        _isExsisTopicList: function _isExsisTopicList(id) {
+            var topicList = this.topicList;
+            for (var k in topicList) {
+                if (topicList[k].id === id) {
+                    return false;
+                }
+            }
+            return true;
+        },
+
+        getTopics: _.debounce(function (nV) {
+            var _this2 = this;
+
+            var isMulti = nV.indexOf(',') > -1,
+                url = '/topic/search/' + nV;
+            if (!isMulti) {
+                axios.get(url).then(function (res) {
+                    console.log(res);
+                    _this2.searchResult = res.data;
+                });
+            }
+        }, 1000),
         onToggleComment: function onToggleComment(key) {
             if (key instanceof Object) {
                 this.$refs.question.toggleShow('question');

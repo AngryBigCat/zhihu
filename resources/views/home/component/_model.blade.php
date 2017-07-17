@@ -20,7 +20,15 @@
                 </div>
                 <div class="form-group">
                     <div>
-                        <input name="topic" type="text" class="form-control model-border-normal" placeholder="添加话题，请用半角英文 “ , ” 号分割">
+                        <!-- 已选择的话题 -->
+                        <ul v-show="topicList.length != 0" class="list-unstyled list-inline tags-list" v-on:click="onRemoveTopic">
+                            <li v-for="item in topicList"><span class="label label-primary">@{{ item.text }} <i class="fa fa-close"></i></span></li>
+                        </ul>
+                        <input v-model="modelTopic" name="topic" type="text" class="form-control model-border-normal" placeholder="添加话题，最多选择5个">
+                        <!-- 选择话题列表 -->
+                        <ul class="topicList" v-show="searchResult.length != 0" v-on:click="onInsertTopic">
+                            <li v-for="(item, index) in searchResult" v-bind:data-id="item.id">@{{ item.name }}</li>
+                        </ul>
                     </div>
                 </div>
                 <div class="form-group model-question-descripe">

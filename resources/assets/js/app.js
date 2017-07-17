@@ -23,12 +23,53 @@ import followerList from './components/follower-list.vue';
 
 
 const app = new Vue({
+    data: {
+        modelTopic: '',
+        searchResult: [],
+        topicList: [],
+    },
+    watch: {
+      modelTopic(nV) {
+          this.getTopics(nV);
+      }
+    },
     mounted() {
         $('#author-follower').on('hidden.bs.modal', (event) => {
             this.$refs.authorFollower.followerList = [];
-        });
+        }, 1000);
     },
     methods: {
+        onRemoveTopic(event) {
+             conosole.log(event);
+        },
+        onInsertTopic(event) {
+            let id = event.target.dataset.id,
+                text = event.target.innerText,
+                isTopic = this._isExsisTopicList(id);
+            if (!(this.topicList.length >= 5) && isTopic) {
+                let topic = { text, id };
+                this.topicList.push(topic);
+            }
+        },
+        _isExsisTopicList(id) {
+            let topicList = this.topicList;
+            for(let k in topicList) {
+                if (topicList[k].id === id) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        getTopics: _.debounce(function (nV) {
+            var isMulti = nV.indexOf(',') > -1,
+                url = '/topic/search/' + nV;
+            if (!isMulti) {
+                axios.get(url).then((res) => {
+                    console.log(res);
+                    this.searchResult = res.data;
+                });
+            }
+        }, 1000),
         onToggleComment(key) {
             if (key instanceof Object) {
                 this.$refs.question.toggleShow('question');

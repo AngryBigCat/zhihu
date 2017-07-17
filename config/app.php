@@ -189,6 +189,9 @@ return [
         //
         Barryvdh\Debugbar\ServiceProvider::class,
 
+        //Scout全文搜索
+        Laravel\Scout\ScoutServiceProvider::class
+
     ],
 
     /*

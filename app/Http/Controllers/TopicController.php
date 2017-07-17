@@ -3,42 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Tag;
+use App\Topic;
 use DB;
 
 class TopicController extends Controller
 {
     public function index()
     {
-    	$tags = DB::table('tags')->whereIn('id',[1,2,3])->get();
-        // $data = Tag::find($id);
-        // $question = $data->question;
-        // dd($question);die;
-        $topic = DB::table('tags')->where('id',1)->get();
-        foreach ($topic as $key => $value) {
-            $qiao=$value->img;
-        }
-        foreach ($topic as $key => $value) {
-            $jin = $value->tag_name;
-        }
-        $data = Tag::find(1);
-        dd($data);
-        $question = $data->question;
-    	return view('home.topic.topic',compact('tags','question','qiao','jin'));
+        $topics = Topic::all();
+        return view('home.topic.index', compact('topics'));
     }
 
-    public function tag($id)
+    public function show($id)
     {
+        return view('home.topic.show');
+    }
 
-    	$tags = DB::table('tags')->whereIn('id',[1,2,3])->get();
-        $topic = DB::table('tags')->where('id',$id)->get();
-        foreach ($topic as $key => $value) {
-            $qiao=$value->img;
+    public function search($keyword = '')
+    {
+        if (empty($keyword)) {
+            return [];
         }
-        foreach ($topic as $key => $value) {
-            $jin = $value->tag_name;
+        $result = Topic::search($keyword)->get();
+        if ($result->isEmpty()) {
+            return [];
         }
-    	$data = Tag::find($id);
-        $question = $data->question;
-    	return view('home.topic.content',compact('tags','question','qiao','jin'));
+        return $result;
     }
 }

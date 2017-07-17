@@ -39,7 +39,8 @@ Route::get('question/{id}/mostthumb', 'QuestionController@mostThumbSort');
 Route::get('question/{id}/latest', 'QuestionController@latestSort');
 Route::get('question/{id}/oldest', 'QuestionController@oldestSort');
 
-
+Route::get('topic', 'TopicController@index')->name('topic');
+Route::get('topic/search/{key?}', 'TopicController@search');
 
 
 //提交回答
@@ -66,6 +67,7 @@ Route::get('login/refereshcapcha', 'Auth\LoginController@refereshcapcha');
 Route::post('user/{id}/toggleFollow', 'UserController@toggleFollow')->middleware('auth');
 
 Route::get('user/{id}/followers', 'UserController@getFollowersByAuthorID');
+
 
 
 //后台首页
@@ -153,10 +155,6 @@ Route::get('contact',function(){
     return view('home.contact');
 })->name('contact');
 
-// 话题
-Route::get('topic','TopicController@index')->name('topic');
-// 内容
-Route::get('topic/{id}','TopicController@tag');
 
 // 我的主页
 Route::group(['prefix' => 'people'], function () {
