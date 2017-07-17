@@ -69,11 +69,10 @@ class TopicController extends Controller
             foreach($tag_htid as $v) {
                 $tag_ids[] = $v->id;
             }
-             // dd( $tag_ids);
 
               //用户关注的问题
             $tagss = \App\User::find($user)->followings(\App\question::class)->get();
-            // dd($tagss);
+
             $question_ids = [];
             foreach($tagss as $v) {
                 $question_ids[] = $v->id;
@@ -152,6 +151,7 @@ class TopicController extends Controller
             return view('home.topic.topic',compact('data' ,'tags','img','id','tag_name','huati','res','count','question_ids','tag_ids'));
         }
      }
+
     //连表查询函数,按时间排序多表查询
     public static function TimeAnswer($qs_id)
      {
@@ -164,19 +164,7 @@ class TopicController extends Controller
             ->first();
         return (array)$res;
      }
-    //连表查询函数,按点赞数量排序多表查询
-    public static function oneAnswer($qs_id)
-     {
-        $res = DB::table('answers as ans')
-            ->join('users', 'ans.user_id', '=', 'users.id')
-            ->join('user_details as userinfo', 'ans.user_id', '=', 'userinfo.user_id')
-            ->where('ans.question_id',$qs_id)
-            ->select('ans.*', 'users.name', 'userinfo.a_word')
-            ->orderBy('vote_count', 'acs')
-            ->first();
-        return (array)$res;
-     }
-    //连表查询函数,按浏览量排序多表查询
+    //连表查询函数,按点赞量排序多表查询
     public static function browseAnswer($qs_id)
      {
         $res = DB::table('answers as ans')
@@ -184,10 +172,11 @@ class TopicController extends Controller
             ->join('user_details as userinfo', 'ans.user_id', '=', 'userinfo.user_id')
             ->where('ans.question_id',$qs_id)
             ->select('ans.*', 'users.name', 'userinfo.a_word')
-            ->orderBy('browse', 'desc')
+            ->orderBy('vote_count', 'desc')
             ->first();
         return (array)$res;
      }
+
     //热门排序话题详情
     public function topicHot($id)
      {
@@ -314,70 +303,7 @@ class TopicController extends Controller
         return view('home.topic.topicDetails',compact('data','tag_name','res','description','sonTag','tag','pid','img','tag_ids','ids','question_ids','numsonTag','count'));
 
      }
-    //精华排序话题详情
-    public function topicRefined($id)
-     {
-        if(empty($id)){
-            return redirect('/');
-        }
-        
-        $user = Auth::id();
-        if(empty($user)){
-            return redirect('/');
-        } else {
-             //获取话题id
-            $topic = DB::table('tags')->where('id',$id)->get();
-            $tag_name = $topic[0]->tag_name;
-            $description = $topic[0]->description;
-            $pid = $topic[0]->pid;
-            $img = $topic[0]->img;
-            $ids = $topic[0]->id;
-            $count=\App\Tag::find($ids)->followers()->count();
-            //多个话题有多个问题 多对多
-            $data = Tag::find($id);
-            $question = $data->question;
-            // 获取问题ID
-            $qs_id=[];
-            foreach ($question as $key => $value) {
-                array_push($qs_id, $value->id);
-            }
 
-            //连表查询用户,问题 
-            $res = DB::table('questions')
-                ->whereIn('id', $qs_id)
-                ->orderBy('created_at', 'desc')
-                ->get();
-            $huati= DB::table('tags')->paginate(5);
-
-            $data = [];
-            for($i = 0; $i<count($qs_id); $i++){
-                $data[$qs_id[$i]] =  self::oneAnswer($qs_id[$i]);
-            }
-            // dd($data);
-            // 父话题
-            $tag= DB::table('tags')
-             ->where('pid','=',0)
-             ->get();
-             // 子话题
-            $sonTag = $this->getClassify($id);
-            //子话题的数量
-            $numsonTag = count($sonTag);
-            //用户关注的问题
-            $tags = \App\User::find($user)->followings(\App\Tag::class)->get();
-            $tag_ids = [];
-            foreach($tags as $v) {
-                $tag_ids[] = $v->id;
-            }
-            //用户关注的问题
-            $ques = \App\User::find($user)->followings(\App\Question::class)->get();
-            $question_ids = [];
-            foreach($ques as $v) {
-                $question_ids[] = $v->id;
-            }
-            
-        }
-        return view('home.topic.topicRefined',compact('data','tag_name','res','description','sonTag','tag','pid','img','tag_ids','ids','question_ids','numsonTag','count'));  
-     } 
     //话题广场
     public function topicClassify($id)
      { 
@@ -421,7 +347,7 @@ class TopicController extends Controller
     public function topicConcern()
      {
         // 话题的数量
-        $tags =\App\Tag::all()->take(6);
+        $tags =\App\Tag::all()->take(1);
         // 用户ID
         $user = Auth::id();
         // 获取用户关注的话题
@@ -442,6 +368,7 @@ class TopicController extends Controller
 
         return view('home.topic.topicConcern',compact('tags','tag_ids','count'));
      }
+
     //分类函数 获取子话题
     public function getClassify($pid)
      {

@@ -371,7 +371,6 @@
               <h4>{{$tag_name}}</h4><br>
               <div class="huati-yinzi-title">
                 <a href="/topicDetails/{{$ids}}">动态</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-                <a href="/topicRefined/{{$ids}}">精华</a>&nbsp;&nbsp;|&nbsp;&nbsp;
               </div>
             </div>
             <div class="huati-fenxiang">
@@ -398,11 +397,8 @@
                         <a href="" class="huati-content-c topicname">{{$data[$value->id]['name']}}</a>&nbsp;&nbsp;
                         <span class="huati-content-d">{{$data[$value->id]['a_word']}}</span>
 
-                        <div class="huati-wenzahng">
-                              <img src="{{$data[$value->id]['img']}}" style="width:120px">
-                              <div class="huati-wenzahng-a">
-                                    <p>{{$data[$value->id]['content']}}<a href="">显示全部</a></p>
-                              </div>
+                        <div class="huati-wenzahng">                  
+                                    <p>{{$data[$value->id]['content']}}<a href="">显示全部</a></p>           
                         </div>
                         <div class="huati-wenzhang-lianjie">
                               <a style="cursor:pointer">
