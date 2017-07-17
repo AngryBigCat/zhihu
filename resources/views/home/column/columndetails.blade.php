@@ -2,6 +2,9 @@
 
 @section('column')
 	<style type="text/css">
+		body{
+			padding:0px;
+		}
 	 	.container-fluid {
 	 		background:#FFFFFF;
 	 	}

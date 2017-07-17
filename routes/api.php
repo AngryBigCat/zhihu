@@ -16,3 +16,10 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+//测试api
+/*Route::group(['prefix' => 'v1'], function () {
+    Route::get('answer/{id}/comment', 'CommentController@getCommentsByAnswerID');
+    Route::post('answer/{id}/comment', 'CommentController@store');
+});*/

@@ -1,15 +1,17 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <!-- CSRF Token -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>知乎</title>
+    <title>@yield('title') - {{ config('app.name') }}</title>
+    <link rel="stylesheet" type="text/css" href="/amazeui/css/font-awesome.4.6.0.css">
+    <link rel="stylesheet" href="/amazeui/css/amazeui.min.css">
+    <link rel="stylesheet" href="/amazeui/css/amazeui.cropper.css">
+    <link rel="stylesheet" href="/amazeui/css/custom_up_img.css">
+    <link rel="stylesheet" type="text/css" href="/css/jquery.pinwheel-0.1.0.css">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     @yield('style')
 </head>
 <body>
@@ -20,5 +22,8 @@
         </div>
     </div>
     <script src="{{ asset('js/app.js') }}"></script>
+    <script type="text/javascript" src="/js/jquery.pinwheel-0.1.0.js"></script>
+    
+    @yield('script')
 </body>
 </html>

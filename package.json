@@ -15,6 +15,7 @@
     "browser-sync": "^2.18.12",
     "browser-sync-webpack-plugin": "^1.1.4",
     "cross-env": "^3.2.3",
+    "font-awesome": "^4.7.0",
     "holderjs": "^2.9.4",
     "jade": "^1.11.0",
     "jquery": "^3.1.1",
@@ -23,6 +24,7 @@
     "lodash": "^4.17.4",
     "pug": "^2.0.0-rc.2",
     "vue": "^2.1.10",
-    "vue-router": "^2.6.0"
+    "vue-router": "^2.6.0",
+    "wangeditor": "^3.0.3"
   }
 }

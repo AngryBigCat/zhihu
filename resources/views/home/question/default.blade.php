@@ -2,69 +2,96 @@
 
 @section('style')
 <style>
-    .navbar, .navbar-default {
-        margin-bottom: 0;
+    body {
+        background: #f7f8fa;
+        padding-top: 50px;
     }
-    .question-head {
-        background-color: #fff;
-        min-height: 230px;
-        margin-bottom: 22px;
-        overflow: hidden;
-    }
-    .question-head-tag {
-        margin: 20px 0 15px 0;
-    }
-    .tag-list {
-        display: flex;
-        list-style: none;
+    h1 {
         padding: 0;
         margin: 0;
     }
-    .tag-list > li {
-        margin-right: 10px;
-        font-size: 14px;
-        height: 30px;
-        line-height: 25px;
-        font-weight: normal;
-        border-radius: 20px;
-        background: #eef4fa;
-        color: #3e7ac2;
+    #toolbar {
+        background: #f7f8fa;
+        border-bottom: 1px solid #e7eaf1;
+        border-top: 1px solid #e7eaf1;
+    }
+    #toolbar .w-e-droplist {
+        z-index: 2;
+    }
+    #editor2 {
+        margin-bottom: 10px;
+    }
+    #editor2 .w-e-text {
+        min-height: 150px;
+        overflow-y: hidden;
+    }
+    #editor2 .w-e-text:empty:before {
+        content: '|';
+        color:#bbb;
+    }
+    .navbar, .navbar-default {
+        margin-bottom: 0;
+    }
+    .question-header {
+        background-color: #fff;
+        margin-bottom: 20px;
+        padding: 15px 0;
+    }
+    .question-top {
+        margin-bottom: 15px;
+    }
+    .question-head-tag {
+        margin-bottom: 15px;
     }
     .question-head-h1 {
         font-size: 22px;
-        margin: 0 0 10px 0;
+        margin-bottom: 15px;
     }
     .question-head-des {
-        height: 87px;
-        overflow: hidden;
-        margin-bottom: 10px;
+
     }
-    .question-board {
+    .question-head-counts {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .question-head-counts > a {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        align-items: flex-end;
-        height: 230px;
-        padding: 18px;
-    }
-    .question-board-counts {
-        display: flex;
-    }
-    .question-board-counts > div {
-        display: flex;
+        padding: 0 20px;
         text-align: center;
-        flex-direction: column;
-        width: 100px;
-        font-size: 16px;
+        border-right: 1px solid #eee;
+        text-decoration: none;
     }
-    .question-board-btn > a {
+    .question-head-counts > a:last-child {
+        border-right: none;
+    }
+    .question-head-btn {
+        display: flex;
+        justify-content: flex-end;
+    }
+    .question-head-btn > a {
         width: 100px;
         margin-left: 10px;
+    }
+    .question-head-btn > a.following {
+        background-color: #c3ccd9;
+        border: 1px solid #c3ccd9;
+    }
+    .question-head-btn > a.following:active {
+        background-color: #c3ccd9;
+        border: 1px solid #c3ccd9;
     }
     .question-answer-top {
         display: flex;
         justify-content: space-between;
         margin-bottom: 10px;
+    }
+    .question-answer-top .btn-group.open .dropdown-toggle {
+        box-shadow: none;
+    }
+      .sort-toggle {
+        box-shadow: none;
+        cursor: pointer;
     }
     .question-answer-item {
         padding: 15px 0;
@@ -108,16 +135,23 @@
         margin-right: 20px;
         color: #aaa;
     }
-    .vote-button > a {
+    .vote-button > button {
         background: #ebf3fb;
         color: #2d84cc;
         border: none;
-        padding: 10px;
         border-radius: 4px;
-        text-decoration: none;
         margin-right: 5px;
+        padding: 5px 10px;
     }
-    .vote-button > a:hover {
+    .vote-button > .vote-active {
+        background-color: #2d84cc;
+        color: #eef3f7;
+    }
+    .vote-button > .vote-active:hover {
+        background-color: #1c73bb;
+        color: #eef3f7;
+    }
+    .vote-button > button:hover {
         background: #e4ebf3;
         color: #2d84cc;
     }
@@ -147,30 +181,15 @@
     .about-author-btn > a {
         width: 120px;
     }
+    .about-author-btn > a.following {
+        background-color: #c3ccd9;
+        border: 1px solid #c3ccd9;
+    }
     .answeradd-header {
         padding: 16px 20px;
     }
-    .editable-toolbar {
-        padding: 6px 12px;
-        background: #eee;
-        border-bottom: 1px solid #ddd;
-        border-top: 1px solid #ddd;
-    }
     .editable-box {
         padding: 15px 20px;
-    }
-    .answeradd-textarea {
-        min-height: 100px;
-        resize: none;
-        outline: 0;
-        margin-bottom: 15px;
-    }
-    .answeradd-textarea:empty:before{
-        content: attr(placeholder);
-        color:#bbb;
-    }
-    .answeradd-textarea:focus:before{
-        content:none;
     }
     .editable-box-btn {
         display: flex;
@@ -181,52 +200,10 @@
 
 {{-- 问题页面标题部分 --}}
 @section('question-head')
-<div class="question-head">
+<div class="question-header">
     <div class="container">
-        <div class="col-md-8">
-            {{-- 标题左半部分 --}}
-            <div class="question-head-tag">
-                <ul class="tag-list">
-                    <li class="label label-info"><a href="">电影</a></li>
-                    <li class="label label-info"><a href="">演员</a></li>
-                    <li class="label label-info"><a href="">Angelababy（杨颖）</a></li>
-                    <li class="label label-info"><a href="">如何评价 X 的演技</a></li>
-                    <li class="label label-info"><a href="">林依晨</a></li>
-                </ul>
-            </div>
-            <h1 class="question-head-h1">Angelababy和林依晨之间差了什么?</h1>
-            <div class="question-head-des">
-                差的是演技吧，当然还有为人处世上的区别，林依晨为人特别低调，baby正好相反！baby在这条路上要有的路还远，而依晨已经走出适合自己且无法被取代的令人仰望的路了！依晨属于永远永远不会被过誉，不论是作为演员还是个人！我特别特别的喜欢她，不论是就她的作品，还是在作品之外表现出来的人品，都让我佩服不已。如果说，我这一生有想成为的人，林依晨肯定算其中一个。她太厉害了，我觉得自己终其一生估计都难以望其项背。 首先我们可以来讨论一下她的作品，就我个人拙见，我觉得，她的作品都很有自己的特色，不会被经典的光芒所掩盖。就拿她的《射雕英雄传》来说，我们大家公认的经典的是翁美玲那个版本的，但是谁也不能否认林依晨演的黄蓉完全没有自己的特色吧。她在剧中所表现出来的机灵调皮可爱，与翁美玲演的黄蓉相比，各有千秋，同样让人印象深刻。
-
-                作者：七七
-                链接：https://www.zhihu.com/question/58815400/answer/186466400
-                来源：知乎
-                著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-            </div>
-            <div class="question-head-footer">
-                @component('home.component._footerCon')
-                @endcomponent
-            </div>
-        </div>
-        <div class="col-md-4">
-            {{-- 标题右半部分 --}}
-            <div class="question-board">
-                <div class="question-board-counts">
-                    <div>
-                        <span>关注者</span>
-                        <span>15191</span>
-                    </div>
-                    <div>
-                        <span>被浏览</span>
-                        <span>12062984</span>
-                    </div>
-                </div>
-                <div class="question-board-btn">
-                    <a class="btn btn-primary">关注问题</a>
-                    <a class="btn btn-default"><span class="fa fa-pencil"></span> 写回答</a>
-                </div>
-            </div>
-        </div>
+        @include('home.question._question-top')
+        @include('home.question._question-bottom')
     </div>
 </div>
 @endsection
@@ -236,94 +213,82 @@
 @section('content')
 <div class="row">
     <div class="col-md-8">
+        @yield('topAnswer')
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="question-answer-top">
-                    <span>116 个回答</span>
-                    <span class="pull-right">默认排序 <span class="fa fa-sort"></span></span>
-                </div>
                 {{-- 回答item --}}
-                <div class="question-answer-item">
-                    <div class="item-box">
-                        @include('home.question._author')
+                @if($question->answers->isEmpty())
+                    @include('home.question._empty-status')
+                @else
+                    @include('home.question._answer-top')
+                    @include('home.question._answer')
+                @endif
+            </div>
+        </div>
+        @if(Auth::user())
+            @if(!$question->isSubscribe() && !$myAnswer)
+                <div class="panel panel-default answeradd">
+                    <div class="answeradd-header">
+                        @include('home.question._author', ['user' => Auth::user()])
                     </div>
-                    <div class="answer-thumbs-counts">
-                        <span>1733 人赞同了该回答</span>
+                    <div id="toolbar"></div>
+                    <div class="editable-box">
+                        <div id="editor2"></div>
+                        <div class="editable-box-btn">
+                            <a href="{{ route('answer.store') }}" class="btn btn-primary addAnswer">提交回答</a>
+                        </div>
                     </div>
-                    <div class="answer-main-box">
-                        <div class="answer-main-content"></div>
-                        差的是演技吧，当然还有为人处世上的区别，林依晨为人特别低调，baby正好相反！baby在这条路上要有的路还远，而依晨已经走出适合自己且无法被取代的令人仰望的路了！依晨属于永远永远不会被过誉，不论是作为演员还是个人！我特别特别的喜欢她，不论是就她的作品，还是在作品之外表现出来的人品，都让我佩服不已。如果说，我这一生有想成为的人，林依晨肯定算其中一个。她太厉害了，我觉得自己终其一生估计都难以望其项背。 首先我们可以来讨论一下她的作品，就我个人拙见，我觉得，她的作品都很有自己的特色，不会被经典的光芒所掩盖。就拿她的《射雕英雄传》来说，我们大家公认的经典的是翁美玲那个版本的，但是谁也不能否认林依晨演的黄蓉完全没有自己的特色吧。她在剧中所表现出来的机灵调皮可爱，与翁美玲演的黄蓉相比，各有千秋，同样让人印象深刻。
-                        作者：七七
-                        链接：https://www.zhihu.com/question/58815400/answer/186466400
-                        来源：知乎
-                        著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+                </div>
+            @else
+                @if($myAnswer->trashed())
+                    <div class="panel panel-default">
+                        <div class="panel-heading text-center">
+                            你已经删除了该问题的回答，如果需要修改，请先
+                            <span class="restoreAnswer">
+                                @include('home.question._toggleLink', [
+                                         'text' => '撤销删除',
+                                         'id' => $myAnswer->id,
+                                        ])
+                            </span>
+                        </div>
                     </div>
-                        @component('home.component._footerCon')
-                        <li class="vote-button">
-                            <a href="#">2014 <span class="fa fa-caret-up"></span></a>
-                            <a href="#"><span class="fa fa-caret-down"></span></a>
-                        </li>
-                        @endcomponent
+                @else
+                <div class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        一个问题你只能回答一次，但你可以对
+                        <a class="on-modify-show"
+                           data-toggle="collapse"
+                           data-parent="#accordion"
+                           href="#collapseOne">现有回答</a>
+                        进行修改
+                    </div>
+                    <div  id="collapseOne" class="panel-collapse collapse">
+                        <div class="answeradd-header">
+                            @include('home.question._author', ['user' => Auth::user()])
+                        </div>
+                        <div id="toolbar"></div>
+                        <div class="editable-box">
+                            <div id="editor2"><p>{!! $myAnswer->content !!}</p></div>
+                            <div class="editable-box-btn">
+                                <a href="{{ route('answer.update', ['id' => $myAnswer->id]) }}" class="btn btn-primary updateAnswer">更新回答</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            @endif
+        @else
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    请<a href="{{ route('login') }}">登录</a>后在回答
                 </div>
             </div>
-        </div>
-        <div class="panel panel-default answeradd">
-            <div class="answeradd-header">
-                @include('home.question._author')
-            </div>
-            <div class="editable-toolbar">
-                    <button class="btn btn-default btn-sm"><span class="glyphicon glyphicon-bold"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="glyphicon glyphicon-italic"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="glyphicon glyphicon-header"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="fa fa-quote-left"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="fa fa-code"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="fa fa-list-ol"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="fa fa-list-ul"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="glyphicon glyphicon-picture"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="glyphicon glyphicon-film"></span></button>
-                    <button class="btn btn-default btn-sm"><span class="fa fa-superscript"></span></button>
-        </div>
-            <div class="editable-box">
-                <div contenteditable="true" placeholder="写回答..." class="answeradd-textarea"></div>
-                <div class="editable-box-btn">
-                    <button class="btn btn-primary">提交回答</button>
-                </div>
-            </div>
-        </div>
+        @endif
     </div>
 
     {{-- 问题页面右半部份 --}}
     <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">关于作者</h3>
-            </div>
-            <div class="panel-body" class="about-author">
-                <div class="about-author-head">
-                    @include('home.question._author')
-                </div>
-                <div class="about-author-bottom">
-                    <div class="about-author-counts">
-                        <div class="counts-item">
-                            <span>回答</span>
-                            <span>20</span>
-                        </div>
-                        <div class="counts-item">
-                            <span>文章</span>
-                            <span>20</span>
-                        </div>
-                        <div class="counts-item">
-                            <span>关注者</span>
-                            <span>20</span>
-                        </div>
-                    </div>
-                    <div class="about-author-btn">
-                        <a class="btn btn-primary"><span class="fa fa-plus"></span> 关注她</a>
-                        <a class="btn btn-default"><span class="fa fa-comments"></span> 发私信</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @yield('topAuthor')
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">相关问题</h3>
@@ -336,34 +301,169 @@
                 <li class="list-group-item">如何评价《喜剧之王》这部电影？ 289 个回答</li>
             </ul>
         </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">相关 Live 推荐</h3>
-            </div>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <img src="img/avatar04.png" alt="" width="40" height="40">
-                    <span>运营拆解怎么做“电影营销”</span>
-                </li>
-                <li class="list-group-item">
-                    <img src="img/avatar04.png" alt="" width="40" height="40">
-                    <span>不该被遗忘：22 位慰安妇老人的人生故事</span>
-                </li>
-                <li class="list-group-item">
-                    <img src="img/avatar04.png" alt="" width="40" height="40">
-                    <span>如何成为自由职业译员？</span>
-                </li>
-                <li class="list-group-item">
-                    <img src="img/avatar04.png" alt="" width="40" height="40">
-                    <span>编剧：从创意到剧本全攻略</span>
-                </li>
-                <li class="list-group-item">
-                    <img src="img/avatar04.png" alt="" width="40" height="40">
-                    <span>阿甘与郭靖的人生通关密码</span>
-                </li>
-            </ul>
-        </div>
     </div>
 </div>
 @endsection
 {{-- End --}}
+
+@section('script')
+<script>
+        var editor2 = new E('#toolbar', '#editor2');
+        editor2.customConfig.menus = [
+            'bold',  // 粗体
+            'italic',  // 斜体
+            'head',  // 标题
+            'quote',  // 引用
+            'code',  // 插入代码
+            'list',  // 列表
+            'emoticon',  // 表情
+            'image',  // 插入图片
+            'video',  // 插入视频
+        ];
+        editor2.customConfig.zIndex = 1;
+        editor2.create();
+
+
+        /*
+         提交问题
+         */
+        $('.addAnswer').on('click', function (event) {
+            event.preventDefault();
+            axios.post(this.href, {
+                question_id: `{{ $question->id }}`,
+                content: editor2.txt.html()
+            }).then(function (res) {
+                if (res.status === 200) {
+                    $('.alert-info-box').addClass('alert-success').html('回答问题成功！' + '，请稍等...').show('fast');
+                    window.location.reload();
+                }
+            });
+        });
+
+        /**
+         * 更新回答
+         */
+        $('.updateAnswer').on('click', function (event) {
+            event.preventDefault();
+            axios.put(this.href, {
+                content: editor2.txt.html()
+            }).then(function (res) {
+                if (res.status === 200) {
+                    $('.alert-info-box').addClass('alert-success').html('回答更新成功！' + '，请稍等...').show('fast');
+                    window.location.reload();
+                }
+            });
+        });
+
+        /*
+         点赞、取消点赞
+         */
+        $('.vote').on('click', function (event) {
+            var url = event.currentTarget.dataset.href;
+            var curl = url.split('/');
+            if (curl[curl.length - 1] === 'upVote') {
+                curl.splice(-1, 1, 'cancelVote');
+            } else if (curl[curl.length - 1] === 'cancelVote') {
+                curl.splice(-1, 1, 'upVote');
+            }
+            $(this).attr('data-href', curl.join('/'));
+            url = curl.join('/');
+            var _this = this;
+            axios.post(url).then(function (res) {
+                var old = $(_this).find('.num').text();
+                if (res.data === 'up') {
+                    var add = parseInt(old) + 1;
+                    $(_this).addClass('vote-active');
+                    $(_this).find('.num').text(add);
+                    $(_this).parent().parent().parent().find('.text-count').text(add);
+                } else if (res.data === 'cancel') {
+                    var sub = parseInt(old) - 1;
+                    $(_this).removeClass('vote-active');
+                    $(_this).find('.num').text(sub);
+                    $(_this).parent().parent().parent().find('.text-count').text(sub);
+                }
+            });
+        });
+
+        /*
+        关注、取消关注问题
+         */
+        $('.toggleFollow').click(function (event) {
+            event.preventDefault();
+            var _this = this,
+                count = $('.count-follow').text();
+            axios.post(this.href).then(function (res) {
+                if (!_.isEmpty(res.data.attached)) {
+                    $(_this).html('正在关注').addClass('following');
+                    $('.count-follow').html(parseInt(count) +  1);
+                } else {
+                    $(_this).html('关注问题').removeClass('following');
+                    $('.count-follow').html(parseInt(count) -  1);
+                }
+            });
+        });
+
+        /**
+         * 关注回答的用户
+         */
+        $('.toggle-follow').click(function (event) {
+            event.preventDefault();
+            var id = event.currentTarget.dataset.id,
+                url = '/user/' + id + '/toggleFollow',
+                count = $('.follower-count').text(),
+                _this = this;
+            axios.post(url).then(function (res) {
+                if (!_.isEmpty(res.data.attached)) {
+                    $(_this).html('取消关注').addClass('following');
+                    $('.follower-count').html(parseInt(count) +  1);
+                } else {
+                    $(_this).html( "<span class='fa fa-plus'><span>"+ ' 关注TA').removeClass('following');
+                    $('.follower-count').html(parseInt(count) -  1);
+                }
+            });
+        });
+
+        /**
+         * 删除问题、回答
+         */
+        $('.remove').click(function (event) {
+            var id = event.target.dataset.id,
+                module = event.target.dataset.module,
+                url = `/${module}/${id}`;
+            axios.interceptors.request.use((config) => {
+                $(this).find('a').hide();
+                $(this).find('span').show();
+                return config;
+            });
+            axios.delete(url).then(function (res) {
+                if (res.status == 200) {
+                    $('.alert-info-box').addClass('alert-success').html(res.data.msg).show('fast');
+                    if (res.data.from === 'question') {
+                        window.location.href = '/';
+                    } else if (res.data.from === 'answer') {
+                        window.location.reload();
+                    }
+                }
+            });
+        });
+
+        /**
+         * 撤销删除问题
+         */
+        $('.restoreAnswer').click(function (event) {
+            var id = event.target.dataset.id,
+                url = '/answer/' + id + '/restore';
+            axios.interceptors.request.use((config) => {
+                $(this).find('a').hide();
+                $(this).find('span').show();
+                return config;
+            });
+            axios.patch(url).then(function (res) {
+                if (res.status == 200) {
+                    $('.alert-info-box').addClass('alert-success').html(res.data.msg).show('fast');
+                    window.location.reload();
+                }
+            });
+        });
+</script>
+@endsection
