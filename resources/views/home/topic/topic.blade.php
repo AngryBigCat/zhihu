@@ -432,11 +432,11 @@
                                                 <span class="huati-content-d">{{$data[$value->id]['a_word']}}</span>
 
                                                 <div class="huati-wenzahng">
-                                                      <img src="{{$data[$value->id]['img']}}" style="width:120px">
-                                                      <div class="huati-wenzahng-a">
+                                                     
+                                                      
                                                       {{$data[$value->id]['content']}}
                                                             <p>&nbsp;&nbsp;<a href="">显示全部</a></p>
-                                                      </div>
+                                                     
                                                 </div>
                                                 <div class="huati-wenzhang-lianjie">
                                                      <a style="cursor:pointer" class="Attention" >

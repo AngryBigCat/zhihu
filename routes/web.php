@@ -199,8 +199,6 @@ Route::group([], function(){
     Route::get('/topicDetails/{id}','TopicController@topicHot');
     //时间排序话题详情
     Route::get('topicTime/{id}','TopicController@topicTime');
-    //精华排序话题详情
-    Route::get('/topicRefined/{id}','TopicController@topicRefined');
     //关注发送ajax
     Route::get('/ajaxd','TopicController@ajaxd');
     Route::POST('/ajaxs','TopicController@ajaxs');
