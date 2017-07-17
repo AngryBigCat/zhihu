@@ -15,7 +15,6 @@
 			<span>编辑推荐</span>
 			</div>
 			<div class="pull-right">
-<<<<<<< HEAD
 			<a href="{{route('found/more')}}">更多推荐<i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
 			</div>
 		</div>
@@ -39,7 +38,6 @@
 					    </a>
 						<span class="pull-right">
 							{{$v->content}}
-=======
 			<a href="#">更多推荐<i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
 			</div>
 		</div>
@@ -61,13 +59,11 @@
 					    </a>
 						<span class="pull-right">
 							正宗之词非常可笑，两个不同发源地的东西，怎么可能放在一个角度去对比谁更正宗？ 山西人做的是山西正宗的，北京人做的就是北京正宗的，这种问题岂不是和说“张默和房祖名谁是周润发的亲儿子”一样了？荒谬。 至于山西北京二地炸酱面的差别，这个问题很不好…
->>>>>>> gaoju
 						</span>
 				    </div>
 				  </div>
 				</div>							
 			</div>
-<<<<<<< HEAD
 			@endforeach
 			@foreach($titles as $v)
 			<div>
@@ -199,7 +195,6 @@
 	</script>
 		
 @endsection	
-=======
 			<div>
 				<a href="#"><h5>TRX 训练和传统器械训练相比有什么优劣势呢？</h5></a>
 			</div>
@@ -723,4 +718,3 @@
 	</div>
 </div>
 @stop
->>>>>>> gaoju

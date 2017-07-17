@@ -10,4 +10,5 @@ class User_detail extends Model
     public $primaryKey = 'user_id';
 
     public $incrementing = false;
+
 }

@@ -12,25 +12,14 @@ class CreateCommentsTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('comments')) {
-            Schema::create('comments', function (Blueprint $table) {
-                $table->increments('id')->comment('评论id');
-                $table->unsignedInteger('user_id')->comment('用户id');
-                $table->unsignedInteger('commentable_id')->comment('关联id');
-                $table->string('commentable_type')->comment('类型');
-                $table->text('content')->comment('评论内容');
-                $table->timestamp('deleted_at')->comment('软删除');
-                $table->timestamps();
-            });
-        } else {
-            Schema::table('comments', function ($table) {
-                // 添加的字段
-                // if (!Schema::hasColumn('users', 'b')) {
-                //     //
-                //     $table->string('b');
-                // }
-            });
-        }
+        Schema::create('comments', function (Blueprint $table) {
+            $table->increments('id')->comment('评论id');
+            $table->unsignedInteger('user_id')->comment('用户id');
+            $table->unsignedInteger('commentable_id')->comment('关联id');
+            $table->string('commentable_type')->comment('类型');
+            $table->text('content')->comment('评论内容');
+            $table->timestamps();
+        });
     }
 
     /**

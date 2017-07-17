@@ -62,7 +62,7 @@ const app = new Vue({
         },
         getTopics: _.debounce(function (nV) {
             var isMulti = nV.indexOf(',') > -1,
-                url = '/topic/search/' + nV;
+                url = '/search/topic/' + nV;
             if (!isMulti) {
                 axios.get(url).then((res) => {
                     console.log(res);

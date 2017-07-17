@@ -38,9 +38,8 @@ Route::get('question/{id}/followers', 'QuestionController@getFollowersByQuestion
 Route::get('question/{id}/mostthumb', 'QuestionController@mostThumbSort');
 Route::get('question/{id}/latest', 'QuestionController@latestSort');
 Route::get('question/{id}/oldest', 'QuestionController@oldestSort');
+Route::get('search/topic/{key?}', 'SearchController@topicSearch');
 
-Route::get('topic', 'TopicController@index')->name('topic');
-Route::get('topic/search/{key?}', 'TopicController@search');
 
 
 //提交回答
@@ -58,18 +57,12 @@ Route::post('answer/{id}/comment', 'AnswerController@storeCommentByAnswerID')->m
 //点赞、取消点赞
 Route::post('answer/{id}/{type}', 'AnswerController@toggleVote')->middleware('auth');
 
-
-
 //刷新验证码
 Route::get('login/refereshcapcha', 'Auth\LoginController@refereshcapcha');
 
 //关注用户、取消用户
 Route::post('user/{id}/toggleFollow', 'UserController@toggleFollow')->middleware('auth');
-
 Route::get('user/{id}/followers', 'UserController@getFollowersByAuthorID');
-
-
-
 //后台首页
 Route::get('/admin',function(){
     return view('admin.index');
@@ -137,6 +130,10 @@ Route::get('collect/myQuestion', function(){
 })->name('collect.myQuestion');
 
 // 发现
+Route::get('found',function(){
+    return view('home.found.found');
+})->name('found');
+
 Route::get('found','FoundController@found')->name('found');
 Route::get('retui','FoundController@retui')->name('retui');
 Route::get('found/more','FoundController@more')->name('found/more');
@@ -167,4 +164,45 @@ Route::group(['prefix' => 'people'], function () {
     Route::post('edit', 'PeopleController@edit');
     // 修改头像
     Route::post('edit_headPic', 'PeopleController@edit_headPic');
+});
+
+//后台首页
+Route::get('/admin','admin\AdminController@index');
+
+// 后台话题
+Route::group([], function(){
+    //话题列表
+    Route::get('/admin/listtopic','admin\TopicController@listtopic');
+        //话题删除
+    Route::get('/admin/topicdelete','admin\TopicController@delete');
+    //话题增加get页面
+    Route::get('/admin/topiccreate','admin\TopicController@topiccreate');
+    //话题添加post操作
+    Route::post('/admin/topiccreate','admin\TopicController@create');
+    // 话题编辑get页面
+    Route::get('/admin/topicupdate','admin\TopicController@topicupdate');
+    //话题更新post操作
+    Route::post('/admin/topicupdate','admin\TopicController@update');
+});
+
+//前台话题
+Route::group([], function(){
+    //热门排序话题页面
+    Route::get('/topic/{id}','TopicController@index')->name('topic');
+    //时间排序话题页面
+    Route::get('/topicTimeTag/{id}','TopicController@topicTimeTag');
+    //用户没关注话题的时间跳这个
+    Route::get('topic','TopicController@topicConcern');
+    //话题广场分类
+    Route::get('/topicSquare/{id}','TopicController@topicClassify');
+    //热门排序话题详情
+    Route::get('/topicDetails/{id}','TopicController@topicHot');
+    //时间排序话题详情
+    Route::get('topicTime/{id}','TopicController@topicTime');
+    //精华排序话题详情
+    Route::get('/topicRefined/{id}','TopicController@topicRefined');
+    //关注发送ajax
+    Route::get('/ajaxd','TopicController@ajaxd');
+    Route::POST('/ajaxs','TopicController@ajaxs');
+    
 });

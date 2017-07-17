@@ -52479,7 +52479,7 @@ var app = new Vue({
             var _this2 = this;
 
             var isMulti = nV.indexOf(',') > -1,
-                url = '/topic/search/' + nV;
+                url = '/search/topic/' + nV;
             if (!isMulti) {
                 axios.get(url).then(function (res) {
                     console.log(res);

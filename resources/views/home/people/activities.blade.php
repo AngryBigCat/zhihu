@@ -91,7 +91,7 @@
 @endsection
 
 
-@section('js')
+@section('script')
 <script type="text/javascript">
 	// 点击 编辑封面图片
 	$(document).ready(function () {

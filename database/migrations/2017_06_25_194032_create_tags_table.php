@@ -13,6 +13,8 @@ class CreateTagsTable extends Migration
      */
     public function up()
     {
+
+
         if (!Schema::hasTable('tags')) {
             Schema::create('tags', function (Blueprint $table) {
                 $table->increments('id')->comment('话题id');
@@ -20,7 +22,7 @@ class CreateTagsTable extends Migration
                 $table->char('path',50)->default('0')->comment('父id下面的子id连接');
                 $table->char('tag_name',50)->comment('话题名称');
                 $table->text('description')->comment('话题描述');
-                $table->char('thumb',255)->comment('话题缩略图');
+                $table->char('img',255)->comment('话题缩略图');
                 $table->timestamps();
             });
         } else {
@@ -32,6 +34,7 @@ class CreateTagsTable extends Migration
                 // }
             });
         }
+
     }
 
     /**
