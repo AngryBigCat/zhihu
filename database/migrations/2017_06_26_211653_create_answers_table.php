@@ -13,14 +13,17 @@ class CreateAnswersTable extends Migration
      */
     public function up()
     {
+
         if (!Schema::hasTable('answers')) {
-            Schema::create('answers', function (Blueprint $table) {
-                $table->increments('id')->comment('回答id');
-                $table->integer('user_id')->comment('用户id');
-                $table->integer('question_id')->comment('问题id');
-                $table->text('content')->comment('回答内容');
-                $table->timestamps();
-            });
+           Schema::create('answers', function (Blueprint $table) {
+            $table->increments('id')->comment('回答id');
+            $table->text('content')->comment('回答内容');
+            $table->integer('vote')->default(0)->comment('点赞');
+            $table->integer('user_id')->comment('用户id');
+            $table->integer('question_id')->comment('问题id');
+            $table->timestamp('deleted_at')->nullable()->comment('软删除');
+            $table->timestamps();
+        });
         } else {
             Schema::table('answers', function ($table) {
                 // 添加的字段

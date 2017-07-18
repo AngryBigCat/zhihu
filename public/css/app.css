@@ -8352,6 +8352,8 @@ button.close {
 
 body {
   padding-top: 70px;
+  font-size: 14px;
+  color: #666;
 }
 
 h1,
@@ -8360,8 +8362,9 @@ h3,
 h4,
 h5,
 h6,
+ol,
 ul,
-ol {
+p {
   margin: 0;
   padding: 0;
 }

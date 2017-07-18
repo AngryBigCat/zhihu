@@ -1,6 +1,19 @@
 @extends('home.layouts.default')
 @section('style')
 <style>
+    #toolbar {
+        background: #f7f8fa;
+        border: 1px solid #e7eaf1;
+    }
+    #editor {
+        border-right: 1px solid #e7eaf1;
+        border-left: 1px solid #e7eaf1;
+        border-bottom: 1px solid #e7eaf1;
+    }
+    #editor .w-e-text {
+        min-height: 150px;
+        overflow-y: hidden;
+    }
     .from-topic {
         color: #ccc;
     }
@@ -144,6 +157,47 @@
         margin-right: 20px;
         color: #aaa;
     }
+    /* 提问框 */
+    .modal-title {
+        text-align: center;
+        padding: 20px 0 10px;
+        font-size: 25px;
+    }
+    .modal-header {
+        border-bottom: none;
+    }.modal-footer {
+         border-top: none;
+     }
+    .modal-title small {
+        color: #bbb;
+        font-size: 16px;
+    }
+    .model-border-normal {
+        resize: none;
+        border: 1px solid #eee;
+        box-shadow: none;
+    }
+    .model-border-normal:focus {
+        border: 1px solid #aaa;
+        box-shadow: none;
+        outline: none;
+    }
+    .model-question-descripe {
+        margin-top: 50px;
+    }
+    .model-question-descripe-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 0 10px;
+    }
+    .model-question-descripe-head .right button {
+        margin-left: 20px;
+    }
+    .model-question-descripe-input {
+        min-height: 100px;
+    }
 </style>
 @endsection
 
@@ -158,7 +212,7 @@
             <span class="entry-box-arrow-border"></span>
             <div class="index-entry-box">
                 <ul class="entry-box-list">
-                    <li><a href="#"><span class="fa fa-question-circle-o"></span> 提问</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#myModal"><span class="fa fa-question-circle-o"></span> 提问</a></li>
                     <li><a href="#"><span class="fa fa-file-text-o"></span> 回答</a></li>
                     <li><a href="#"><span class="fa fa-pencil-square-o"></span> 写文章</a></li>
                 </ul>
@@ -276,5 +330,80 @@
             </ul>
         </div>
     </div>
+    @include('home.component._model')
 </div>
+@endsection
+
+@section('script')
+    <script>
+        function Base() {
+            this.editor = new E('#toolbar', '#editor');
+        }
+
+        /*
+        页面初始化加载
+        */
+        Base.prototype._initLoad = function () {
+            this.editorLoad();
+            this.addQuestion();
+        };
+        /*
+        编辑器加载
+        */
+        Base.prototype.editorLoad = function () {
+            var menuParamter = [
+                'bold',  // 粗体
+                'italic',  // 斜体
+                'head',  // 标题
+                'quote',  //  引用
+                'code',  // 插入代码
+                'list',  // 列表
+                'emoticon',  // 表情
+                'image',  // 插入图片
+                'video',  // 插入视频
+            ];
+            //配置编辑区域的 z-index
+            this.editor.customConfig.zIndex = 0;
+            // 自定义菜单配置
+            this.editor.customConfig.menus = menuParamter;
+            this.editor.create();
+        };
+
+        /*
+        ajax提问，添加问题
+         */
+        Base.prototype.addQuestion = function () {
+            var base = this;
+            $('#addQuestion').on('submit', function (event) {
+                event.preventDefault();
+                var form = this;
+                $.ajax({
+                    url: form.action,
+                    type: 'POST',
+                    data: {
+                        title: form.title.value,
+                        topic: form.topic.value,
+                        describe: base.editor.txt.html(),
+                        _token: form._token.value
+                    },
+                    success: function (res) {
+                        window.location.href = res;
+                    },
+                    error: function (res) {
+                        var err = res.responseJSON;
+                        $('.errMessage').attr('style', 'display: block');
+                        for (var i in err) {
+                            $('.errMessage').find('ul').append('<li>'+ err[i] +'</li>')
+                        }
+                        setTimeout(function () {
+                            $('.errMessage').attr('style', 'display: none').find('ul').find('li').remove();
+                        }, 2000);
+                    }
+                });
+            });
+        };
+
+        var base = new Base();
+        base._initLoad();
+    </script>
 @endsection

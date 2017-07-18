@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
                 $table->char('email',50)->nullable()->comment('用户邮箱');
                 $table->char('remember_token',255)->comment('用户标识');
                 $table->timestamps();
+                $table->softDeletes()->comment('软删除');
             });
         } else {
             Schema::table('users', function ($table) {
@@ -41,6 +42,6 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        // Schema::dropIfExists('users');
+        Schema::dropIfExists('users');
     }
 }
