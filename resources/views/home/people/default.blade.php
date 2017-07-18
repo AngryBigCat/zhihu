@@ -4,6 +4,8 @@
 	@include('home.people._style')
 @endsection
 
+@section('title',  $user->name)
+
 @section('content')
 		@if(Auth::id() == $_SESSION['id'])
 			@include('home.people._header')
@@ -15,11 +17,10 @@
 			@section('bread')
 			<ul class="bread nav nav-pills">
                 @if(Auth::id() == $_SESSION['id'])
-			   <li role="presentation"><a data-pjax href="/people/activities">动态</a></li>
+                <li role="presentation"><a data-pjax href="/people/answers">回答 <span>{{ $count['ans_count'] }}</span></a></li>
                @else 
-                <li role="presentation"><a data-pjax href="/people/activitie/{{$_SESSION['id']}}">动态</a></li>
+                <li role="presentation"><a data-pjax href="/people/answer/{{$_SESSION['id']}}">回答 <span>{{ $count['ans_count'] }}</span></a></li>
                @endif
-			   <li role="presentation"><a data-pjax href="/people/answers">回答 <span>{{ $count['ans_count'] }}</span></a></li>
 			   <li role="presentation"><a data-pjax href="/people/asks">提问 <span>{{ $count['que_count'] }}</span></a></li>
 			   <li role="presentation"><a data-pjax href="/people/topics">话题 <span>{{ $count['tag_count'] }}</span></a></li>
 			   <li role="presentation"><a data-pjax href="/people/collections">收藏 <span>{{ $count['collect_count'] }}</span></a></li>

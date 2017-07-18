@@ -39,7 +39,7 @@
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{{ route('people.act') }}"><span class="fa fa-user"></span> 我的主页</a></li>
+                                <li><a href="{{ route('people.answers') }}"><span class="fa fa-user"></span> 我的主页</a></li>
                                 <li><a href="#"><span class="fa fa-cog"></span> 设置</a></li>
                                 <li>
                                     <a href="{{ route('logout') }}"

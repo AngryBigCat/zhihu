@@ -206,11 +206,9 @@ Route::get('contact',function(){
 
 // 我的主页
 Route::group(['prefix' => 'people', 'middleware' => 'auth'], function () {
-    // 我的主页动态
-    Route::get('activitie/{id}', 'PeopleController@activitie');
-    Route::get('activities', 'PeopleController@activities')->name('people.act');
     // 我的主页回答
     Route::get('answers', 'PeopleController@answers')->name('people.answers');
+    Route::get('answer/{id}', 'PeopleController@answer');
     // 我的主页提问
     Route::get('asks', 'PeopleController@asks')->name('people.asks');
     // 我的主页话题
@@ -266,10 +264,6 @@ Route::group(['prefix'=>'admin', 'middleware'=>'adminLogin'], function() {
     // 修改回答
     Route::post('answer/update_ans/{id}', 'admin\AnswerController@update_ans');
 
-    // 回答列表
-    Route::get('answers/ans_list', 'admin\AnswerController@index');
-    // 删除回答
-    Route::post('answers/ans_del', 'admin\AnswerController@ans_del');
     // 软删除回答列表
     Route::get('del_answer', 'admin\AnsDelListController@del_answerList')->name('answer.del_answer');
     // 还原软删除回答数据

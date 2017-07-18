@@ -11,47 +11,37 @@ use Overtrue\LaravelFollow\FollowRelation;
 
 class PeopleController extends Controller
 {
-    /**
-     * 我的主页 -- 动态
-     */
-    public function activities()
-    {
-        $_SESSION['id'] = Auth::id();
-        $user_id = User_detail::find(Auth::id());
-        if (empty($user_id)) {
-            User_detail::create(['user_id'=>Auth::id()]);
-        }
-
-        
-        $user = $this->getUser();
-        $count = $this->getCount();
-    	return view('home.people.activities', ['user'=>$user, 'count'=>$count]);
-    }
-
-    /**
-     * 别人的主页 -- 动态
-     */
-    public function activitie($id)
-    {
-        $_SESSION['id'] = $id;
-        
-        $user_id = User_detail::find($id);
-        if (empty($user_id)) {
-            User_detail::create(['user_id'=>$id]);
-        }
-        
-        $user = $this->getUser();
-        $count = $this->getCount();
-
-        return view('home.people.activities', ['user'=>$user, 'count'=>$count]);
-    }
-
+    
     /**
      * 我的主页 -- 回答
      */
     public function answers()
     {
-        $id = $_SESSION['id'];
+        $_SESSION['id'] = Auth::id();
+        // 获取回答的问题id
+        $id = Auth::id();
+        $qs_id = \App\Answer::where('user_id', $id)->select('question_id')->get();
+        $info = DB::table('questions as qs')
+            ->Join('answers', 'qs.id','=','answers.question_id')
+            ->Join('users', 'answers.user_id','=','users.id')
+            ->Join('user_details', 'answers.user_id', '=', 'user_details.user_id')
+            ->where('answers.user_id', $id)
+            ->whereNull('answers.deleted_at')
+            ->whereIn('qs.id', $qs_id)
+            ->select('qs.id','qs.title','qs.describe','users.id as uid','users.name','user_details.headpic','user_details.a_word','answers.id as ans_id','answers.content')
+            ->get();
+        $user = $this->getUser();
+        $count = $this->getCount();
+
+        return view('home.people.answers',['user'=>$user,'info'=>$info,'count'=>$count]);
+    }
+
+    /**
+     * 用户主页  -- 回答
+     */
+    public function answer($id)
+    {
+        $_SESSION['id'] = $id;
         // 获取回答的问题id
         $qs_id = \App\Answer::where('user_id', $id)->select('question_id')->get();
         $info = DB::table('questions as qs')
@@ -63,7 +53,9 @@ class PeopleController extends Controller
             ->whereIn('qs.id', $qs_id)
             ->select('qs.id','qs.title','qs.describe','users.id as uid','users.name','user_details.headpic','user_details.a_word','answers.id as ans_id','answers.content')
             ->get();
-        return view('home.people.answers',['info'=>$info]);
+        $user = $this->getUser();
+        $count = $this->getCount();
+        return view('home.people.answers',['user'=>$user,'info'=>$info,'count'=>$count]);
     }
     /**
      * 我的主页 -- 提问
