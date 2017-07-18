@@ -25,14 +25,14 @@
 		padding:5px;
 		border-bottom: 1px solid #ddd;
 	}
-	#wenda h4+div img{
+	/*#wenda h4+div img{
 		border-radius: 5px;
-	}
+	}*/
 	#wenda h4+div>span{
-		width:450px;
+		width:90%;
 		display: block;
 		/*border:1px solid blue;*/
-		margin-right: 15px
+		margin:0 15px
 	}
 	#retui{
 		/*border:1px solid red;*/

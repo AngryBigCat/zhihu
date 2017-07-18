@@ -35,10 +35,7 @@
 				  <div class="media-body">
 				    <h4 class="media-heading"><a href="">{{$v->name}}，</a><span>{{$v->job}}，{{$v->introduction}}</span></h4>
 				    <div>
-					    <a href="#" class="pull-left">
-					      <img class="media-object" src="{{$v->qs_img}}" alt="..." width="200px">
-					    </a>
-						<span class="pull-right">
+						<span>
 							{{$v->describe}}
 						</span>
 				    </div>
@@ -221,19 +218,7 @@
 				  	no.html('没有帮助');
 				}
 			});
-		
 
-		{{-- 热推下的评论下的弹框 --}}
-		$('.comment').each(function () {
-			var com = $(this);
-			com.click(function () {
-				com.popover({
-					html:true,
-					placement:"bottom",
-					content:'<ul class="ul_tan"> <li class="tan"> <div class="pull-left"> <img src="/img/avatar2.png" alt="" width="30px" height="30px"> </div> <div class="pull-right"> <div><a href="#">山之阳</a></div> <div>有理有据，令人信服</div> <div class="ca"> <div class="pull-left" > <span> 10小时前 </span> <div class="tan_hide"> <a><i class="fa fa-reply" aria-hidden="true"></i> 回复 </a> <a><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> 赞 </a> <a><i class="fa fa-thumbs-o-down" aria-hidden="true"></i> 踩 </a> <a><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 举报 </a> </div> </div> <div class="pull-right" data-toggle="tooltip" data-placement="bottom" title="29人觉得这个很赞">29 赞</div> </div> </div> </li> </ul>',
-				});
-			});
-		});
 		$('.popover').css('width','500px');
 		$('.tan').each(function (){
 			var tan = $(this).find('.tan_hide');

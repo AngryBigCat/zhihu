@@ -87,7 +87,7 @@ $('.follow').click(function() {
         dataType: 'json',
         success: function (data) {
             if (data.status==0) {
-                col.html('<i class="fa fa-plus" aria-hidden="true"></i> 关注问题');
+                col.html('<i class="fa fa-plus" aria-hidden="true"></i> 关注');
             }else{
                 col.html('取消关注');
             }

@@ -71,7 +71,7 @@
 				<div class="section-gongneng">
 					  <a href="#" name="focus" class="attent" qus_id="{{$v->id}}">取消关注</a>
 					  <span class="#">•</span>
-                        <span class="#">182 人回答</span>
+                        <span class="#">{{ \App\Question::find($v->id)->answers->count() }}个回答</span>
 
 
                         <span class="zg-bull">•</span>

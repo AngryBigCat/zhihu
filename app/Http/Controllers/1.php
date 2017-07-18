@@ -89,3 +89,8 @@ class BlogController extends Controller
     }
 }
 // 控制器
+@if(in_array($v->id,$question_ids))
+取消关注
+@else
+<i class="fa fa-plus" aria-hidden="true"></i>关注
+@endif

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Collect;
 use App\Question;
+use App\User;
 
 class CollectController extends Controller
 {
@@ -110,6 +111,7 @@ class CollectController extends Controller
         foreach($res as $v) {
             $collect_ids[] = $v->id;
         }
+        
         return view('home.collect.detail',compact('collect','res','collect_ids'));
     }
 }

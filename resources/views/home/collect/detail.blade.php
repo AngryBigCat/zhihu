@@ -73,7 +73,18 @@
         <!-- Nav tabs -->
         <div class="back"><i class="fa fa-angle-double-left" aria-hidden="true"></i><a href="{{route('collect.collections')}}"> 返回{{DB::table('users')->where('id',$collect->user_id)->first()->name}}的收藏 </a></div>
         <div>
-        	<h1>{{$collect->name}}</h1>
+        <div style="height:50px">
+        	<h1 class="pull-left">{{$collect->name}}</h1>
+    		<div class="pull-right">
+        		<button class="btn btn-info follow" col_id="{{$collect->id}}" style="margin: 5px 20px 0 0">
+					@if(\App\Collect::find($collect->id)->isFollowedBy(\App\User::find(Auth::id())))
+					取消关注
+					@else
+					<i class="fa fa-plus" aria-hidden="true"></i> 关注
+					@endif
+        		</button>
+        	</div>
+        </div>	
         	<div class="describe">
         		@if(empty($collect->intro))
 				收藏夹的主人太懒了，什么都没写^~^
@@ -124,8 +135,6 @@
 								<div class="dropdown-menu qrcode" aria-labelledby="dLabel" qrcode="{{$v->describe}}" style="padding:10px"></div>
 							</div>
 							<span> . </span>
-							<a class="collect" data-toggle="modal" data-target="#collect" qus_id="{{$v->id}}"><i class="fa fa-bookmark" aria-hidden="true"></i> 收藏 </a>
-							<span> . </span>
 							<a class="no_help"> 没有帮助 </a>
 							</div>
 							<span> . </span>
@@ -167,6 +176,31 @@
 		$('#myModal').on('shown.bs.modal', function () {
 		  	$('#myInput').focus()
 		})
+
+		// 关注收藏夹
+		$('.follow').click(function() {
+		    var col_id = $(this).attr('col_id');
+		    var col = $(this);
+		    $.ajax({
+		        url: "/collect/followAjax",
+		        type: 'GET',
+		        data: { data :col_id },
+		        dataType: 'json',
+		        success: function (data) {
+		            if (data.status==0) {
+		                col.html('<i class="fa fa-plus" aria-hidden="true"></i> 关注');
+		            }else{
+		                col.html('取消关注');
+		            }
+		            // console.log(data);
+		        },
+		        error: function (data) {
+		            console.log(data);
+		        }
+		    });
+		    return false;
+		}); 	
+
 		{{-- 热推下的内容的字数限制 --}}
 	    //限制字符个数
 	    $("p").each(function(){
