@@ -262,6 +262,10 @@ Route::group(['prefix'=>'admin', 'middleware' => 'adminLogin'], function() {
     // 用户注销
     Route::get('logout', 'admin\LoginController@logout')->name('admin.logout');
 
+    // 回答列表
+    Route::get('answers/ans_list', 'admin\AnswerController@index');
+    // 删除回答
+    Route::post('answers/ans_del', 'admin\AnswerController@ans_del');
     // 软删除回答列表
     Route::get('del_answer', 'admin\AnsDelListController@del_answerList')->name('answer.del_answer');
     // 还原软删除回答数据

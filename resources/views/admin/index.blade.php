@@ -222,7 +222,7 @@
         <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
                         class="am-icon-wpforms sidebar-nav-link-logo"></i> 回答管理 </a>
             <ul class="sidebar-nav sidebar-nav-sub">
-                <li class="sidebar-nav-link"><a href="/admin/answer"> <span
+                <li class="sidebar-nav-link"><a href="/admin/answers/ans_list"> <span
                                 class="am-icon-angle-right sidebar-nav-link-logo"></span> 回答列表 </a></li>
                 <li class="sidebar-nav-link"><a href="/admin/del_answer"> <span
                                 class="am-icon-angle-right sidebar-nav-link-logo"></span> 删除的回答 </a></li>
