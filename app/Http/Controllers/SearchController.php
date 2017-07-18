@@ -1,11 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Tag;
 
 class SearchController extends Controller
 {
+
     public function testInsertTopic($key)
     {
         return Tag::create([

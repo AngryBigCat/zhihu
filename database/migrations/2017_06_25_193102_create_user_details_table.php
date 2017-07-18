@@ -19,10 +19,10 @@ class CreateUserDetailsTable extends Migration
             $table->char('address',255)->nullable()->comment('个人住址');
             $table->char('job',100)->nullable()->comment('工作');
             $table->char('edu', 100)->nullable()->comment('教育经历');
-            $table->integer('visit_count')->default('0')->comment('浏览数');
             $table->char('headpic',255)->default('boxed-bg.png')->comment('头像');
+            $table->integer('visit_count')->nullable()->comment('用户页计数');
             $table->char('coverpic',255)->nullable()->comment('封面图');
-            $table->enum('sex',['0','1'])->default('1')->comment('性别:0为女1为男2为保密');
+            $table->enum('sex',['0','1'])->default('1')->comment('性别:0为女1为男');
             $table->timestamps();
         });
     }

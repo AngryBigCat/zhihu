@@ -2,11 +2,11 @@
     <div class="col-md-8">
         <div class="question-head-tag">
             <ul class="list-unstyled list-inline">
-                <li><a href="#">汽车</a></li>
-                <li><a href="#">汽车</a></li>
-                <li><a href="#">汽车</a></li>
-                <li><a href="#">汽车</a></li>
-                <li><a href="#">汽车</a></li>
+
+                @foreach($question->tags as $tag)
+                <li><a href="{{ route('topic', $tag->id) }}">{{ $tag->tag_name }}</a></li>
+                @endforeach
+                
             </ul>
         </div>
         <h1 class="question-head-h1">{{ $question->title }}</h1>

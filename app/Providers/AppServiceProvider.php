@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\PeopleController;
 use Illuminate\Support\Facades\Schema;
-use Session;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,11 +16,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
         Schema::defaultStringLength(191);
         Carbon::setLocale('zh');
         
         session_start();
-        view()->composer('home.people.*', function ($view) {
+
+
+        View()->composer('home.people.*', function($view) {
             $people = new PeopleController();
 
             // 获取当前登录用户的信息

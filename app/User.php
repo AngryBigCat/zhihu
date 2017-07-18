@@ -9,10 +9,12 @@ use Jcc\LaravelVote\Vote;
 use Overtrue\LaravelFollow\Traits\CanBeFollowed;
 use Overtrue\LaravelFollow\Traits\CanFollow;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Overtrue\LaravelFollow\Traits\CanSubscribe;
+
 
 class User extends Authenticatable
 {
-    use Notifiable, Vote, CanFollow, CanBeFollowed, SoftDeletes;
+    use Notifiable, Vote, CanFollow, CanBeFollowed, CanSubscribe, SoftDeletes;
 
     protected $dates = ['deleted_at'];
 

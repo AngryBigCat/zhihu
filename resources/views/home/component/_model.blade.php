@@ -10,7 +10,9 @@
                 </h4>
             </div>
             <div class="modal-body">
-                <div class="form-group">
+
+                <div class="form-group" v-bind:class="{ 'has-error': postTitleError }">
+                    <label v-show="postTitleError" class="control-label">请在标题的最后包含一个问号</label>
                     <textarea v-model="postTitle" class="postQuestion-title border-normal form-control" placeholder="问题标题"></textarea>
                 </div>
                 <div class="form-group">
@@ -20,7 +22,7 @@
                                 @{{ tag.text }} <i class="fa fa-close"></i></span>
                         </li>
                     </ul>
-                    <input v-model="postTopic" class="postQuestion-topic border-normal form-control" placeholder="添加话题，最多选择5个">
+                    <input v-model="postTopic" class="postQuestion-topic border-normal form-control" placeholder="
                     <!-- 选择话题列表 -->
                     <ul class="topicList" v-show="searchResult.length != 0" v-on:click="onInsertTopic">
                         <li v-for="topic in searchResult" v-bind:data-id="topic.id">@{{ topic.tag_name }}</li>
@@ -34,11 +36,6 @@
                         <div id="toolbar"></div>
                         <div id="editor"></div>
                     </div>
-                </div>
-                <div class="checkbox">
-                    <label>
-                        <input type="checkbox"> 匿名提问
-                    </label>
                 </div>
             </div>
             <div class="modal-footer">

@@ -22,7 +22,6 @@ class CreateTagsTable extends Migration
             $table->char('img',255)->comment('话题缩略图');
             $table->timestamps();
         });
-       
     }
 
     /**
@@ -32,6 +31,6 @@ class CreateTagsTable extends Migration
      */
     public function down()
     {
-        // Schema::dropIfExists('tags');
+         Schema::dropIfExists('tags');
     }
 }

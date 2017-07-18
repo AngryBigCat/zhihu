@@ -23,15 +23,18 @@ import commentList from './components/comment-list.vue';
 import followerList from './components/follower-list.vue';
 
 
-const app = new Vue({
+
+
+let app = new Vue({
     data: {
+        postTitleError: false,
         postTitle: '',
-        postTopic: '',
-        searchResult: [],
+        selectTopic: '',
         topicList: [],
+        searchResult: [],
     },
     watch: {
-        postTopic(newValue) {
+        selectTopic(newValue) {
             this.getTopics(newValue);
         }
     },
@@ -42,7 +45,35 @@ const app = new Vue({
     },
     methods: {
         onPostQuestion() {
-
+            if (this.postTitle.search(/(\?|\uff1f)$/) === -1) {
+                this.postTitleError = true;
+                setTimeout(() => {
+                    this.postTitleError = false;
+                }, 2000);
+                return false;
+            }
+            let ids = this._filterIds();
+            let data = {
+                title: this.postTitle,
+                topic_ids: ids,
+            };
+            if (editor.txt.text()) {
+                data['describe'] = editor.txt.html()
+            }
+            axios.post('/question', data).then(res => {
+                if (res.status == 200) {
+                    $('.alert-info-box').addClass('alert-success').html(res.data.msg).show('fast');
+                    window.location.href = res.data.redirect_url;
+                }
+            });
+        },
+        _filterIds() {
+            let topic_ids = this.topicList,
+                ids = [];
+            for (let v of topic_ids) {
+                ids.push(v.id);
+            }
+            return ids;
         },
         onRemoveTopic(event) {
             let index = event.target.dataset.index;
@@ -55,6 +86,8 @@ const app = new Vue({
             if (!(this.topicList.length >= 5) && isTopic) {
                 let topic = { text, id };
                 this.topicList.push(topic);
+                this.selectTopic = '';
+                this.searchResult = [];
             }
         },
         _isExsisTopicList(id) {
@@ -100,4 +133,21 @@ const app = new Vue({
     }
 }).$mount('#app');
 
-//基础构造方法
+/*
+
+var editor = new E('#toolbar', '#editor');
+//配置编辑区域的 z-index
+editor.customConfig.zIndex = 0;
+// 自定义菜单配置
+editor.customConfig.menus = [
+    'bold',  // 粗体
+    'italic',  // 斜体
+    'head',  // 标题
+    'quote',  //  引用
+    'code',  // 插入代码
+    'list',  // 列表
+    'emoticon',  // 表情
+    'image',  // 插入图片
+    'video',  // 插入视频
+];
+editor.create();*/

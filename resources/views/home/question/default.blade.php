@@ -1,5 +1,7 @@
 @extends('home.layouts.default')
 
+@section('title', $question->title)
+
 @section('style')
 <style>
     body {
@@ -269,8 +271,8 @@
                         <div id="toolbar"></div>
                         <div class="editable-box">
                             <div id="editor2"><p>{!! $myAnswer->content !!}</p></div>
-                            <div class="editable-box-btn">
-                                <a href="{{ route('answer.update', ['id' => $myAnswer->id]) }}" class="btn btn-primary updateAnswer">更新回答</a>
+ 
+                                <a href="{{ route('answer.update', $myAnswer->id) }}" class="btn btn-primary updateAnswer">更新回答</a>
                             </div>
                         </div>
                     </div>
@@ -340,7 +342,7 @@
             });
         });
 
-        /**
+        /**pp
          * 更新回答
          */
         $('.updateAnswer').on('click', function (event) {

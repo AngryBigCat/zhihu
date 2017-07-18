@@ -1,4 +1,3 @@
-
 @foreach($answers as $key => $answer)
     @if(!$answer->trashed())
         <div class="question-answer-item">

@@ -1,9 +1,15 @@
 @extends('home.layouts.default')
+
+@section('title', '首页')
+
 @section('style')
 <style>
     #toolbar {
         background: #f7f8fa;
         border: 1px solid #e7eaf1;
+    }
+    #toolbar .w-e-droplist {
+        z-index: 2;
     }
     #editor {
         border-right: 1px solid #e7eaf1;
@@ -312,8 +318,8 @@
     </div>
     <div class="col-md-4">
         <ul class="list-group">
-            <a href="#" class="list-group-item"><span class="fa fa-folder-o"></span> 我的收藏</a>
-            <a href="#" class="list-group-item"><span class="fa fa-check-square-o"></span> 我关注的问题</a>
+            <a href="{{route('collect.collections')}}" class="list-group-item"><span class="fa fa-folder-o"></span> 我的收藏</a>
+            <a href="{{route('collect.following')}}" class="list-group-item"><span class="fa fa-check-square-o"></span> 我关注的问题</a>
             <a href="#" class="list-group-item"><span class="fa fa-file-o"></span> 邀请我回答的问题</a>
         </ul>
         <ul class="list-group">
@@ -372,5 +378,21 @@
 
         var base = new Base();
         base._initLoad();
+        let editor = new E('#toolbar', '#editor');
+        //配置编辑区域的 z-index
+        editor.customConfig.zIndex = 1;
+        // 自定义菜单配置
+        editor.customConfig.menus = [
+            'bold',  // 粗体
+            'italic',  // 斜体
+            'head',  // 标题
+            'quote',  //  引用
+            'code',  // 插入代码
+            'list',  // 列表
+            'emoticon',  // 表情
+            'image',  // 插入图片
+            'video',  // 插入视频
+        ];
+        editor.create();
     </script>
-@endsection
+

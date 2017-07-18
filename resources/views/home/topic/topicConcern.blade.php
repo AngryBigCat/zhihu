@@ -1,4 +1,6 @@
 @extends('home.layouts.default')
+
+@section('title', '话题动态')
 @section('style')
     <style>
         .foot {

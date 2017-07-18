@@ -24,6 +24,7 @@ class TopicController extends Controller
         // 获取数据
 
         $data = $request->except(['_token']);
+
         if($request->hasFile('img','tag_name','description')){
             // 更改图片路径
             if($request->hasFile('img')){

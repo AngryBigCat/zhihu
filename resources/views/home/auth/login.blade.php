@@ -1,5 +1,7 @@
 @extends('home.layouts.default')
 
+@section('title', '登陆')
+
 @section('content')
     <div class="row">
         <div class="col-md-8 col-md-offset-2">

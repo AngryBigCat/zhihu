@@ -1,6 +1,7 @@
 @extends('home.layouts.default')
 
-@section('title', '哈哈哈')
+
+@section('title', '话题动态')
 
 @section('style')
 	<style>
@@ -169,6 +170,16 @@
       		float:right;
       		
       	}
+            .huida_quanbu{
+                  width:584px;
+                  height:100px;
+                  float:left;
+                  overflow: hidden;
+                  text-overflow: ellipsis;     
+            }
+            .allanswer{
+                  float: right;
+            }
       	.huati-wenzahng-a {
       		width:377px;
       		height:120px;
@@ -383,6 +394,9 @@
             .biaoyanse{
                   color:red;
             }
+            .xiaoshou{
+                 cursor:pointer;
+            }
 	</style>
 @endsection
 @section('content')
@@ -420,27 +434,59 @@
                                     </div>
                               </div>
 
+
                               <div class="clearfix"></div>
                                           <!-- 内容 -->
                               <div class="tab-content">
                                     <!-- <div role="tabpanel" class="tab-pane active" id="商业"> -->
                                     <!-- 内容 -->
-                                     @foreach($res as $value)
+                                     @foreach($res as $key => $value)
                                           <div class="huati-neirong">
                                                 <a href="" class="huati-content-a"  target="_blank">{{$value->title}}</a><br>
-                                                <a href="" class="huati-content-b">
-                                                {{$data[$value->id]['vote_count']}}
-                                                </a>&nbsp;
-                                                <a href="" class="huati-content-c"  target="_blank">{{$data[$value->id]['name']}}</a>&nbsp;&nbsp;
-                                                <span class="huati-content-d">{{$data[$value->id]['a_word']}}</span>
-
-                                                <div class="huati-wenzahng">
-                                                     
+                                          @if(isset($data[$value->id]['content']))
+                                                <a href="" class="huati-content-b praise" praiseIn=" {{$data[$value->id]['id']}}">
+                                                      @if(!isset($data[$value->id]['vote_count']))
+                                                            此回答无赞
+                                                      @else   
+                                                            {{$data[$value->id]['vote_count']}}赞
+                                                      @endif
                                                       
-                                                      {{$data[$value->id]['content']}}
-                                                            <p>&nbsp;&nbsp;<a href="">显示全部</a></p>
+                                                </a>&nbsp;&nbsp;
+
+                                                <a href="" class="huati-content-c">
+                                                      @if(!isset($data[$value->id]['name']))
+                                                            匿名用户回答
+                                                      @else   
+                                                            {{$data[$value->id]['name']}}
+                                                      @endif
+                                                </a>&nbsp;&nbsp;
+                                                <span class="huati-content-d">
+                                                      @if(!isset($data[$value->id]['a_word']))
+                                                            用户暂无签名
+                                                      @else
+                                                             {{$data[$value->id]['a_word']}}
+                                                      @endif
+                                                </span>&nbsp;&nbsp;&nbsp;&nbsp;
+                                                      @if(!isset($data[$value->id]['created_at']))
+                                                             暂时无人回答
+                                                      @else   
+                                                            {{$data[$value->id]['created_at']}}
+                                                      @endif
+                                                <div class="huati-wenzahng">
+                                                     <div class="huida_quanbu">
+                                                       @if(!isset($data[$value->id]['content']))     
+                                                            此问题暂时无人回答
+                                                       @else
+                                                            {{$data[$value->id]['content']}}
+                                                       @endif
+                                                      </div>
+                                                            <div class="allanswer">&nbsp;&nbsp;<a href="">显示全部</a>
+                                                            </div>
                                                      
                                                 </div>
+                                          @else
+                                              此问题暂时无人回答  
+                                          @endif
                                                 <div class="huati-wenzhang-lianjie">
                                                      <a style="cursor:pointer" class="Attention" >
                                                             <i class="z-icon-follow"></i>
@@ -452,14 +498,10 @@
                                                             @endif
                                                             </span>
                                                       </a>&nbsp;
-                                                      <a href="">
+
+                                                      <a class="xiaoshou" v-on:click="onToggleComment({{ $key }})">
                                                             <i class="z-icon-comment"></i>
-                                                            <span>666条评论</span>
-                                                            <span></span>
-                                                      </a>&nbsp;
-                                                      <a href="" class="Hidelink">
-                                                            <i class="z-icon-thank"></i>
-                                                            <span>感谢</span>
+                                                            <span>评论</span>
                                                             <span></span>
                                                       </a>&nbsp;
                                                       <a href="" class="Hidelink">
@@ -471,19 +513,15 @@
                                                             <i class="z-icon-collect"></i>
                                                             <span>收藏</span>
                                                             <span></span>
-                                                      </a>
-                                                      <a href="" class="Hidelink">
-                                                            <span class="zg-bull">•&nbsp;</span>
-                                                            <span>举报</span>
-                                                            <span></span>
-                                                      </a>
-                                                      <a href="">
-                                                            <span class="zg-bull">•&nbsp;</span>
-                                                            <span>禁止转载</span>
-                                                            <span></span>
-                                                      </a>
+
+                                                      </a> 
                                                 </div>
                                           </div>
+                                          @if(!isset($data[$value->id]['id']))
+                               
+                                          @else   
+                                               <comment-list parent-id="{{ $data[$value->id]['id'] }}" ref="{{ $key }}"></comment-list>
+                                          @endif
                                      @endforeach
                                     <!-- </div> -->
                               </div>
@@ -521,49 +559,9 @@
             </div>
       </div>
 
-
-
-<div id="tan" class="content" style="display:none">
-      <div class="con-top">
-            <div class="con-img">
-                  <a href=""><img src="/uploads/headPic/1499096092.png"></a>
-            </div>
-            <div class="con-name">
-                  <a href="">名字</a>
-                  <div class="con-name-info"><span>哈哈哈</span> | <span>嘻嘻嘻</span> </div>
-            </div>
-      </div>
-      <div class="con-down">
-            <div class="con-down-count">
-                  <a class="con-down-item" href="">
-                        <span class="con-down-value">34</span>
-                        <span class="con-down-key">回答</span>
-                  </a>
-                  <a class="con-down-item" href="">
-                        <span class="con-down-value">34</span>
-                        <span class="con-down-key">文章</span>
-                  </a>
-                  <a class="con-down-item" href="">
-                        <span class="con-down-value">34K</span>
-                        <span class="con-down-key">关注者</span>
-                  </a>
-            </div>
-            <div class="">
-                  <button class="btn-follow btn btn-success">关注他</button>
-            </div>
-      </div>
-</div>
-
 @stop
 @section('script')
-	<script type="text/javascript">
-            // $('.huati-content-c').mouseover(function() {
-                 var con = $('#tan').clone(true).css('display','block');
-                 $('.huati-content-c').pinwheel({content: con});
-                 $.get('/');
-            // });      
-                 
-
+	<script type="text/javascript"> 
             $('.huati-neirong').each(function() {
                   var th = $(this);
                   $(this).hover(
@@ -590,7 +588,6 @@
             $('.follow_que').click(function() {
                   // alert($);ss
                   var que_id = $(this).attr('que_id');
-
                   var th = $(this);
                   $.ajax({
                         url: "/ajaxs",

@@ -6,6 +6,8 @@ use App\Tag;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Question;
+
 
 class TopicController extends Controller
 {
@@ -47,6 +49,8 @@ class TopicController extends Controller
             //多个话题有多个问题 多对多
             $dat = Tag::find($id);
             $question = $dat->question;
+
+
             // 获取问题ID
             $qs_id = [];
             foreach ($question as $key => $value) {
@@ -62,6 +66,7 @@ class TopicController extends Controller
             for ($i = 0; $i < count($qs_id); $i++) {
                 $data[$qs_id[$i]] = self::browseAnswer($qs_id[$i]);
             }
+
             //用户关注话题
             $tag_htid = \App\User::find($user)->followings(\App\Tag::class)->get();
             $tag_ids = [];
@@ -72,9 +77,19 @@ class TopicController extends Controller
             //用户关注的问题
             $tagss = \App\User::find($user)->followings(\App\question::class)->get();
 
+            
+
             $question_ids = [];
             foreach ($tagss as $v) {
                 $question_ids[] = $v->id;
+            }
+
+
+            //用户关注话题
+            $tag_htid = \App\User::find($user)->followings(\App\Tag::class)->get();
+            $tag_ids = [];
+            foreach ($tag_htid as $v) {
+                $tag_ids[] = $v->id;
             }
             return view('home.topic.topic', compact('data', 'tags', 'img', 'id', 'tag_name', 'huati', 'res', 'count', 'question_ids', 'tag_ids'));
         }
@@ -398,22 +413,4 @@ class TopicController extends Controller
             $user->follow($tag);
             echo json_encode(['status' => 1, 'msg' => '取消关注']);
         }
-    }
-
-    //关注问题
-    public function ajaxs(Request $request)
-    {
-
-        $que_id = $request->data;
-
-        $user = \App\User::find(Auth::id());
-        $que = \App\Question::find($que_id);
-        if ($user->isFollowing($que)) {
-            $user->unfollow($que);
-            echo json_encode(['status' => 0, 'msg' => '关注']);
-        } else {
-            $user->follow($que);
-            echo json_encode(['status' => 1, 'msg' => '取消关注']);
-        }
-    }
 }
