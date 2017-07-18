@@ -1,6 +1,10 @@
 @extends('home.layouts.default')
 
 @section('style')
+    <link rel="stylesheet" type="text/css" href="/amazeui/css/font-awesome.4.6.0.css">
+    <link rel="stylesheet" href="/amazeui/css/amazeui.min.css">
+    <link rel="stylesheet" href="/amazeui/css/amazeui.cropper.css">
+    <link rel="stylesheet" href="/amazeui/css/custom_up_img.css">
 	@include('home.people._style')
 @endsection
 
@@ -42,6 +46,8 @@
 {{-- pjax加速 --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.pjax/1.9.6/jquery.pjax.min.js"></script> 
+<script src="/amazeui/js/amazeui.min.js" charset="utf-8"></script>
+<script src="/amazeui/js/cropper.min.js" charset="utf-8"></script>
 
 <script type="text/javascript">
 

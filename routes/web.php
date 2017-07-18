@@ -202,7 +202,13 @@ Route::group(['prefix'=>'admin', 'middleware' => 'adminLogin'], function() {
     
 
 // 回答管理
-    Route::resource('answer', 'admin\AnswerController');
+    // 回答列表
+    Route::get('answer', 'admin\AnswerController@index');
+    // 删除回答
+    Route::post('answer/ans_del/{id}', 'admin\AnswerController@ans_del');
+    // 修改回答
+    Route::post('answer/update_ans/{id}', 'admin\AnswerController@update_ans');
+    
     // 软删除回答列表
     Route::get('del_answer', 'admin\AnsDelListController@del_answerList')->name('answer.del_answer');
     // 还原软删除回答数据

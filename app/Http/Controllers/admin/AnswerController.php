@@ -35,7 +35,7 @@ class AnswerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update_ans(Request $request, $id)
     {
         $content = $request->content;
         $answer = \App\Answer::find($id);
@@ -54,7 +54,7 @@ class AnswerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function ans_del($id)
     {
         $answer = \App\Answer::find($id);
         if ($answer->delete()) {

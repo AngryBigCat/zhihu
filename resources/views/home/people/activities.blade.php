@@ -3,7 +3,7 @@
 	@section('daohang')
 	<div role="tabpanel" class="tab-pane active" id="dongtai">
 		<div class="dongtai-dongtai">
-			<span>的动态</span>
+			<span>{{ $count['sex'] }}的动态</span>
 		</div>
 	    	
 		<div class="dongtai-content">

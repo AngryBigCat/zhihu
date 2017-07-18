@@ -7,6 +7,7 @@ use App\User_detail;
 use App\User;
 use DB;
 use Illuminate\Support\Facades\Auth;
+use Overtrue\LaravelFollow\FollowRelation;
 
 class PeopleController extends Controller
 {
@@ -21,6 +22,7 @@ class PeopleController extends Controller
             User_detail::create(['user_id'=>Auth::id()]);
         }
 
+        
         $user = $this->getUser();
         $count = $this->getCount();
     	return view('home.people.activities', ['user'=>$user, 'count'=>$count]);
@@ -32,7 +34,7 @@ class PeopleController extends Controller
     public function activitie($id)
     {
         $_SESSION['id'] = $id;
-
+        
         $user_id = User_detail::find($id);
         if (empty($user_id)) {
             User_detail::create(['user_id'=>$id]);

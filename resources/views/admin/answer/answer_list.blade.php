@@ -77,9 +77,8 @@
                                     <td class="am-text-middle content"><span>{{ $val->content }}</span><input type="text" value="{{$val->content}}" name="content"></td>
                                     <td class="am-text-middle">
                                         <div class="tpl-table-black-operation">
-                                        <form action="/admin/answer/{{ $val->id }}" method="post">
+                                        <form action="/admin/answer/ans_del/{{ $val->id }}" method="post">
                                             {{ csrf_field() }}
-                                            {{ method_field('DELETE') }}
                                             <button type="submit" class="am-btn-danger">
                                                 <i class="am-icon-trash"></i> 删除
                                             </button>
@@ -119,8 +118,8 @@
             var val = $(this).val();
             var ans_id = $(this).parents('.gradeC').find('td:first').html();
             $.ajax({
-                url : '/admin/answer/'+ans_id,
-                type: 'PUT',
+                url : '/admin/answer/update_ans/'+ans_id,
+                type: 'POST',
                 data: {
                     'content' : val,
                     '_token' : '{{ csrf_token() }}'
