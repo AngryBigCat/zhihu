@@ -8,29 +8,18 @@ class CreateCommentsTable extends Migration
 {
     /**
      * Run the migrations.
-     * 评论表
      * @return void
      */
     public function up()
     {
-        if (!Schema::hasTable('comments')) {
-            Schema::create('comments', function (Blueprint $table) {
-                $table->increments('id')->comment('评论id');
-                $table->integer('user_id')->comment('用户id');
-                $table->integer('question_id')->comment('问题id');
-                $table->integer('answer_id')->comment('回答id');
-                $table->text('content')->comment('评论内容');
-                $table->timestamps();
-            });
-        } else {
-            Schema::table('comments', function ($table) {
-                // 添加的字段
-                // if (!Schema::hasColumn('users', 'b')) {
-                //     //
-                //     $table->string('b');
-                // }
-            });
-        }
+        Schema::create('comments', function (Blueprint $table) {
+            $table->increments('id')->comment('评论id');
+            $table->unsignedInteger('user_id')->comment('用户id');
+            $table->unsignedInteger('commentable_id')->comment('关联id');
+            $table->string('commentable_type')->comment('类型');
+            $table->text('content')->comment('评论内容');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -40,6 +29,6 @@ class CreateCommentsTable extends Migration
      */
     public function down()
     {
-        // Schema::dropIfExists('comments');
+         Schema::dropIfExists('comments');
     }
 }

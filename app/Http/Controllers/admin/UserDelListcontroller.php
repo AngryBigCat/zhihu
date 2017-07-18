@@ -21,6 +21,7 @@ class UserDelListcontroller extends Controller
                     $query->where('name','like','%'.$keywords.'%');
                 }
             })
+        ->orderBy('deleted_at', 'desc')
         ->paginate($request->input('num',10));
         return view('admin.user.deletelist', ['users'=>$users, 'data'=>$request->all()]);
     }

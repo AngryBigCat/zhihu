@@ -2,7 +2,6 @@
 	.Card{
 		margin-bottom: 20px;
 		border-radius: 10px;
-		/*border:1px solid red;*/
 	}
 	.nav-pills{
 		border-bottom: 1px solid #F0F2F7;
@@ -71,17 +70,35 @@
 		color: #fff;
 		font-size:15px;
 	}
+	.ProfileHeader-detailLabel{
+		width: 60px;
+	    margin-right: 37px;
+	    font-weight: 700;
+	}
 	.user-title{
 		position:relative;
 		left:40px;
 		padding:10px;
 		color:black;
 	}
+
 	.user-title .yiju{
 		font-size:18px;
 	}
+	.see_userinfo{
+		cursor: pointer;
+	}
+	.nosee_userinfo{
+		display:none;
+	}
+	.nosee_userinfo a{
+		cursor: pointer;
+	}
 	.ProfileHeader-infoItem{
 		margin:10px 0px;
+	}
+	.user_info .ProfileHeader-infoItem{
+		margin:20px 0px;
 	}
 	.user-title a{
 		color:grey;
@@ -102,7 +119,18 @@
 		float:right;
 		position:relative;
 		right:50px;
-		bottom: 20px;
+		bottom: 15px;
+	}
+	.tgge-follow{
+		margin-top:-50px;
+	}
+	.btn-edit .btn{
+		width:96px;
+		color:#fff;
+	}
+	.btn-edit .btn-geren{
+		width:118px;
+		margin-top: -15px;
 	}
 	.dongtai{
 		background: white;
@@ -181,7 +209,6 @@
 	}
 	.dongtai-content-gongneng{
 		margin:0px 0px;
-		/*border:1px solid red;*/
 	}
 	.dongtai-content-gongneng a{
 		text-decoration: none;
@@ -215,8 +242,12 @@
 		cursor: pointer;
 	}
 	.zhuan-item{
+		margin-bottom: 15px;
 		padding-bottom: 15px;
 		position: relative;
+		padding-top: 20px;
+		border-top:1px solid #F0F2F7;
+
 	}
 	.zhuan-item > .zhuan-right{
 		margin-left:85px;
@@ -226,9 +257,12 @@
 	}
 	.zhuan-item .btn-guanzhu{
 		width:96px;
+	}
+	.zhuan-item .btn-beiguanzhu{
+		width:96px;
 		position: absolute;
 		right: 10px;
-		top:8px;
+		top:40px;
 	}
 	.zhuan-right a{
 		display:inline-block;
@@ -244,11 +278,11 @@
 		margin-left:10px;
 	}
 	.zhuan-right .zhuan-desc{
+		color:#175199;
 		display: inline-block;
 		margin-top: 6px;
 	}
 	.zhuan-right .zhuan-bottom{
-		/*border:1px solid red;*/
 		margin-top:3px;
 	}
 	#message-text{
@@ -256,5 +290,12 @@
 	}
 	.icon{
 		color: #9FADC7;
+	}
+	.right-gongju a{
+		cursor:pointer;
+	}
+	.modal-header{
+		border-bottom: 0px;
+		margin-bottom: -15px;
 	}
 </style>

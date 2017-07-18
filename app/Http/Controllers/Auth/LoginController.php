@@ -41,4 +41,13 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
+    /**
+     * 刷新验证码
+     * @return mixed
+     */
+    public function refereshcapcha()
+    {
+        return captcha_img('flat');
+    }
 }

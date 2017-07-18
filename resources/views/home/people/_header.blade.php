@@ -1,13 +1,29 @@
+      <div class="er_cover">
+          <span class="help-block text-center">
+              <strong>{{ Session::get('info') }}</strong>
+          </span>
+        </div>
+      @if ($errors->has('cover-img'))
+       <div class="er_cover">
+          <span class="help-block text-center">
+              <strong>{{ $errors->first('cover-img') }}</strong>
+          </span>
+        </div>
+      @endif
   <div class="Card col-md-12">
-  	<div class="UserCoverEditor">
+  	<div class="UserCoverEditor" >
   		<button class="edit-img Button DynamicColorButton--white UserCoverEditor-simpleEditButton">
-  		<span class="glyphicon glyphicon-camera" aria-hidden="true"></span>　编辑封面图片
+  		  <span class="glyphicon glyphicon-camera" aria-hidden="true"></span>　编辑封面图片
   		</button>
-      <form style="display:none" action="/user" method="post" enctype="multipart/form-data">
+      <form class="edit_cover" style="display:none" action="/people/edit_cover" method="post" enctype="multipart/form-data">
             {{ csrf_field() }}
-         <input type="file" name="cover-img" class="cover-img" style="display: none;" accept="image/jpeg, image/gif" />
+         <input type="file" onchange="$('.edit_cover').submit()" name="cover-img" class="cover-img" style="display: none;" accept="image/jpeg, image/png" />
       </form>
-  		<img src="holder.js/100px200?text=封面图片&bg=#aea">
+      @if($user -> coverpic == "")
+  		  <img style="width:100%;height:200px;background:#96A1A9">
+      @else
+        <img style="width:100%;height:240px" src="/uploads/coverPic/{{$user->coverpic}}">
+      @endif
   	</div>
   	<div class="ProfileHeader-main">
     		<div class="head-pic"  id="up-img-touch">
@@ -17,29 +33,64 @@
               <span>修改我的头像</span>
            </div>
     		</div>
+
     		<div class="user-title">
     			<h2>{{ $user->name }} <span class="yiju">{{ $user->a_word }}</span></h2>
-          <div class="ProfileHeader-infoItem">
-            <span class="icon glyphicon glyphicon-lock" aria-hidden="true"></span>&nbsp;&nbsp;
-            <span>互联网</span>
-            <div class="ProfileHeader-divider"></div>
-            <span>{{ $user->job }}</span>
+
+          <div class="userinfo">
+              <div class="ProfileHeader-infoItem">
+              <span class="icon glyphicon glyphicon-lock" aria-hidden="true"></span>&nbsp;&nbsp;
+            
+              <span>{{ $user->job }}</span>
+            </div>
+            <div class="ProfileHeader-infoItem">
+              <span class="icon glyphicon glyphicon-education" aria-hidden="true"></span>&nbsp;&nbsp;
+              <span>{{ $user->edu }}</span>
+              <div class="ProfileHeader-divider"></div>
+              @if($user->sex == '1')
+                <span class="icon fa fa-male"></span>
+              @else
+                <span class="icon fa fa-female"></span>
+              @endif
+            </div>
           </div>
-    			<div class="ProfileHeader-infoItem">
-            <span class="icon glyphicon glyphicon-education" aria-hidden="true"></span>&nbsp;&nbsp;
-            <span>教育经历</span>
-            <div class="ProfileHeader-divider"></div>
-            <span></span>
+          <div class="user_info" style="display:none">
+              <div class="ProfileHeader-infoItem">
+                <span class="ProfileHeader-detailLabel">现居住地</span>
+                <span>{{ $user->address }}</span>
+              </div>
+              <div class="ProfileHeader-infoItem">
+                <span class="ProfileHeader-detailLabel">职业经历</span>
+                <span>{{ $user->job }}</span>
+              </div>
+              <div class="ProfileHeader-infoItem">
+                <span class="ProfileHeader-detailLabel">教育经历</span>
+                <span>{{ $user->edu }}</span>
+              </div>
+              <div class="ProfileHeader-infoItem">
+                <span class="ProfileHeader-detailLabel">个人简介</span>
+                <span>{{ $user->intro }}</span>
+              </div>
           </div>
 
-          <span class="icon glyphicon glyphicon-menu-down" aria-hidden="true"></span>&nbsp;&nbsp;
-    			<a href="">查看详细资料</a>
-    			<div class="btn-edit">
-    				 <button class="btn btn-info" data-toggle="modal" data-target="#exampleModal">
-    				 编辑个人资料
-    				 </button>
-    			</div>
-    		</div>	
+          <div class="userinfo_footer">
+            <div class="see_userinfo">
+              <span class="icon glyphicon glyphicon-menu-down"></span>&nbsp;&nbsp;
+              <a>查看详细资料</a>
+            </div>
+            
+            <div class="nosee_userinfo">
+              <span class="icon glyphicon glyphicon-menu-up"></span>&nbsp;&nbsp;
+              <a>收起详细资料</a>
+            </div>
+
+            <div class="btn-edit">
+               <button class="btn-geren btn btn-info" data-toggle="modal" data-target="#exampleModal">
+               编辑个人资料
+               </button>
+            </div>
+          </div>
+    	</div>	
   	</div>
 </div>
 
@@ -61,7 +112,7 @@
             	<input type="radio" @if($user->sex== "1") checked @endif   name="sex" value="1" checked  id="recipient-name">男
             </label>
             <label>
-           	 <input type="radio" @if($user->sex== "1") checked @endif name="sex" value="0"  id="recipient-name">女
+           	 <input type="radio" @if($user->sex== "0") checked @endif name="sex" value="0"  id="recipient-name">女
             </label>
           </div>
 
@@ -80,6 +131,10 @@
             <input type="text" name="job" value="{{ $user->job }}" class="form-control">
           </div>
 
+          <div class="form-group">
+            <label for="message-text" class="control-label">  教育经历:</label>
+            <input type="text" name="edu" value="{{ $user->edu }}" class="form-control">
+          </div>
 
           <div class="form-group">
             <label for="message-text" name="introductions" class="control-label">个人介绍:</label>
@@ -95,7 +150,6 @@
     </div>
   </div>
 </div>
-
 
 <!--图片上传框-->
 <div class="am-modal am-modal-no-btn up-frame-bj " tabindex="-1" id="doc-modal-1">
