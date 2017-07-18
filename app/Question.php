@@ -25,7 +25,15 @@ class Question extends Model
     }
 
     /**
-     * 问题关联的回答
+     * 问题和话题的多对多关系
+     */
+    public function question()
+    {
+        return $this->belongsToMany('\App\Question','question_tag','tag_id','question_id');
+    }
+
+    /**
+     * 关联问题下的回答
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function answers()
@@ -33,6 +41,12 @@ class Question extends Model
         return $this->hasMany('App\Answer');
     }
 
+    /**
+     * 返回已登陆用户自己的回答
+     * @param $answers
+     * @param $id
+     * @return mixed
+     */
     public function filterAppointAnswers($answers, $id)
     {
         return $answers->filter(function ($item, $key) use ($id){
@@ -138,6 +152,14 @@ class Question extends Model
     public function countFollow()
     {
         return $this->followers()->count();
+    }
+
+    /**
+     * 统计该问题总共的回答数 
+     */
+    public function countAnswer()
+    {
+        return $this->answers()->count();
     }
 
     /**

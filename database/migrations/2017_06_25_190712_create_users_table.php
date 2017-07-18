@@ -19,7 +19,9 @@ class CreateUsersTable extends Migration
             $table->char('password',255)->comment('用户密码');
             $table->enum('auth',['0','1'])->default('0')->comment('用户权限0为普通用户，1为管理员');
             $table->char('email',50)->nullable()->comment('用户邮箱');
+            $table->char('remember_token',255)->nullable()->comment('用户标识');
             $table->timestamps();
+            $table->softDeletes()->comment('软删除');
         });
     }
 

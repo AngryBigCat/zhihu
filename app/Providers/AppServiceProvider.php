@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
+use App\Http\Controllers\PeopleController;
+use Session;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,6 +17,20 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Carbon::setLocale('zh');
+
+        session_start();
+
+        View::composer('home.people.*', function($view) {
+            $people = new PeopleController();
+
+            // 获取当前登录用户的信息
+            $user = $people->getUser();
+            $view->with('user', $user);
+
+            // 获取数量
+            $count = $people->getCount();
+            $view->with('count', $count);
+        });
     }
 
     /**

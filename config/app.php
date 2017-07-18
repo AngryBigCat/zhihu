@@ -179,6 +179,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        // Barryvdh\Debugbar\ServiceProvider::class,
+
+
         //关注、点赞
         Overtrue\LaravelFollow\FollowServiceProvider::class,
         Jcc\LaravelVote\VoteServiceProvider::class,

@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use \App\Tag;
+use App\Tag;
 use DB;
 
 class LoginController extends Controller

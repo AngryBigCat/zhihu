@@ -13,6 +13,7 @@
                 <div class="answer-main-content">{!! $answer->content !!}</div>
             </div>
             @component('home.component._footerCon')
+                <!-- 点赞 -->
                 <li class="vote-button">
                     <button class="vote {{ $answer->isVote() ? 'vote-active' : ''}}"
                             data-href="{{ $answer->isVote() ? url("answer/$answer->id/upVote") : url("answer/$answer->id/cancelVote") }}">
@@ -20,6 +21,7 @@
                     </button>
                     <button><span class="fa fa-caret-down"></span></button>
                 </li>
+                <!-- 评论 -->
                 <li v-on:click="onToggleComment({{ $key }})">
                     <a href="javascript:void(0);">
                         <span class="fa fa-comment"></span>

@@ -11,11 +11,11 @@ class Answer extends Model
 {
     //第三方包
     use CanBeVoted, SoftDeletes;
+    // 软删除
+    protected $dates = ['deleted_at'];
 
     //第三方包属性 与User关联
     protected $vote = User::class;
-
-    protected $dates = ['deleted_at'];
 
     //可写入的字段
     protected $fillable = ['content', 'question_id', 'user_id'];

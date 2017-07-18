@@ -1,6 +1,6 @@
 <header>
     <nav class="header navbar navbar-default navbar-fixed-top">
-        <div class="container">
+        <div class="container ">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -37,7 +37,7 @@
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="/user"><span class="fa fa-user"></span> 我的主页</a></li>
+                                <li><a href="{{ route('people.act') }}"><span class="fa fa-user"></span> 我的主页</a></li>
                                 <li><a href="#"><span class="fa fa-cog"></span> 设置</a></li>
                                 <li>
                                     <a href="{{ route('logout') }}"

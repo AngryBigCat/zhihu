@@ -7,12 +7,8 @@ use Illuminate\Database\Migrations\Migration;
 class CreateQuestionsTable extends Migration
 {
     /**
-     * Run the migrations.
-<<<<<<< HEAD
-=======
-     *
+     * Run the migrations
      * 问题表
->>>>>>> 6d39dbd71f6615c88d66cf532ff6c5eaee552c96
      * @return void
      */
     public function up()
@@ -26,6 +22,7 @@ class CreateQuestionsTable extends Migration
             $table->softDeletes()->comment('软删除');
             $table->timestamps();
         });
+
     }
 
     /**

@@ -8,11 +8,13 @@ use Illuminate\Support\Facades\Auth;
 use Jcc\LaravelVote\Vote;
 use Overtrue\LaravelFollow\Traits\CanBeFollowed;
 use Overtrue\LaravelFollow\Traits\CanFollow;
-use Overtrue\LaravelFollow\Traits\CanSubscribe;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    use Notifiable, Vote, CanFollow, CanSubscribe, CanBeFollowed;
+    use Notifiable, Vote, CanFollow, CanBeFollowed, SoftDeletes;
+
+    protected $dates = ['deleted_at'];
 
     /**
      * The attributes that are mass assignable.
@@ -25,7 +27,6 @@ class User extends Authenticatable
 
     /**
      * The attributes that should be hidden for arrays.
-     *
      * @var array
      */
     protected $hidden = [
@@ -85,4 +86,13 @@ class User extends Authenticatable
         }
         return false;
     }
+
+    /**
+     * 关系一对一 用户信息表
+     */
+    public function user_details()
+    {
+        return $this->hasOne('\App\User_detail','user_id');
+    }
+
 }

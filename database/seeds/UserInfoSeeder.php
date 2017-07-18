@@ -14,10 +14,10 @@ class UserInfoSeeder extends Seeder
         //
 
           	$data = [];
-          	for($i=1; $i<=5; $i++) {
+          	for($i=24; $i<=43; $i++) {
           		$tmp = [];
               $tmp['user_id'] = $i;
-          		$tmp['introduction'] = '这是个人介绍';
+          		$tmp['intro'] = '这是个人介绍';
           		$tmp['address'] = '个人地址';
           		$tmp['job'] = '工作';
           		$tmp['headpic'] = '/upload/a.jpg';

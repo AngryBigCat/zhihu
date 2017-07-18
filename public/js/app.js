@@ -52410,6 +52410,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_comment_list_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__components_comment_list_vue__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_follower_list_vue__ = __webpack_require__("./resources/assets/js/components/follower-list.vue");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_follower_list_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__components_follower_list_vue__);
+
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
