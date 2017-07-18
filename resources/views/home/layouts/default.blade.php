@@ -28,10 +28,9 @@
         </div>
     </div>
     <script src="{{ asset('js/app.js') }}"></script>
-    <script type="text/javascript" src="/js/jquery.pinwheel-0.1.0.js"></script>
     <script src="/amazeui/js/amazeui.min.js" charset="utf-8"></script>
     <script src="/amazeui/js/cropper.min.js" charset="utf-8"></script>
-    <link rel="stylesheet" href="/node_modules/social-share.js/dist/css/share.min.css">
+    <script type="text/javascript" src="/js/jquery.pinwheel-0.1.0.js"></script>
     <script src="/share/js/jquery.share.min.js"></script>
     @yield('script')
 </body>

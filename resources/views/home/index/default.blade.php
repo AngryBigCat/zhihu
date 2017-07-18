@@ -226,6 +226,7 @@
         border-top: none;
         max-height: 150px;
         overflow-y: scroll;
+        margin: 0;
     }
     .topicList > li {
         padding: 10px;
@@ -250,11 +251,7 @@
                 <ul class="entry-box-list">
                     <li><a href="#" data-toggle="modal" data-target="#myModal"><span class="fa fa-question-circle-o"></span> 提问</a></li>
                     <li><a href="#"><span class="fa fa-file-text-o"></span> 回答</a></li>
-                    <li><a href="#"><span class="fa fa-pencil-square-o"></span> 写文章</a></li>
                 </ul>
-                <div class="entry-box-after">
-                    <a href="#">草稿(2)</a>
-                </div>
             </div>
     </div>
         <div class="panel panel-default">
