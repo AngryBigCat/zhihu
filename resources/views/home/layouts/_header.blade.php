@@ -1,5 +1,5 @@
 <header>
-    <nav class="navbar navbar-default navbar-fixed-top">
+    <nav class="header navbar navbar-default navbar-fixed-top">
         <div class="container">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -16,14 +16,14 @@
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="/">首页<span class="sr-only">(current)</span></a></li>
                     <li><a href="#">发现</a></li>
-                    <li><a href="#">话题</a></li>
+                    <li><a href="/topic/{{$id or 1}}">话题</a></li>
+                    <form class="navbar-form navbar-left">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="搜索你感兴趣的内容。。。">
+                        </div>
+                        <button type="submit" class="btn btn-default">提问</button>
+                    </form>
                 </ul>
-                <form class="navbar-form navbar-left">
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="搜索问题">
-                    </div>
-                    <button type="submit" class="btn btn-default">提问</button>
-                </form>
                 <ul class="nav navbar-nav navbar-right">
                     @if (Auth::guest())
                         <li><a href="{{ route('login') }}">登陆</a></li>
@@ -56,6 +56,8 @@
                 </ul>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
+        <!-- 快闪提示框 -->
+        <div class="alert-info-box alert"></div>
     </nav>
     @yield('question-head')
 </header>

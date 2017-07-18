@@ -2,10 +2,21 @@
 
 @section('style')
 <style>
+    body {
+        background: #f7f8fa;
+        padding-top: 50px;
+    }
+    h1 {
+        padding: 0;
+        margin: 0;
+    }
     #toolbar {
         background: #f7f8fa;
         border-bottom: 1px solid #e7eaf1;
         border-top: 1px solid #e7eaf1;
+    }
+    #toolbar .w-e-droplist {
+        z-index: 2;
     }
     #editor2 {
         margin-bottom: 10px;
@@ -17,9 +28,6 @@
     #editor2 .w-e-text:empty:before {
         content: '|';
         color:#bbb;
-    }
-    body {
-        padding-top: 50px;
     }
     .navbar, .navbar-default {
         margin-bottom: 0;
@@ -173,6 +181,10 @@
     .about-author-btn > a {
         width: 120px;
     }
+    .about-author-btn > a.following {
+        background-color: #c3ccd9;
+        border: 1px solid #c3ccd9;
+    }
     .answeradd-header {
         padding: 16px 20px;
     }
@@ -190,50 +202,8 @@
 @section('question-head')
 <div class="question-header">
     <div class="container">
-        <div class="row question-top">
-            <div class="col-md-8">
-                <div class="question-head-tag">
-                    <ul class="list-unstyled list-inline">
-                        <li><a href="#">汽车</a></li>
-                        <li><a href="#">汽车</a></li>
-                        <li><a href="#">汽车</a></li>
-                        <li><a href="#">汽车</a></li>
-                        <li><a href="#">汽车</a></li>
-                    </ul>
-                </div>
-                <h1 class="question-head-h1">{{ $question->title }}</h1>
-                <div class="question-head-des">
-                    {{ $question->describe }}
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="question-head-counts">
-                    <a href="#">
-                        <span>关注者</span>
-                        <span>{{ $question->countFollow() }}</span>
-                    </a>
-                    <a href="#">
-                        <span>被浏览</span>
-                        <span>{{ $question->visit_count }}</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="row question-bottom">
-            <div class="col-md-8">
-                @component('home.component._footerCon')
-                @endcomponent
-            </div>
-            <div class="col-md-4">
-                <div class="question-head-btn">
-                    <a href="{{ url("question/$question->id/toggleFollow") }}"
-                       class="btn btn-primary toggleFollow {{ $question->isFollow() ? 'following' : '' }}">
-                        {{ $question->isFollow() ? '正在关注' : '关注问题' }}
-                    </a>
-                    <a href="#" class="btn btn-default"><span class="fa fa-pencil"></span> 写回达</a>
-                </div>
-            </div>
-        </div>
+        @include('home.question._question-top')
+        @include('home.question._question-bottom')
     </div>
 </div>
 @endsection
@@ -243,95 +213,82 @@
 @section('content')
 <div class="row">
     <div class="col-md-8">
+        @yield('topAnswer')
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="question-answer-top">
-                    <span>{{ $question->answers()->count() }} 个回答</span>
-                    <div class="btn-group pull-right">
-                        <span href="#" class="dropdown-toggle sort-toggle" data-toggle="dropdown">
-                            {{ $sort['selection'] }} <span class="fa fa-sort"></span>
-                        </span>
-                        <ul class="dropdown-menu ">
-                            @foreach($sort['options'] as $key => $value)
-                            <li><a href="{{ url("question/$question->id/$key") }}">{{ $value }}</a></li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
                 {{-- 回答item --}}
-                @foreach($answers as $answer)
-                <div class="question-answer-item">
-                    <div class="item-box">
-                        @include('home.question._author', ['user' => $answer->user])
-                    </div>
-                    <div class="answer-thumbs-counts">
-                        <span class="text-count">{{ $answer->countVote() }}</span>
-                        <span>人赞同了该回答</span>
-                    </div>
-                    <div class="answer-main-box">
-                        <div class="answer-main-content">{{ $answer->content }}</div>
-                    </div>
-                        @component('home.component._footerCon')
-                        <li class="vote-button">
-                            <button class="vote {{ $answer->isVote() ? 'vote-active' : ''}}"
-                                    data-href="{{ $answer->isVote() ? url("answer/$answer->id/upVote") : url("answer/$answer->id/cancelVote") }}">
-                                <span class="num">{{ $answer->countVote() }}</span> <span class="fa fa-caret-up"></span>
-                            </button>
-                            <button><span class="fa fa-caret-down"></span></button>
-                        </li>
-                        @endcomponent
-                </div>
-                @endforeach
+                @if($question->answers->isEmpty())
+                    @include('home.question._empty-status')
+                @else
+                    @include('home.question._answer-top')
+                    @include('home.question._answer')
+                @endif
             </div>
         </div>
         @if(Auth::user())
-        <div class="panel panel-default answeradd">
-            <div class="answeradd-header">
-                @include('home.question._author', ['user' => Auth::user()])
-            </div>
-            <div id="toolbar"></div>
-            <div class="editable-box">
-                <div id="editor2"></div>
-                <div class="editable-box-btn">
-                    <a href="{{ route('answer.store') }}" class="btn btn-primary addAnswer">提交回答</a>
+            @if(!$question->isSubscribe() && !$myAnswer)
+                <div class="panel panel-default answeradd">
+                    <div class="answeradd-header">
+                        @include('home.question._author', ['user' => Auth::user()])
+                    </div>
+                    <div id="toolbar"></div>
+                    <div class="editable-box">
+                        <div id="editor2"></div>
+                        <div class="editable-box-btn">
+                            <a href="{{ route('answer.store') }}" class="btn btn-primary addAnswer">提交回答</a>
+                        </div>
+                    </div>
+                </div>
+            @else
+                @if($myAnswer->trashed())
+                    <div class="panel panel-default">
+                        <div class="panel-heading text-center">
+                            你已经删除了该问题的回答，如果需要修改，请先
+                            <span class="restoreAnswer">
+                                @include('home.question._toggleLink', [
+                                         'text' => '撤销删除',
+                                         'id' => $myAnswer->id,
+                                        ])
+                            </span>
+                        </div>
+                    </div>
+                @else
+                <div class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        一个问题你只能回答一次，但你可以对
+                        <a class="on-modify-show"
+                           data-toggle="collapse"
+                           data-parent="#accordion"
+                           href="#collapseOne">现有回答</a>
+                        进行修改
+                    </div>
+                    <div  id="collapseOne" class="panel-collapse collapse">
+                        <div class="answeradd-header">
+                            @include('home.question._author', ['user' => Auth::user()])
+                        </div>
+                        <div id="toolbar"></div>
+                        <div class="editable-box">
+                            <div id="editor2"><p>{!! $myAnswer->content !!}</p></div>
+                            <div class="editable-box-btn">
+                                <a href="{{ route('answer.update', ['id' => $myAnswer->id]) }}" class="btn btn-primary updateAnswer">更新回答</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            @endif
+        @else
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                    请<a href="{{ route('login') }}">登录</a>后在回答
                 </div>
             </div>
-        </div>
         @endif
     </div>
 
     {{-- 问题页面右半部份 --}}
     <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">关于作者</h3>
-            </div>
-            <div class="panel-body" class="about-author">
-                <div class="about-author-head">
-                    {{--@include('home.question._author')--}}
-                </div>
-                <div class="about-author-bottom">
-                    <div class="about-author-counts">
-                        <div class="counts-item">
-                            <span>回答</span>
-                            <span>20</span>
-                        </div>
-                        <div class="counts-item">
-                            <span>文章</span>
-                            <span>20</span>
-                        </div>
-                        <div class="counts-item">
-                            <span>关注者</span>
-                            <span>20</span>
-                        </div>
-                    </div>
-                    <div class="about-author-btn">
-                        <a class="btn btn-primary"><span class="fa fa-plus"></span> 关注她</a>
-                        <a class="btn btn-default"><span class="fa fa-comments"></span> 发私信</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @yield('topAuthor')
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">相关问题</h3>
@@ -344,17 +301,6 @@
                 <li class="list-group-item">如何评价《喜剧之王》这部电影？ 289 个回答</li>
             </ul>
         </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">相关 Live 推荐</h3>
-            </div>
-            <ul class="list-group">
-                <li class="list-group-item">
-                    <img src="/img/avatar04.png" alt="" width="40" height="40">
-                    <span>运营拆解怎么做“电影营销”</span>
-                </li>
-            </ul>
-        </div>
     </div>
 </div>
 @endsection
@@ -363,164 +309,161 @@
 @section('script')
 <script>
         var editor2 = new E('#toolbar', '#editor2');
+        editor2.customConfig.menus = [
+            'bold',  // 粗体
+            'italic',  // 斜体
+            'head',  // 标题
+            'quote',  // 引用
+            'code',  // 插入代码
+            'list',  // 列表
+            'emoticon',  // 表情
+            'image',  // 插入图片
+            'video',  // 插入视频
+        ];
+        editor2.customConfig.zIndex = 1;
+        editor2.create();
 
-        /*
-         富文本工具条配置与创建
-         */
-        (function () {
-            editor2.customConfig.menus = [
-                'bold',  // 粗体
-                'italic',  // 斜体
-                'head',  // 标题
-                'quote',  // 引用
-                'code',  // 插入代码
-                'list',  // 列表
-                'emoticon',  // 表情
-                'image',  // 插入图片
-                'video',  // 插入视频
-            ];
-            editor2.create();
-        })();
 
         /*
          提交问题
          */
-        (function () {
-            $('.addAnswer').on('click', function (event) {
-                event.preventDefault();
-                axios.post(this.href, {
-                    question_id: {{ $question->id }},
-                    content: editor2.txt.text()
-                }).then(function (res) {
+        $('.addAnswer').on('click', function (event) {
+            event.preventDefault();
+            axios.post(this.href, {
+                question_id: `{{ $question->id }}`,
+                content: editor2.txt.html()
+            }).then(function (res) {
+                if (res.status === 200) {
+                    $('.alert-info-box').addClass('alert-success').html('回答问题成功！' + '，请稍等...').show('fast');
                     window.location.reload();
-                }).catch(function (err) {
-                    console.log(err);
-                });
+                }
             });
-        })();
+        });
+
+        /**
+         * 更新回答
+         */
+        $('.updateAnswer').on('click', function (event) {
+            event.preventDefault();
+            axios.put(this.href, {
+                content: editor2.txt.html()
+            }).then(function (res) {
+                if (res.status === 200) {
+                    $('.alert-info-box').addClass('alert-success').html('回答更新成功！' + '，请稍等...').show('fast');
+                    window.location.reload();
+                }
+            });
+        });
 
         /*
          点赞、取消点赞
          */
-        (function () {
-            $('.vote').on('click', function (event) {
-                var url = event.currentTarget.dataset.href;
-                var curl = url.split('/');
-                if (curl[curl.length - 1] === 'upVote') {
-                    curl.splice(-1, 1, 'cancelVote');
-                } else if (curl[curl.length - 1] === 'cancelVote') {
-                    curl.splice(-1, 1, 'upVote');
+        $('.vote').on('click', function (event) {
+            var url = event.currentTarget.dataset.href;
+            var curl = url.split('/');
+            if (curl[curl.length - 1] === 'upVote') {
+                curl.splice(-1, 1, 'cancelVote');
+            } else if (curl[curl.length - 1] === 'cancelVote') {
+                curl.splice(-1, 1, 'upVote');
+            }
+            $(this).attr('data-href', curl.join('/'));
+            url = curl.join('/');
+            var _this = this;
+            axios.post(url).then(function (res) {
+                var old = $(_this).find('.num').text();
+                if (res.data === 'up') {
+                    var add = parseInt(old) + 1;
+                    $(_this).addClass('vote-active');
+                    $(_this).find('.num').text(add);
+                    $(_this).parent().parent().parent().find('.text-count').text(add);
+                } else if (res.data === 'cancel') {
+                    var sub = parseInt(old) - 1;
+                    $(_this).removeClass('vote-active');
+                    $(_this).find('.num').text(sub);
+                    $(_this).parent().parent().parent().find('.text-count').text(sub);
                 }
-                $(this).attr('data-href', curl.join('/'));
-                url = curl.join('/');
-                var _this = this;
-                axios.post(url).then(function (res) {
-                    var old = $(_this).find('.num').text();
-                    if (res.data === 'up') {
-                        var add = parseInt(old) + 1;
-                        $(_this).addClass('vote-active');
-                        $(_this).find('.num').text(add);
-                        $(_this).parent().parent().parent().find('.text-count').text(add);
-                    } else if (res.data === 'cancel') {
-                        var sub = parseInt(old) - 1;
-                        $(_this).removeClass('vote-active');
-                        $(_this).find('.num').text(sub);
-                        $(_this).parent().parent().parent().find('.text-count').text(sub);
-                    }
-                });
             });
-        })();
+        });
 
         /*
         关注、取消关注问题
          */
-        (function () {
-            $('.toggleFollow').click(function (event) {
-                event.preventDefault();
-                var _this = this;
-                axios.post(this.href).then(function (res) {
-                    if (!_.isEmpty(res.data.attached)) {
-                        $(_this).html('正在关注').addClass('following');
-                    } else {
-                        $(_this).html('关注问题').removeClass('following');
-                    }
-                });
-            });
-        })();
-
-
-/*
-        function Base() {
-            this.editor2 = new E('#toolbar', '#editor2');
-            this.editorLoad();
-            this.answerLoad();
-        };
-
-        Base.prototype.editorLoad = function () {
-            // 富文本自定义菜单配置
-            this.editor2.customConfig.menus = [
-                'bold',  // 粗体
-                'italic',  // 斜体
-                'head',  // 标题
-                'quote',  // 引用
-                'code',  // 插入代码
-                'list',  // 列表
-                'emoticon',  // 表情
-                'image',  // 插入图片
-                'video',  // 插入视频
-            ];
-            this.editor2.create();
-        };
-
-        Base.prototype.answerLoad = function () {
-            var base = this;
-
-            /!*
-            提交问题
-             *!/
-            $('.addAnswer').on('click', function (event) {
-                event.preventDefault();
-                axios.post(this.href, {
-                    question_id: {{ $question->id }},
-                    content: base.editor2.txt.text()
-                }).then(function (res) {
-                    window.location.reload();
-                }).catch(function (err) {
-                    console.log(err);
-                });
-            });
-
-            /!*
-            点赞、取消点赞
-             *!/
-            $('.vote').on('click', function (event) {
-                var url = event.currentTarget.dataset.href;
-                var curl = url.split('/');
-                if (curl[curl.length - 1] === 'upVote') {
-                    curl.splice(-1, 1, 'cancelVote');
-                } else if (curl[curl.length - 1] === 'cancelVote') {
-                    curl.splice(-1, 1, 'upVote');
+        $('.toggleFollow').click(function (event) {
+            event.preventDefault();
+            var _this = this,
+                count = $('.count-follow').text();
+            axios.post(this.href).then(function (res) {
+                if (!_.isEmpty(res.data.attached)) {
+                    $(_this).html('正在关注').addClass('following');
+                    $('.count-follow').html(parseInt(count) +  1);
+                } else {
+                    $(_this).html('关注问题').removeClass('following');
+                    $('.count-follow').html(parseInt(count) -  1);
                 }
-                $(this).attr('data-href', curl.join('/'));
-                url = curl.join('/');
-                var _this = this;
-                axios.post(url).then(function (res) {
-                    var old = $(_this).find('.num').text();
-                    if (res.data === 'up') {
-                        var add = parseInt(old) + 1;
-                        $(_this).addClass('vote-active');
-                        $(_this).find('.num').text(add);
-                        $(_this).parent().parent().parent().find('.text-count').text(add);
-                    } else if (res.data === 'cancel') {
-                        var sub = parseInt(old) - 1;
-                        $(_this).removeClass('vote-active');
-                        $(_this).find('.num').text(sub);
-                        $(_this).parent().parent().parent().find('.text-count').text(sub);
-                    }
-                });
             });
-        };*/
+        });
 
+        /**
+         * 关注回答的用户
+         */
+        $('.toggle-follow').click(function (event) {
+            event.preventDefault();
+            var id = event.currentTarget.dataset.id,
+                url = '/user/' + id + '/toggleFollow',
+                count = $('.follower-count').text(),
+                _this = this;
+            axios.post(url).then(function (res) {
+                if (!_.isEmpty(res.data.attached)) {
+                    $(_this).html('取消关注').addClass('following');
+                    $('.follower-count').html(parseInt(count) +  1);
+                } else {
+                    $(_this).html( "<span class='fa fa-plus'><span>"+ ' 关注TA').removeClass('following');
+                    $('.follower-count').html(parseInt(count) -  1);
+                }
+            });
+        });
 
+        /**
+         * 删除问题、回答
+         */
+        $('.remove').click(function (event) {
+            var id = event.target.dataset.id,
+                module = event.target.dataset.module,
+                url = `/${module}/${id}`;
+            axios.interceptors.request.use((config) => {
+                $(this).find('a').hide();
+                $(this).find('span').show();
+                return config;
+            });
+            axios.delete(url).then(function (res) {
+                if (res.status == 200) {
+                    $('.alert-info-box').addClass('alert-success').html(res.data.msg).show('fast');
+                    if (res.data.from === 'question') {
+                        window.location.href = '/';
+                    } else if (res.data.from === 'answer') {
+                        window.location.reload();
+                    }
+                }
+            });
+        });
+
+        /**
+         * 撤销删除问题
+         */
+        $('.restoreAnswer').click(function (event) {
+            var id = event.target.dataset.id,
+                url = '/answer/' + id + '/restore';
+            axios.interceptors.request.use((config) => {
+                $(this).find('a').hide();
+                $(this).find('span').show();
+                return config;
+            });
+            axios.patch(url).then(function (res) {
+                if (res.status == 200) {
+                    $('.alert-info-box').addClass('alert-success').html(res.data.msg).show('fast');
+                    window.location.reload();
+                }
+            });
+        });
 </script>
 @endsection

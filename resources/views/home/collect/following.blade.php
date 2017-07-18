@@ -47,6 +47,8 @@
         	font-size:13px;
    		}
 	</style>
+	@include('home.layouts._foot_style')
+
 @endsection
 
 @section('content')
@@ -101,4 +103,5 @@
 		</div>
 	</div>
 	@include('home.collect._rightTool')
+	@include('home.layouts._footer')
 @endsection

@@ -6,11 +6,17 @@
     "type": "project",
     "require": {
         "php": ">=5.6.4",
+        "algolia/algoliasearch-client-php": "^1.18",
+        "barryvdh/laravel-debugbar": "^2.4",
         "caouecs/laravel-lang": "^3.0",
+        "doctrine/dbal": "^2.5",
+        "graham-campbell/markdown": "^7.1",
         "jcc/laravel-vote": "^1.1",
         "laravel/framework": "5.4.*",
+        "laravel/scout": "^3.0",
         "laravel/tinker": "~1.0",
-        "overtrue/laravel-follow": "^1.1"
+        "overtrue/laravel-follow": "^1.1",
+        "mews/captcha": "~2.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
@@ -23,7 +29,10 @@
         ],
         "psr-4": {
             "App\\": "app/"
-        }
+        },
+        "files": [
+            "app/Common/function.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

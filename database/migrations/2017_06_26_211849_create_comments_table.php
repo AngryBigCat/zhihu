@@ -8,16 +8,15 @@ class CreateCommentsTable extends Migration
 {
     /**
      * Run the migrations.
-     *
      * @return void
      */
     public function up()
     {
         Schema::create('comments', function (Blueprint $table) {
             $table->increments('id')->comment('评论id');
-            $table->integer('user_id')->comment('用户id');
-            $table->integer('question_id')->comment('问题id');
-            $table->integer('answer_id')->comment('回答id');
+            $table->unsignedInteger('user_id')->comment('用户id');
+            $table->unsignedInteger('commentable_id')->comment('关联id');
+            $table->string('commentable_type')->comment('类型');
             $table->text('content')->comment('评论内容');
             $table->timestamps();
         });

@@ -29,6 +29,7 @@
         .font-weight{
             font-weight: bold;
             font-size:14px;
+            padding:20px 10px 10px;
         }
         .font-weight a{
             color: #259;
@@ -160,6 +161,8 @@
         <hr>
         <hr>
     </div>
+
+    @include('home.layouts._footer')
     <div class="content container clearfix navbar-fixed-bottom" id="dibu">
         <!-- <div role="separator" class="divider"></div> -->
         <ul class="li-horizontal">
@@ -180,5 +183,4 @@
         <span class="copy">© 2017 知乎</span>
 
         </div>  
-    
 @stop

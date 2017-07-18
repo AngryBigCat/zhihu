@@ -17,21 +17,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['prefix' => 'v1'], function () {
-    Route::resource('lessons', 'LessonsController');
-});
 
-
-Route::group(['prefix' => 'v2'], function () {
-    Route::get('banner', function () {
-        return response()->json([
-            'code' => 0,
-            'msg' => '这里是消息',
-            'data' => [
-                'id' => 1,
-                'name' => '刘康',
-                'url' => 'lakgame.win'
-            ]
-        ]);
-    });
-});
+//测试api
+/*Route::group(['prefix' => 'v1'], function () {
+    Route::get('answer/{id}/comment', 'CommentController@getCommentsByAnswerID');
+    Route::post('answer/{id}/comment', 'CommentController@store');
+});*/
