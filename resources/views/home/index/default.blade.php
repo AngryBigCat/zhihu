@@ -1,9 +1,15 @@
 @extends('home.layouts.default')
+
+@section('title', '首页')
+
 @section('style')
 <style>
     #toolbar {
         background: #f7f8fa;
         border: 1px solid #e7eaf1;
+    }
+    #toolbar .w-e-droplist {
+        z-index: 2;
     }
     #editor {
         border-right: 1px solid #e7eaf1;
@@ -157,7 +163,6 @@
         margin-right: 20px;
         color: #aaa;
     }
-
     /* 提问框 */
     .modal-title {
         text-align: center;
@@ -173,18 +178,24 @@
         color: #bbb;
         font-size: 16px;
     }
-    .model-border-normal {
+    .border-normal {
         resize: none;
         border: 1px solid #eee;
+        border-radius: 4px;
         box-shadow: none;
+        padding: 5px 10px;
     }
-    .model-border-normal:focus {
-        border: 1px solid #aaa;
-        box-shadow: none;
-        outline: none;
-    }
-    .model-question-descripe {
+    .postQuestion-descripe {
+        border-radius: 4px;
+        padding: 5px;
         margin-top: 50px;
+    }
+    .border-normal:empty:before{
+        content: attr(placeholder);
+        color:#bbb;
+    }
+    .border-normal:focus:before{
+        content:none;
     }
     .model-question-descripe-head {
         display: flex;
@@ -199,7 +210,30 @@
     .model-question-descripe-input {
         min-height: 100px;
     }
-
+    .postQuestion-title {
+        min-height: 58px;
+    }
+    .tags-list {
+        margin-bottom: 5px;
+    }
+    .tags-list > li {
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .topicList {
+        list-style: none;
+        border: 1px solid #ddd;
+        border-top: none;
+        max-height: 150px;
+        overflow-y: scroll;
+    }
+    .topicList > li {
+        padding: 10px;
+    }
+    .topicList > li:hover {
+        background: #eee;
+        cursor: pointer;
+    }
 </style>
 @endsection
 
@@ -272,9 +306,9 @@
                                 </div>
                             </div>
                             <div class="index-topic-footer">
-                                @component('home.component._footerCon')
-                                    <li><span class="fa fa-plus"></span> 关注问题</li>
-                                @endcomponent
+                                {{--@component('home.component._footerCon', ['key' => 1])--}}
+                                    {{--<li><span class="fa fa-plus"></span> 关注问题</li>--}}
+                                {{--@endcomponent--}}
                             </div>
                         </div>
                     </div>
@@ -301,36 +335,6 @@
                 <a href="#" class="list-group-item">专栏・发现</a>
             </ul>
         </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">知乎 Live ⚡</h3>
-            </div>
-            <ul class="list-group">
-                <a href="#" class="list-group-item">如何恰当地给出自己的意见</a>
-                <a href="#" class="list-group-item">如何恰当地给出自己的意见</a>
-                <a href="#" class="list-group-item">如何恰当地给出自己的意见</a>
-            </ul>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">知乎圆桌</h3>
-            </div>
-            <ul class="list-group">
-                <a href="#" class="list-group-item">科学健身入门</a>
-                <a href="#" class="list-group-item">科学健身入门</a>
-                <a href="#" class="list-group-item">科学健身入门</a>
-            </ul>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">知乎圆桌</h3>
-            </div>
-            <ul class="list-group">
-                <a href="#" class="list-group-item">烘焙的美好时光</a>
-                <a href="#" class="list-group-item">烘焙的美好时光</a>
-                <a href="#" class="list-group-item">烘焙的美好时光</a>
-            </ul>
-        </div>
     </div>
     @include('home.component._model')
 </div>
@@ -338,74 +342,22 @@
 
 @section('script')
     <script>
-        function Base() {
-            this.editor = new E('#toolbar', '#editor');
-        }
-
-        /*
-        页面初始化加载
-        */
-        Base.prototype._initLoad = function () {
-            this.editorLoad();
-            this.addQuestion();
-        };
-        /*
-        编辑器加载
-        */
-        Base.prototype.editorLoad = function () {
-            var menuParamter = [
-                'bold',  // 粗体
-                'italic',  // 斜体
-                'head',  // 标题
-                'quote',  //  引用
-                'code',  // 插入代码
-                'list',  // 列表
-                'emoticon',  // 表情
-                'image',  // 插入图片
-                'video',  // 插入视频
-            ];
-            //配置编辑区域的 z-index
-            this.editor.customConfig.zIndex = 0;
-            // 自定义菜单配置
-            this.editor.customConfig.menus = menuParamter;
-            this.editor.create();
-        };
-
-        /*
-        ajax提问，添加问题
-         */
-        Base.prototype.addQuestion = function () {
-            var base = this;
-            $('#addQuestion').on('submit', function (event) {
-                event.preventDefault();
-                var form = this;
-                $.ajax({
-                    url: form.action,
-                    type: 'POST',
-                    data: {
-                        title: form.title.value,
-                        topic: form.topic.value,
-                        describe: base.editor.txt.html(),
-                        _token: form._token.value
-                    },
-                    success: function (res) {
-                        window.location.href = res;
-                    },
-                    error: function (res) {
-                        var err = res.responseJSON;
-                        $('.errMessage').attr('style', 'display: block');
-                        for (var i in err) {
-                            $('.errMessage').find('ul').append('<li>'+ err[i] +'</li>')
-                        }
-                        setTimeout(function () {
-                            $('.errMessage').attr('style', 'display: none').find('ul').find('li').remove();
-                        }, 2000);
-                    }
-                });
-            });
-        };
-
-        var base = new Base();
-        base._initLoad();
+        let editor = new E('#toolbar', '#editor');
+        //配置编辑区域的 z-index
+        editor.customConfig.zIndex = 1;
+        // 自定义菜单配置
+        editor.customConfig.menus = [
+            'bold',  // 粗体
+            'italic',  // 斜体
+            'head',  // 标题
+            'quote',  //  引用
+            'code',  // 插入代码
+            'list',  // 列表
+            'emoticon',  // 表情
+            'image',  // 插入图片
+            'video',  // 插入视频
+        ];
+        editor.create();
     </script>
 @endsection
+

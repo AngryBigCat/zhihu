@@ -3,13 +3,16 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Jcc\LaravelVote\CanBeVoted;
 
 class Answer extends Model
 {
     //第三方包
-    use CanBeVoted;
+    use CanBeVoted, SoftDeletes;
+    // 软删除
+    protected $dates = ['deleted_at'];
 
     //第三方包属性 与User关联
     protected $vote = User::class;
@@ -34,6 +37,14 @@ class Answer extends Model
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     */
+    public function comments()
+    {
+        return $this->morphMany('App\Comment', 'commentable');
+    }
+
+    /**
      * 是否点过赞
      */
     public function isVote()
@@ -43,6 +54,7 @@ class Answer extends Model
     }
 
     //以下两个方法，可考虑放入控制器里面
+
     /**
      * 点赞
      */

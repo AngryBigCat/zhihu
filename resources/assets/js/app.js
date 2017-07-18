@@ -19,12 +19,136 @@ window.E = require('wangeditor');
 
 //import components
 import searchView from './components/search-view/search-view.vue';
+import commentList from './components/comment-list.vue';
+import followerList from './components/follower-list.vue';
 
-const app = new Vue({
+
+
+
+
+let app = new Vue({
+    data: {
+        postTitleError: false,
+        postTitle: '',
+        selectTopic: '',
+        topicList: [],
+        searchResult: [],
+    },
+    watch: {
+        selectTopic(newValue) {
+            this.getTopics(newValue);
+        }
+    },
+    mounted() {
+        $('#author-follower').on('hidden.bs.modal', (event) => {
+            this.$refs.authorFollower.followerList = [];
+        }, 1000);
+    },
+    methods: {
+        onPostQuestion() {
+            if (this.postTitle.search(/(\?|\uff1f)$/) === -1) {
+                this.postTitleError = true;
+                setTimeout(() => {
+                    this.postTitleError = false;
+                }, 2000);
+                return false;
+            }
+            let ids = this._filterIds();
+            let data = {
+                title: this.postTitle,
+                topic_ids: ids,
+            };
+            if (editor.txt.text()) {
+                data['describe'] = editor.txt.html()
+            }
+            axios.post('/question', data).then(res => {
+                if (res.status == 200) {
+                    $('.alert-info-box').addClass('alert-success').html(res.data.msg).show('fast');
+                    window.location.href = res.data.redirect_url;
+                }
+            });
+        },
+        _filterIds() {
+            let topic_ids = this.topicList,
+                ids = [];
+            for (let v of topic_ids) {
+                ids.push(v.id);
+            }
+            return ids;
+        },
+        onRemoveTopic(event) {
+            let index = event.target.dataset.index;
+            this.topicList.splice(index, 1);
+        },
+        onInsertTopic(event) {
+            let id = event.target.dataset.id,
+                text = event.target.innerText,
+                isTopic = this._isExsisTopicList(id);
+            if (!(this.topicList.length >= 5) && isTopic) {
+                let topic = { text, id };
+                this.topicList.push(topic);
+                this.selectTopic = '';
+                this.searchResult = [];
+            }
+        },
+        _isExsisTopicList(id) {
+            let topicList = this.topicList;
+            for(let k in topicList) {
+                if (topicList[k].id === id) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        getTopics: _.debounce(function (nV) {
+            var isMulti = nV.indexOf(',') > -1,
+                url = '/search/topic/' + nV;
+            if (!isMulti) {
+                axios.get(url).then((res) => {
+                    console.log(res);
+                    this.searchResult = res.data;
+                });
+            }
+        }, 1000),
+        onToggleComment(key) {
+            if (key instanceof Object) {
+                this.$refs.question.toggleShow('question');
+            } else if (key === 'topAnswer') {
+                this.$refs.topAnswer.toggleShow('answer');
+            } else {
+                this.$refs[key].toggleShow('answer');
+            }
+        },
+        onGetFollower(type) {
+            if (type === 'question') {
+                this.$refs.questionFollower.onGetFollower('question');
+            }  else {
+                this.$refs.authorFollower.onGetFollower('user');
+            }
+        }
+    },
     components: {
         searchView,
+        commentList,
+        followerList
     }
 }).$mount('#app');
 
-//基础构造方法
+/*
 
+var editor = new E('#toolbar', '#editor');
+//配置编辑区域的 z-index
+editor.customConfig.zIndex = 0;
+// 自定义菜单配置
+editor.customConfig.menus = [
+    'bold',  // 粗体
+    'italic',  // 斜体
+    'head',  // 标题
+    'quote',  //  引用
+    'code',  // 插入代码
+    'list',  // 列表
+    'emoticon',  // 表情
+    'image',  // 插入图片
+    'video',  // 插入视频
+];
+editor.create();*/

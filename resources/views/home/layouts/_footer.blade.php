@@ -1,11 +1,3 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: Angry
- * Date: 2017/6/22
- * Time: 21:46
- */
-?>
 <div class="foot col-md-12">
 	<span class="copy pull-left">&copy; 2017知乎</span>
 	<ul class="pull-right">

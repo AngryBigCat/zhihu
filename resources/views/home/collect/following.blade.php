@@ -48,6 +48,7 @@
    		}
 	</style>
 	@include('home.layouts._foot_style')
+
 @endsection
 
 @section('content')

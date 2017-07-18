@@ -1,75 +1,80 @@
-@extends('home.layouts.default') @section('style')
-<style>
-.gengduo {
-    margin-top: 50px;
-}
+@extends('home.layouts.default')
 
-.font-weight {
-    font-weight: bold;
-    font-size: 14px;
-    padding: 20px 10px 10px;
-}
+@section('style')
+    <style>
+        .gengduo {
+            margin-top: 50px;
+        }
 
-.font-weight a {
-    color: #259;
-    text-decoration: none;
-}
+        .font-weight {
+            font-weight: bold;
+            font-size: 14px;
+            padding: 20px 10px 10px;
+        }
 
-.down-tool a,
-.down-tool {
-    color: #999;
-    font-size: 13px;
-    text-decoration: none;
-}
+        .font-weight a {
+            color: #259;
+            text-decoration: none;
+        }
 
-.right-tool {
-    font-size: 13px;
-}
+        .down-tool a,
+        .down-tool {
+            color: #999;
+            font-size: 13px;
+            text-decoration: none;
+        }
 
-.right-tool a {
-    text-decoration: none;
-}
-</style>
-@include('home.layouts._foot_style') 
-@stop 
+        .right-tool {
+            font-size: 13px;
+        }
+
+        .right-tool a {
+            text-decoration: none;
+        }
+    </style>
+    @include('home.layouts._foot_style')
+@stop
 @section('content')
-<div class="row" id="content">
-    <div class="col-md-8">
-        <!-- Nav tabs -->
-        <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">我创建的收藏</a></li>
-        </ul>
-        <div id="info" class="bg-info well-sm" style="padding:0;margin-top: 10px;text-align: center">
-            {{Session::get('info')}}
-        </div>
-        <!-- Tab panes -->
-        <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="profile">
-                <div id="#" class="">
-                @foreach($myCollects as $v)
-                    <div class="" id="">
-                        <h4 class="font-weight">
-    
-                    <a href="/collect/colQus/{{$v->id}}">{{$v->name}}</a>
+    <div class="row" id="content">
+        <div class="col-md-8">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab"
+                                                          data-toggle="tab">我创建的收藏</a></li>
+            </ul>
+            <div id="info" class="bg-info well-sm" style="padding:0;margin-top: 10px;text-align: center">
+                {{Session::get('info')}}
+            </div>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="profile">
+                    <div id="#" class="">
+                        @foreach($myCollects as $v)
+                            <div class="" id="">
+                                <h4 class="font-weight">
 
-                    </h4>
-                        <div class="down-tool">
-                            <div class="#">
-                                <span style="padding-left: 15px">{{ \App\Collect::find($v->id)->question->count()}}条内容</span>
-                                <span class="#">•</span>
-                                <span class="#" href="#">{{\App\Collect::find($v->id)->followers()->count()}} 人关注</span>
+                                    <a href="/collect/colQus/{{$v->id}}">{{$v->name}}</a>
+
+                                </h4>
+                                <div class="down-tool">
+                                    <div class="#">
+                                        <span style="padding-left: 15px">{{ \App\Collect::find($v->id)->question->count()}}
+                                            条内容</span>
+                                        <span class="#">•</span>
+                                        <span class="#" href="#">{{\App\Collect::find($v->id)->followers()->count()}}
+                                            人关注</span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        @endforeach
                     </div>
-                @endforeach
                 </div>
             </div>
         </div>
+        @include('home.collect._rightTool')
+        <hr>
+        <hr>
     </div>
-    @include('home.collect._rightTool')
-    <hr>
-    <hr>
-</div>
     @include('home.layouts._footer')
 @stop
 
@@ -100,4 +105,5 @@ $('.follow').click(function() {
     return false;
 }); 
 </script>
+
 @stop
