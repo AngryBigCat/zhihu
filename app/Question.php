@@ -5,30 +5,31 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Overtrue\LaravelFollow\Traits\CanBeFollowed;
+use Overtrue\LaravelFollow\Traits\CanBeSubscribed;
 
 class Question extends Model
 {
     //第三方包
-    use CanBeFollowed;
+    use CanBeFollowed, CanBeSubscribed;
 
     //可写入的字段
     protected $fillable = ['user_id', 'title', 'topic', 'describe'];
 
     /**
-     * 问题和话题的多对多关系
-     */
-
-    public function question()
-    {
-        return $this->belongsToMany('\App\Question','question_tag','tag_id','question_id');
-    }
-
-    /**
-     * 问题与评论下的关联
+     * 问题关联的评论
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function comments()
     {
-        return $this->hasMany('App\Comment', 'id', 'question_id');
+        return $this->morphMany('App\Comment', 'commentable');
+    }
+
+    /**
+     * 问题和话题的多对多关系
+     */
+    public function question()
+    {
+        return $this->belongsToMany('\App\Question','question_tag','tag_id','question_id');
     }
 
     /**
@@ -41,6 +42,59 @@ class Question extends Model
     }
 
     /**
+     * 多对多  当前问题都在哪些收藏夹里
+     */
+    public function collects()
+    {
+        return $this->belongsToMany('\App\Collect', 'question_collect', 'question_id', 'collect_id');
+    }
+
+    /**
+     * 返回已登陆用户自己的回答
+     * @param $answers
+     * @param $id
+     * @return mixed
+     */
+    public function filterAppointAnswers($answers, $id)
+    {
+        return $answers->filter(function ($item, $key) use ($id){
+            return $item->id != $id;
+        });
+    }
+
+    /**
+     * 获取已登陆对该问题的回答，如果没有就返回false
+     * @param $answers
+     * @return bool|mixed
+     */
+    public function getLoggedAnswer($answers)
+    {
+        $user = Auth::user();
+        if ($this->isSubscribedBy($user)) {
+            return $this->getAnswer($answers, $user->id, 'User');
+        }
+        return false;
+    }
+
+    /**
+     * 获取问题下的某个回答
+     * @param $answers
+     * @param string $id
+     * @param string $type
+     * @return mixed
+     */
+    public function getAnswer($answers, $id = '', $type = 'Answer')
+    {
+        return $answers->first(function ($item, $key) use ($id, $type) {
+            if ($type == 'User') {
+                return $item->user->id == $id;
+            } else if ($type == 'Answer') {
+                return $item->id == $id;
+            }
+        });
+    }
+
+    /**
      * 判断当前登陆的用户是否关注了该问题
      * @return bool
      */
@@ -48,6 +102,16 @@ class Question extends Model
     {
         $user = Auth::user();
         return $this->isFollowedBy($user);
+    }
+
+    /**
+     * 判断当前登陆的用户是否回答了该问题
+     * @return bool
+     */
+    public function isSubscribe()
+    {
+        $user = Auth::user();
+        return $this->isSubscribedBy($user);
     }
 
     /**
@@ -118,4 +182,5 @@ class Question extends Model
         $question->save();
         return $question;
     }
+    
 }

@@ -15,8 +15,6 @@
             <h4><a href="/people/activitie/{{ $val->id }}">{{ $val->name }}</a>
             @if(\App\User::find($_SESSION['id'])->isFollowing(\App\User::find($val->id)) && \App\User::find($_SESSION['id'])->isFollowedBy(\App\User::find($val->id)))
             <span class="xianghu">相互关注</span>
-            @else
-            <span class="xianghu">关注了你</span>
             @endif
 
             </h4>

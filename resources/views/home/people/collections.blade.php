@@ -5,16 +5,17 @@
     <div class="dongtai-dongtai">
     <span>{{$count['sex']}}的收藏</span>
     </div>
+    @foreach($info as $val)
     <div class="dongtai-content">
-        
         <div class="dongtai-content-title">
-            <a href="">淘宝上有屎？？？</a>
+            <a href="/collect/colQus/{{ $val->id }}">{{ $val->name }}</a>
         </div>
 
         <div>
-            <time>2017-3-24</time> • <span> 10 </span>个回答 • 
-            <span> 10 </span>个关注
+            <time>{{ date('Y-m-d', strtotime($val->updated_at)) }}</time> 更新 • <span> {{ \App\Collect::find($val->id)->questions()->count() }} </span>条内容 • 
+            <span> {{ \App\Collect::find($val->id)->followers()->count() }} </span>个关注
         </div>
     </div>
+    @endforeach
 </div>
 @endsection

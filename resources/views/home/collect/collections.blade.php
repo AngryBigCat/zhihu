@@ -1,8 +1,6 @@
 @extends('home.layouts.default')
 @section('style')
     <style>
-<<<<<<< HEAD
-=======
 
         #dibu {
             margin-bottom: 80px;
@@ -25,17 +23,13 @@
             
             color:#888;
         }
->>>>>>> gaoju
         .gengduo{
             margin-top:50px;
         }
         .font-weight{
             font-weight: bold;
             font-size:14px;
-<<<<<<< HEAD
             padding:20px 10px 10px;
-=======
->>>>>>> gaoju
         }
         .font-weight a{
             color: #259;
@@ -54,10 +48,6 @@
             text-decoration: none;
         }
     </style>
-<<<<<<< HEAD
-    @include('home.layouts._foot_style')
-=======
->>>>>>> gaoju
 @stop
 
 @section('content')
@@ -74,13 +64,9 @@
             <div role="tabpanel" class="tab-pane active" id="home">
                 <div class="#" id="#">
                 <h4 class="font-weight">
-<<<<<<< HEAD
-                <a href="/collection/125834257">方法论做题</a>
-=======
 
                 <a href="/collection/125834257">方法论做题</a>
 
->>>>>>> gaoju
                 </h4>
                 <div class="#">
                     <div class="down-tool">
@@ -175,9 +161,8 @@
         <hr>
         <hr>
     </div>
-<<<<<<< HEAD
+
     @include('home.layouts._footer')
-=======
     <div class="content container clearfix navbar-fixed-bottom" id="dibu">
         <!-- <div role="separator" class="divider"></div> -->
         <ul class="li-horizontal">
@@ -198,6 +183,4 @@
         <span class="copy">© 2017 知乎</span>
 
         </div>  
->>>>>>> gaoju
-    
 @stop

@@ -47,10 +47,8 @@
         	font-size:13px;
    		}
 	</style>
-<<<<<<< HEAD
 	@include('home.layouts._foot_style')
-=======
->>>>>>> gaoju
+
 @endsection
 
 @section('content')
@@ -105,8 +103,5 @@
 		</div>
 	</div>
 	@include('home.collect._rightTool')
-<<<<<<< HEAD
 	@include('home.layouts._footer')
-=======
->>>>>>> gaoju
 @endsection

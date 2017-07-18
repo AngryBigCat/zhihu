@@ -15,6 +15,7 @@
     "browser-sync": "^2.18.12",
     "browser-sync-webpack-plugin": "^1.1.4",
     "cross-env": "^3.2.3",
+    "font-awesome": "^4.7.0",
     "holderjs": "^2.9.4",
     "jade": "^1.11.0",
     "jquery": "^3.1.1",

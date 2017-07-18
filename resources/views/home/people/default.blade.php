@@ -14,11 +14,15 @@
 		<div class="dongtai col-md-12">
 			@section('bread')
 			<ul class="bread nav nav-pills">
+                @if(Auth::id() == $_SESSION['id'])
 			   <li role="presentation"><a data-pjax href="/people/activities">动态</a></li>
+               @else 
+                <li role="presentation"><a data-pjax href="/people/activitie/{{$_SESSION['id']}}">动态</a></li>
+               @endif
 			   <li role="presentation"><a data-pjax href="/people/answers">回答 <span>{{ $count['ans_count'] }}</span></a></li>
 			   <li role="presentation"><a data-pjax href="/people/asks">提问 <span>{{ $count['que_count'] }}</span></a></li>
 			   <li role="presentation"><a data-pjax href="/people/topics">话题 <span>{{ $count['tag_count'] }}</span></a></li>
-			   <li role="presentation"><a data-pjax href="/people/collections">收藏 <span>10</span></a></li>
+			   <li role="presentation"><a data-pjax href="/people/collections">收藏 <span>{{ $count['collect_count'] }}</span></a></li>
 			</ul>
 			@show
 			<div id="pjax-con">
@@ -38,6 +42,7 @@
 {{-- pjax加速 --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.pjax/1.9.6/jquery.pjax.min.js"></script> 
+
 <script type="text/javascript">
 
     // 查看详细资料
@@ -60,6 +65,7 @@
         $(this).parents('.nosee_userinfo').css('display','none');
         $('.see_userinfo').css('display','block');
     });
+
     // 导航栏
     $('.bread a').click(function() {
         $(this).parent('li').addClass('active').siblings().removeClass('active');
@@ -76,7 +82,9 @@
         //pjax链接加载完成后隐藏加载动画；
         $("#pjax_loading").css("display", "none");
         $('#pjax-con').css('display', 'block');
+
         pjax_toggleFollow();
+        pjax_zhuyeFollow();
     });
 
     $(document).on("pjax:timeout", function(event) {
@@ -84,10 +92,11 @@
         event.preventDefault();
     });
 
+    pjax_toggleFollow();
+    pjax_zhuyeFollow();
     // 关注和已关注按钮
     function pjax_toggleFollow() {
-        $('.tgg-follow .toggle-follow').click(function(event) {
-            event.stopPropagation();
+        $('.tgg-follow .toggle-follow').click(function() {
             var uid = $(this).parents('.tgg-follow').attr('uid');
             var _this = $(this);
             var gzz = $('.guanzhu .guanzhuzhe div:last');
@@ -104,6 +113,7 @@
                     if (data.status) {
                         _this.html('<span class="glyphicon glyphicon-plus"></span> 关注Ta').removeClass('btn-info').addClass('btn-primary');
                         gzz.html(count - 1);
+                    flag = false;
                     } else {
                         _this.html('已关注').removeClass('btn-primary').addClass('btn-info');
                         gzz.html(count + 1);
@@ -111,10 +121,11 @@
                 }
             });
         });
+    }
 
+    function pjax_zhuyeFollow() {
         // 我的主页关注
-        $('.tgge-follow .toggle-follow').click(function(event) {
-            event.stopPropagation();
+        $('.tgge-follow .toggle-follow').click(function() {
             var uid = $(this).parents('.tgge-follow').attr('uid');
             var _this = $(this);
             var gzl = $('.guanzhu .guanzhule div:last');
@@ -147,12 +158,6 @@
         });
     }
 	
-
-	
-
-
-	
-
 	// 点击 编辑封面图片
 	$(document).ready(function () {
 		$(".edit-img").click(function () { 
@@ -160,8 +165,8 @@
 		}); 
 
 		setTimeout(function() {
-			$('.er_cover').fadeOut();
-		},3000);
+			$('.er_cover').fadeOut(1000);
+		},2000);
 	});
 	
 	$('.head-pic').hover(
@@ -318,12 +323,12 @@
     });
 
     function rotateimgright() {
-    $("#image").cropper('rotate', 90);
+        $("#image").cropper('rotate', 90);
     }
 
 
     function rotateimgleft() {
-    $("#image").cropper('rotate', -90);
+        $("#image").cropper('rotate', -90);
     }
 
     function set_alert_info(content){

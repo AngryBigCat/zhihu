@@ -1,8 +1,7 @@
 <!-- Modal -->
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <form id="addQuestion" class="modal-content" method="post" action="{{ route('question.store') }}">
-            {{ csrf_field() }}
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="myModalLabel">
@@ -11,17 +10,21 @@
                 </h4>
             </div>
             <div class="modal-body">
-                <div class="alert alert-danger errMessage" style="display: none;">
-                    <ul class="list-unstyled">
+                <div class="form-group">
+                    <textarea v-model="postTitle" class="postQuestion-title border-normal form-control" placeholder="问题标题"></textarea>
+                </div>
+                <div class="form-group">
+                    <!-- 已选择的话题 -->
+                    <ul v-show="topicList.length != 0" class="list-unstyled list-inline tags-list" v-on:click="onRemoveTopic">
+                        <li v-for="(tag, index) in topicList"><span class="label label-primary" v-bind:data-index="index">
+                                @{{ tag.text }} <i class="fa fa-close"></i></span>
+                        </li>
                     </ul>
-                </div>
-                <div class="form-group">
-                    <textarea name="title" class="form-control model-border-normal" placeholder="问题标题"></textarea>
-                </div>
-                <div class="form-group">
-                    <div>
-                        <input name="topic" type="text" class="form-control model-border-normal" placeholder="添加话题，请用半角英文 “ , ” 号分割">
-                    </div>
+                    <input v-model="postTopic" class="postQuestion-topic border-normal form-control" placeholder="添加话题，最多选择5个">
+                    <!-- 选择话题列表 -->
+                    <ul class="topicList" v-show="searchResult.length != 0" v-on:click="onInsertTopic">
+                        <li v-for="topic in searchResult" v-bind:data-id="topic.id">@{{ topic.tag_name }}</li>
+                    </ul>
                 </div>
                 <div class="form-group model-question-descripe">
                     <div class="model-question-descripe-head">
@@ -39,8 +42,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">提交问题</button>
+                <button v-on:click="onPostQuestion" class="btn btn-primary">提交问题</button>
             </div>
-        </form>
+        </div>
     </div>
 </div>

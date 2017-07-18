@@ -4,8 +4,12 @@
 // Variables
 @import "variables";
 
+//font-awesome
+@import "node_modules/font-awesome/scss/font-awesome.scss";
+
 // Bootstrap
 @import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+
 
 
 
@@ -18,4 +22,13 @@ body {
 h1,h2,h3,h4,h5,h6,ol,ul,p {
   margin: 0;
   padding: 0;
+}
+
+.alert-info-box {
+  position: fixed;
+  width: 500px;
+  left: 50%;
+  margin-top: 20px;
+  margin-left: -250px;
+  display: none;
 }

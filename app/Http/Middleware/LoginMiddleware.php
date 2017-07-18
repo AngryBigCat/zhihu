@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Middleware;
-
 use Closure;
 
 class LoginMiddleware
@@ -16,7 +15,7 @@ class LoginMiddleware
     public function handle($request, Closure $next)
     {
         // 检测session信息
-        $id = Session('uid');
+        $id = Session('admin_id');
         if (empty($id)) {
             return redirect('/admin/login');
         } else {

@@ -16,15 +16,14 @@ class PeopleController extends Controller
     public function activities()
     {
         $_SESSION['id'] = Auth::id();
-
         $user_id = User_detail::find(Auth::id());
         if (empty($user_id)) {
             User_detail::create(['user_id'=>Auth::id()]);
         }
 
         $user = $this->getUser();
-
-    	return view('home.people.activities', ['user'=>$user]);
+        $count = $this->getCount();
+    	return view('home.people.activities', ['user'=>$user, 'count'=>$count]);
     }
 
     /**
@@ -40,8 +39,9 @@ class PeopleController extends Controller
         }
         
         $user = $this->getUser();
+        $count = $this->getCount();
 
-        return view('home.people.activities', ['user'=>$user]);
+        return view('home.people.activities', ['user'=>$user, 'count'=>$count]);
     }
 
     /**
@@ -87,22 +87,25 @@ class PeopleController extends Controller
         ->get();
         return view('home.people.topics', ['info'=>$info]);
     }
-
-    /**
-     * 我的主页 -- 专栏
-     */
-    public function columns()
-    {
-        return view('home.people.columns');
-    }
     /**
      * 我的主页 -- 收藏
      */
     public function collections()
     {
-        return view('home.people.collections');
+        $id = $_SESSION['id'];
+        $info = User::find($id)->collects;
+        return view('home.people.collections', ['info'=>$info]);
     }
 
+    /**
+     * 我关注的收藏
+     */
+    public function follow_collection()
+    {
+        $id = $_SESSION['id'];
+        $info = User::find($id)->followings(\App\Collect::class)->get();
+        return view('home.people.follow_collections', ['info'=>$info]);
+    }
     /**
      * 我的主页 -- 关注的人
      */
@@ -293,6 +296,10 @@ class PeopleController extends Controller
             $followings_count = $user->followings(\App\User::class)->whereNull('users.deleted_at')->count();
             // 关注者数
             $followers_count = $user->followers()->whereNull('users.deleted_at')->count();
+            // 创建的收藏夹数
+            $collect_count = $user->collects()->count();
+            // 关注的收藏夹数
+            $follow_col_count = $user->followings(\App\Collect::class)->count();
             // 性别
             $sex = '';
             if (Auth::id() == $_SESSION['id']) {
@@ -306,9 +313,10 @@ class PeopleController extends Controller
                 'tag_count' => $tag_count,
                 'followings_count' => $followings_count,
                 'followers_count' => $followers_count,
-                'sex' => $sex
+                'sex' => $sex,
+                'collect_count' => $collect_count,
+                'follow_col_count' => $follow_col_count
             ];
-
             return $count;
         }
     }
