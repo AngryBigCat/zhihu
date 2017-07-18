@@ -1,7 +1,14 @@
 <div class="author-info">
-    <img class="author-info-img" src="/img/avatar04.png" width="50" height="50">
+    <a href="">
+        <img class="author-info-img"
+             src="{{ $user->user_details->headpic ?
+                 '/uploads/headpic/'.$user->user_details->headpic :
+                 '/img/default-avatar.png' }}"
+             width="50"
+             height="50">
+    </a>
     <div class="author-info-dec">
-        <span class="author-info-name">{{ $user->name }}</span>
-        <span class="author-info-intro">asd</span>
+        <span class="author-info-name"><a href="">{{ $user->name }}</a></span>
+        <span class="author-info-intro">{{ $user->user_details->a_word }}</span>
     </div>
 </div>

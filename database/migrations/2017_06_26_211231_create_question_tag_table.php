@@ -15,7 +15,6 @@ class CreateQuestionTagTable extends Migration
         Schema::create('question_tag', function (Blueprint $table) {
             $table->integer('question_id')->comment('问题id');
             $table->integer('tag_id')->comment('话题id');
-            $table->timestamps();
         });
     }
 

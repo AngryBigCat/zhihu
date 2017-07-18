@@ -42,7 +42,15 @@ Route::get('question/{id}/oldest', 'QuestionController@oldestSort');
 //提问时添加话题弹出的话题列表
 Route::get('search/topic/{key?}', 'SearchController@topicSearch');
 //测试路由
-Route::get('search/topic/{key?}/insert', 'SearchController@testInsertTopic');
+Route::get('search/topic/{key?}/insert', function ($key) {
+    return \App\Tag::create([
+        'pid' => 1,
+        'path' => 'www',
+        'tag_name' => $key,
+        'description' => 'asdasdqweqweqwe',
+        'img' => '/img/avatar04.png',
+    ]);
+});
 
 
 
@@ -210,8 +218,6 @@ Route::group(['prefix'=>'admin', 'middleware' => 'adminLogin'], function() {
     // 用户注销
     Route::get('logout', 'admin\LoginController@logout')->name('admin.logout');
 
-// 回答管理
-    Route::resource('answer', 'admin\AnswerController');
     // 软删除回答列表
     Route::get('del_answer', 'admin\AnsDelListController@del_answerList')->name('answer.del_answer');
     // 还原软删除回答数据
@@ -260,3 +266,6 @@ Route::group([], function(){
     Route::POST('/ajaxs','TopicController@ajaxs');
     
 });
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

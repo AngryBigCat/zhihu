@@ -52436,13 +52436,14 @@ window.E = __webpack_require__("./node_modules/_wangeditor@3.0.3@wangeditor/rele
 
 var app = new Vue({
     data: {
+        postTitleError: false,
         postTitle: '',
-        postTopic: '',
-        searchResult: [],
-        topicList: []
+        selectTopic: '',
+        topicList: [],
+        searchResult: []
     },
     watch: {
-        postTopic: function postTopic(newValue) {
+        selectTopic: function selectTopic(newValue) {
             this.getTopics(newValue);
         }
     },
@@ -52455,7 +52456,61 @@ var app = new Vue({
     },
 
     methods: {
-        onPostQuestion: function onPostQuestion() {},
+        onPostQuestion: function onPostQuestion() {
+            var _this2 = this;
+
+            if (this.postTitle.search(/(\?|\uff1f)$/) === -1) {
+                this.postTitleError = true;
+                setTimeout(function () {
+                    _this2.postTitleError = false;
+                }, 2000);
+                return false;
+            }
+            var ids = this._filterIds();
+            var data = {
+                title: this.postTitle,
+                topic_ids: ids
+            };
+            if (editor.txt.text()) {
+                data['describe'] = editor.txt.html();
+            }
+            axios.post('/question', data).then(function (res) {
+                if (res.status == 200) {
+                    $('.alert-info-box').addClass('alert-success').html(res.data.msg).show('fast');
+                    window.location.href = res.data.redirect_url;
+                }
+            });
+        },
+        _filterIds: function _filterIds() {
+            var topic_ids = this.topicList,
+                ids = [];
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = topic_ids[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var v = _step.value;
+
+                    ids.push(v.id);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return ids;
+        },
         onRemoveTopic: function onRemoveTopic(event) {
             var index = event.target.dataset.index;
             this.topicList.splice(index, 1);
@@ -52467,6 +52522,8 @@ var app = new Vue({
             if (!(this.topicList.length >= 5) && isTopic) {
                 var topic = { text: text, id: id };
                 this.topicList.push(topic);
+                this.selectTopic = '';
+                this.searchResult = [];
             }
         },
         _isExsisTopicList: function _isExsisTopicList(id) {
@@ -52480,14 +52537,14 @@ var app = new Vue({
         },
 
         getTopics: _.debounce(function (nV) {
-            var _this2 = this;
+            var _this3 = this;
 
             var isMulti = nV.indexOf(',') > -1,
                 url = '/search/topic/' + nV;
             if (!isMulti) {
                 axios.get(url).then(function (res) {
                     console.log(res);
-                    _this2.searchResult = res.data;
+                    _this3.searchResult = res.data;
                 });
             }
         }, 1000),
@@ -52515,7 +52572,24 @@ var app = new Vue({
     }
 }).$mount('#app');
 
-//基础构造方法
+/*
+
+var editor = new E('#toolbar', '#editor');
+//配置编辑区域的 z-index
+editor.customConfig.zIndex = 0;
+// 自定义菜单配置
+editor.customConfig.menus = [
+    'bold',  // 粗体
+    'italic',  // 斜体
+    'head',  // 标题
+    'quote',  //  引用
+    'code',  // 插入代码
+    'list',  // 列表
+    'emoticon',  // 表情
+    'image',  // 插入图片
+    'video',  // 插入视频
+];
+editor.create();*/
 
 /***/ }),
 

@@ -35,7 +35,6 @@ class StoreQuestionPost extends FormRequest
     {
         return [
             'title' => 'required|unique:questions|max:50',
-            'topic' => 'required',
             'describe' => 'nullable'
         ];
     }

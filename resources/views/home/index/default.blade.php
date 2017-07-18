@@ -1,9 +1,15 @@
 @extends('home.layouts.default')
+
+@section('title', '首页')
+
 @section('style')
 <style>
     #toolbar {
         background: #f7f8fa;
         border: 1px solid #e7eaf1;
+    }
+    #toolbar .w-e-droplist {
+        z-index: 2;
     }
     #editor {
         border-right: 1px solid #e7eaf1;
@@ -336,41 +342,22 @@
 
 @section('script')
     <script>
-        function Base() {
-            this.editor = new E('#toolbar', '#editor');
-        }
-
-        /*
-        页面初始化加载
-        */
-        Base.prototype._initLoad = function () {
-            this.editorLoad();
-        };
-        /*
-        编辑器加载
-        */
-        Base.prototype.editorLoad = function () {
-            var menuParamter = [
-                'bold',  // 粗体
-                'italic',  // 斜体
-                'head',  // 标题
-                'quote',  //  引用
-                'code',  // 插入代码
-                'list',  // 列表
-                'emoticon',  // 表情
-                'image',  // 插入图片
-                'video',  // 插入视频
-            ];
-            //配置编辑区域的 z-index
-            this.editor.customConfig.zIndex = 0;
-            // 自定义菜单配置
-            this.editor.customConfig.menus = menuParamter;
-            this.editor.create();
-        };
-
-
-
-        var base = new Base();
-        base._initLoad();
+        let editor = new E('#toolbar', '#editor');
+        //配置编辑区域的 z-index
+        editor.customConfig.zIndex = 1;
+        // 自定义菜单配置
+        editor.customConfig.menus = [
+            'bold',  // 粗体
+            'italic',  // 斜体
+            'head',  // 标题
+            'quote',  //  引用
+            'code',  // 插入代码
+            'list',  // 列表
+            'emoticon',  // 表情
+            'image',  // 插入图片
+            'video',  // 插入视频
+        ];
+        editor.create();
     </script>
 @endsection
+
