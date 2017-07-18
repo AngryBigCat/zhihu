@@ -13,21 +13,12 @@ class CreateQuestionTagsTable extends Migration
      */
     public function up()
     {
-        if (!Schema::hasTable('question_tags')) {
-            Schema::create('question_tags', function (Blueprint $table) {
-                $table->integer('question_id')->comment('问题id');
-                $table->integer('tag_id')->comment('话题id');
-                $table->timestamps();
-            });
-        } else {
-            Schema::table('question_tags', function ($table) {
-                // 添加的字段
-                // if (!Schema::hasColumn('users', 'b')) {
-                //     //
-                //     $table->string('b');
-                // }
-            });
-        }
+        Schema::create('question_tags', function (Blueprint $table) {
+            $table->integer('question_id')->comment('问题id');
+            $table->integer('tag_id')->comment('话题id');
+            $table->timestamps();
+        });
+        
     }
 
     /**

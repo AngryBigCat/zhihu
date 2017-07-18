@@ -14,8 +14,7 @@ class CreateAnswersTable extends Migration
     public function up()
     {
 
-        if (!Schema::hasTable('answers')) {
-           Schema::create('answers', function (Blueprint $table) {
+        Schema::create('answers', function (Blueprint $table) {
             $table->increments('id')->comment('回答id');
             $table->text('content')->comment('回答内容');
             $table->integer('vote')->default(0)->comment('点赞');
@@ -24,15 +23,7 @@ class CreateAnswersTable extends Migration
             $table->timestamp('deleted_at')->nullable()->comment('软删除');
             $table->timestamps();
         });
-        } else {
-            Schema::table('answers', function ($table) {
-                // 添加的字段
-                // if (!Schema::hasColumn('users', 'b')) {
-                //     //
-                //     $table->string('b');
-                // }
-            });
-        }
+       
     }
 
     /**

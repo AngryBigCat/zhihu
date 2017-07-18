@@ -12,14 +12,14 @@ class CreateVotesTable extends Migration
      */
     public function up()
     {
-        // Schema::create('votes', function (Blueprint $table) {
-        //     $table->unsignedInteger('user_id');
-        //     $table->unsignedInteger('votable_id');
-        //     $table->string('votable_type')->index();
-        //     $table->enum('type', ['up_vote', 'down_vote'])->default('up_vote');
+        Schema::create('votes', function (Blueprint $table) {
+            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('votable_id');
+            $table->string('votable_type')->index();
+            $table->enum('type', ['up_vote', 'down_vote'])->default('up_vote');
 
-        //     $table->timestamps();
-        // });
+            $table->timestamps();
+        });
     }
 
     /**

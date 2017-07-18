@@ -67,7 +67,9 @@ class AnsDelListController extends Controller
                     }
                 })
             ->paginate($request->input('num',10));
-        // dd($info[0]->title);
+        if (count($info) <= 0) {
+            return redirect('/admin/answer');
+        }
         return view('admin.answer.que_anslist', ['info'=>$info,'data'=>$request->all()]);
     }
 }
