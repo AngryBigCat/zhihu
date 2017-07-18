@@ -15,16 +15,18 @@
                     <label v-show="postTitleError" class="control-label">请在标题的最后包含一个问号</label>
                     <textarea v-model="postTitle" class="postQuestion-title border-normal form-control" placeholder="问题标题"></textarea>
                 </div>
-                <div class="form-group">
+                <div class="form-group" v-bind:class="{ 'has-error': postTopicError }">
                     <!-- 已选择的话题 -->
                     <ul v-show="topicList.length != 0" class="list-unstyled list-inline tags-list" v-on:click="onRemoveTopic">
                         <li v-for="(tag, index) in topicList"><span class="label label-primary" v-bind:data-index="index">
                                 @{{ tag.text }} <i class="fa fa-close"></i></span>
                         </li>
                     </ul>
-                    <input v-model="postTopic" class="postQuestion-topic border-normal form-control" placeholder="
+
+                    <label v-show="postTopicError" class="control-label">请至少选择一个话题</label>
+                    <input v-model="selectTopic" class="postQuestion-topic border-normal form-control" placeholder="添加话题，至少1个，最多选择5个">
                     <!-- 选择话题列表 -->
-                    <ul class="topicList" v-show="searchResult.length != 0" v-on:click="onInsertTopic">
+                    <ul class="topicList list-unstyled" v-show="searchResult.length != 0" v-on:click="onInsertTopic">
                         <li v-for="topic in searchResult" v-bind:data-id="topic.id">@{{ topic.tag_name }}</li>
                     </ul>
                 </div>

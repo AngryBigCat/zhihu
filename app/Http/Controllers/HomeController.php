@@ -42,6 +42,7 @@ class HomeController extends Controller
     	// }
   
      //    return view('home.index.default',compact('id'));
+
         return view('home.index.default');
     }
 }

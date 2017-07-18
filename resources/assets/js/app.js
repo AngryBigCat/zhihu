@@ -28,6 +28,7 @@ import followerList from './components/follower-list.vue';
 let app = new Vue({
     data: {
         postTitleError: false,
+        postTopicError: false,
         postTitle: '',
         selectTopic: '',
         topicList: [],
@@ -45,10 +46,18 @@ let app = new Vue({
     },
     methods: {
         onPostQuestion() {
+            //判断提问标题有没有问号
             if (this.postTitle.search(/(\?|\uff1f)$/) === -1) {
                 this.postTitleError = true;
                 setTimeout(() => {
                     this.postTitleError = false;
+                }, 2000);
+                return false;
+            }
+            if (this.topicList.length < 1) {
+                this.postTopicError = true;
+                setTimeout(() => {
+                    this.postTopicError = false;
                 }, 2000);
                 return false;
             }
