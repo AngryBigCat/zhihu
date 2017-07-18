@@ -182,81 +182,93 @@
                 <a href="javascript:;" class="tpl-user-panel-action-link"> <span class="am-icon-pencil"></span> 账号设置</a>
             </div>
         </div>
-        <!-- 菜单 -->
-        <ul class="sidebar-nav">
-            <li class="sidebar-nav-link">
-                <a href="/admin">
-                    <i class="am-icon-home sidebar-nav-link-logo"></i> 首页
-                </a>
-            </li>
+    <!-- 菜单 -->
+    <ul class="sidebar-nav">
+        <li class="sidebar-nav-link">
+            <a href="/admin">
+                <i class="am-icon-home sidebar-nav-link-logo"></i> 首页
+            </a>
+        </li>
+        <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title active"> <i
+                        class="am-icon-table sidebar-nav-link-logo"></i> 用户管理 </a>
+            <ul class="sidebar-nav sidebar-nav-sub">
+                <li class="sidebar-nav-link"><a class="sub-active" href="{{ url('admin/user') }}"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户列表 </a></li>
+                <li class="sidebar-nav-link">
+                    <a class="sub-active" href="{{ route('user.delList') }}"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 删除的用户 </a>
+                </li>
+                <li class="sidebar-nav-link">
+                    <a href="{{ url('admin/user/create') }}"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户增加 </a></li>
+            </ul>
+        </li>
+        <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
+                        class="am-icon-wpforms sidebar-nav-link-logo"></i> 话题管理 </a>
+            <ul class="sidebar-nav sidebar-nav-sub">
+                <li class="sidebar-nav-link"><a href="/admin/listtopic"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 话题列表 </a></li>
+                <li class="sidebar-nav-link"><a href="/admin/topiccreate"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 话题增加 </a></li>
+            </ul>
+        </li>
+        <li id="question" class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
+                        class="am-icon-clone sidebar-nav-link-logo"></i> 问题管理 </a>
+            <ul class="sidebar-nav sidebar-nav-sub">
+                <li id="listQuestion" class="sidebar-nav-link"><a href="{{route('listQuestion')}}"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 问题列表 </a></li>
+            </ul>
+        </li>
+        <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
+                        class="am-icon-wpforms sidebar-nav-link-logo"></i> 回答管理 </a>
+            <ul class="sidebar-nav sidebar-nav-sub">
+                <li class="sidebar-nav-link"><a href="/admin/answer"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 回答列表 </a></li>
+                <li class="sidebar-nav-link"><a href="/admin/del_answer"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 删除的回答 </a></li>
+            </ul>
+        </li>
+        <li id="found" class="sidebar-nav-link">
+            <a href="javascript:;" class="sidebar-nav-sub-title">
+                <i class="am-icon-key sidebar-nav-link-logo"></i> 发现管理
+            </a>
+            <ul class="sidebar-nav sidebar-nav-sub">
+                <li id="listFound" class="sidebar-nav-link"><a href="{{route('listFound')}}"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现列表 </a></li>
+            </ul>
+        </li>
+        <li id="collect" class="sidebar-nav-link">
+            <a href="javascript:;" class="sidebar-nav-sub-title">
+                <i class="am-icon-star sidebar-nav-link-logo"></i> 收藏管理
+            </a>
+            <ul class="sidebar-nav sidebar-nav-sub">
+                <li id="listCollect" class="sidebar-nav-link"><a href="{{route('listCollect')}}"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 收藏列表 </a></li>
+            </ul>
+        </li>
+        <li id="AD" class="sidebar-nav-link">
+            <a href="javascript:;" class="sidebar-nav-sub-title">
+                <i class="am-icon-envira sidebar-nav-link-logo"></i> 广告管理
+            </a>
+            <ul class="sidebar-nav sidebar-nav-sub">
+                <li id="listAD" class="sidebar-nav-link"><a href="{{route('listAD')}}"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 广告列表 </a></li>
+                <li id="adAdd" class="sidebar-nav-link"><a href="{{route('adAdd')}}"> <span
+                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 广告添加 </a></li>
+            </ul>
+        </li>
+    </ul>
 
-            <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title active"> <i
-                            class="am-icon-table sidebar-nav-link-logo"></i> 用户管理 </a>
-                <ul class="sidebar-nav sidebar-nav-sub">
-                    <li class="sidebar-nav-link"><a class="sub-active" href="{{ url('admin/user') }}"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户列表 </a></li>
-                    <li class="sidebar-nav-link">
-                        <a class="sub-active" href="{{ route('user.delList') }}"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 删除的用户 </a>
-                    </li>
-                    <li class="sidebar-nav-link">
-                        <a href="{{ url('admin/user/create') }}"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户增加 </a></li>
-                </ul>
-            </li>
+</div>
+<!-- 内容区域 -->
+<div class="tpl-content-wrapper">
+    @yield('content')
+</div>
 
-            <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
-                            class="am-icon-wpforms sidebar-nav-link-logo"></i> 话题管理 </a>
-                <ul class="sidebar-nav sidebar-nav-sub">
-                    <li class="sidebar-nav-link"><a href="/admin/listtopic"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 话题列表 </a></li>
-                    <li class="sidebar-nav-link"><a href="/admin/topiccreate"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 话题增加 </a></li>
-                </ul>
-            </li>
-
-            <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
-                            class="am-icon-clone sidebar-nav-link-logo"></i> 问题管理 </a>
-                <ul class="sidebar-nav sidebar-nav-sub">
-                    <li class="sidebar-nav-link"><a href="table-list.html"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 问题列表 </a></li>
-                    <li class="sidebar-nav-link"><a href="table-list-img.html"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 问题增加 </a></li>
-                </ul>
-            </li>
-
-            <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
-                            class="am-icon-key sidebar-nav-link-logo"></i> 发现管理 </a>
-                <ul class="sidebar-nav sidebar-nav-sub">
-                    <li class="sidebar-nav-link"><a href="table-list.html"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现列表 </a></li>
-                    <li class="sidebar-nav-link"><a href="table-list-img.html"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现增加 </a></li>
-                </ul>
-            </li>
-
-            <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
-                            class="am-icon-wpforms sidebar-nav-link-logo"></i> 回答管理 </a>
-                <ul class="sidebar-nav sidebar-nav-sub">
-                    <li class="sidebar-nav-link"><a href="/admin/answer"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 回答列表 </a></li>
-                    <li class="sidebar-nav-link"><a href="/admin/del_answer"> <span
-                                    class="am-icon-angle-right sidebar-nav-link-logo"></span> 删除的回答 </a></li>
-                </ul>
-            </li>
-
-        </ul>
-
-    </div>
-    <!-- 内容区域 -->
-    <div class="tpl-content-wrapper">
-        @yield('content')
-    </div>
-
-    <script src="/admins/js/amazeui.min.js"></script>
-    <script src="/admins/js/amazeui.datatables.min.js"></script>
-    <script src="/admins/js/dataTables.responsive.min.js"></script>
-    <script src="/admins/js/app.js"></script>
-    @yield('script')
+<script src="/admins/js/amazeui.min.js"></script>
+<script src="/admins/js/amazeui.datatables.min.js"></script>
+<script src="/admins/js/dataTables.responsive.min.js"></script>
+<script src="/admins/js/app.js"></script>
+@yield('script')
 </body>
 </html>

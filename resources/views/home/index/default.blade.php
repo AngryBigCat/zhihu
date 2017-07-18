@@ -318,8 +318,8 @@
     </div>
     <div class="col-md-4">
         <ul class="list-group">
-            <a href="#" class="list-group-item"><span class="fa fa-folder-o"></span> 我的收藏</a>
-            <a href="#" class="list-group-item"><span class="fa fa-check-square-o"></span> 我关注的问题</a>
+            <a href="{{route('collect.collections')}}" class="list-group-item"><span class="fa fa-folder-o"></span> 我的收藏</a>
+            <a href="{{route('collect.following')}}" class="list-group-item"><span class="fa fa-check-square-o"></span> 我关注的问题</a>
             <a href="#" class="list-group-item"><span class="fa fa-file-o"></span> 邀请我回答的问题</a>
         </ul>
         <ul class="list-group">

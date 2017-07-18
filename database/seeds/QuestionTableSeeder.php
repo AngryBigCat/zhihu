@@ -11,16 +11,18 @@ class QuestionTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('users')->insert([
-            'name' => 'AngryCat',
-            'email' => 'angrycat123@163.com',
-            'password' => bcrypt('123456'),
-        ]);
-        DB::table('questions')->insert([
-            'user_id' => 1,
-            'title' => '怎样看待冯小刚吐槽现在的年轻演员娘？',
-            'topic' => '1,2,3,4,5',
-            'describe' => '喂喂，你先想一想电影里异形为什么那么厉害? 异形在飞船，里，啊! 你想想一只老虎跑进坦克里，坦克里能活下来几个人? 那么问题来了，老虎能打过坦克么？ 最后，对于甲壳类，我是向来支持清蒸的，看它头那么长蟹黄一定很多吧? '
-        ]);
+        $data = [];
+        for($i=0;$i<50;$i++){
+            $tmp = [];
+            $tmp['user_id'] = rand(1,20);
+            $tmp['tag_id'] = rand(1,20);
+            $tmp['title'] = '神回复'.($i+1);
+            $tmp['describe'] = '额监考老师按时吃阿达额驸案件案发啊啊放假阿卡发咖啡机啊积分卡积分加快分解开关机';
+            $tmp['qs_img'] = '/img/avatar04.png';
+            $tmp['topic'] = '1,2,3,4,5';
+            $tmp['visit_count'] = rand(100,1000);
+            $data[]=$tmp;
+        }
+        DB::table('questions')->insert($data);
     }
 }
