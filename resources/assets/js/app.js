@@ -132,22 +132,3 @@ let app = new Vue({
         followerList
     }
 }).$mount('#app');
-
-/*
-
-var editor = new E('#toolbar', '#editor');
-//配置编辑区域的 z-index
-editor.customConfig.zIndex = 0;
-// 自定义菜单配置
-editor.customConfig.menus = [
-    'bold',  // 粗体
-    'italic',  // 斜体
-    'head',  // 标题
-    'quote',  //  引用
-    'code',  // 插入代码
-    'list',  // 列表
-    'emoticon',  // 表情
-    'image',  // 插入图片
-    'video',  // 插入视频
-];
-editor.create();*/
