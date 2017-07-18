@@ -38,7 +38,12 @@ Route::get('question/{id}/followers', 'QuestionController@getFollowersByQuestion
 Route::get('question/{id}/mostthumb', 'QuestionController@mostThumbSort');
 Route::get('question/{id}/latest', 'QuestionController@latestSort');
 Route::get('question/{id}/oldest', 'QuestionController@oldestSort');
+
+//提问时添加话题弹出的话题列表
 Route::get('search/topic/{key?}', 'SearchController@topicSearch');
+//测试路由
+Route::get('search/topic/{key?}/insert', 'SearchController@testInsertTopic');
+
 
 
 

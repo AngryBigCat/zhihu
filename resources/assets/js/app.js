@@ -24,14 +24,15 @@ import followerList from './components/follower-list.vue';
 
 const app = new Vue({
     data: {
-        modelTopic: '',
+        postTitle: '',
+        postTopic: '',
         searchResult: [],
         topicList: [],
     },
     watch: {
-      modelTopic(nV) {
-          this.getTopics(nV);
-      }
+        postTopic(newValue) {
+            this.getTopics(newValue);
+        }
     },
     mounted() {
         $('#author-follower').on('hidden.bs.modal', (event) => {
@@ -39,8 +40,12 @@ const app = new Vue({
         }, 1000);
     },
     methods: {
+        onPostQuestion() {
+
+        },
         onRemoveTopic(event) {
-             conosole.log(event);
+            let index = event.target.dataset.index;
+            this.topicList.splice(index, 1);
         },
         onInsertTopic(event) {
             let id = event.target.dataset.id,

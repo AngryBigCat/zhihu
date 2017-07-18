@@ -52435,13 +52435,14 @@ window.E = __webpack_require__("./node_modules/_wangeditor@3.0.3@wangeditor/rele
 
 var app = new Vue({
     data: {
-        modelTopic: '',
+        postTitle: '',
+        postTopic: '',
         searchResult: [],
         topicList: []
     },
     watch: {
-        modelTopic: function modelTopic(nV) {
-            this.getTopics(nV);
+        postTopic: function postTopic(newValue) {
+            this.getTopics(newValue);
         }
     },
     mounted: function mounted() {
@@ -52453,8 +52454,10 @@ var app = new Vue({
     },
 
     methods: {
+        onPostQuestion: function onPostQuestion() {},
         onRemoveTopic: function onRemoveTopic(event) {
-            conosole.log(event);
+            var index = event.target.dataset.index;
+            this.topicList.splice(index, 1);
         },
         onInsertTopic: function onInsertTopic(event) {
             var id = event.target.dataset.id,
