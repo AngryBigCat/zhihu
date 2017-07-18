@@ -188,9 +188,12 @@
 	       <li class="sidebar-nav-link"> <a href="table-list-img.html"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 发现增加 </a> </li> 
      	</ul> 
     </li> 
-
+    <li class="sidebar-nav-link"> <a href="javascript:;" class="sidebar-nav-sub-title"> <i class="am-icon-tv sidebar-nav-link-logo"></i> 评论管理  </a> 
+        <ul class="sidebar-nav sidebar-nav-sub"> 
+         <li class="sidebar-nav-link"> <a href="/admin/commentlist"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 评论列表 </a> </li> 
+      </ul> 
+    </li> 
     </ul> 
-
    </div> 
    <!-- 内容区域 --> 
    <div class="tpl-content-wrapper">
