@@ -17,6 +17,7 @@ class CreateQuestionsTable extends Migration
             $table->increments('id')->comment('问题id');
             $table->integer('user_id')->comment('用户id');
             $table->char('title',50)->comment('问题标题');
+            $table->char('qs_img')->nullable()->comment('问题插图');
             $table->text('describe')->nullable()->comment('问题描述');
             $table->integer('visit_count')->default(0)->comment('问题浏览数');
             $table->softDeletes()->comment('软删除');

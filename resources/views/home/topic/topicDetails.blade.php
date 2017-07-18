@@ -1,4 +1,5 @@
 @extends('home.layouts.default')
+@section('title', '话题详情')
 @section('style')
   <style>
       .foot{
@@ -63,7 +64,16 @@
           border-bottom:1px solid #CCCCCC;
           /*background:red;*/
         }
-        
+        .huida_quanbu{
+                width:584px;
+                height:100px;
+                float:left;
+                overflow: hidden;
+                text-overflow: ellipsis;     
+          }
+          .allanswer{
+                float: right;
+          }
         .huati-biaoti-zuo {
           margin-top:-5px;
           float:left;
@@ -358,6 +368,9 @@
         .zihuati-lianjie a {
           font-size:12px;
         }
+         .xiaoshou{
+                 cursor:pointer;
+            }
   </style>
 @endsection
 @section('content')
@@ -390,16 +403,50 @@
             <div class="clearfix"></div>
                 <!-- 内容 -->
             <div class="tab-content">               
-                 @foreach($res as $value)
+                 @foreach($res as $key=>$value)
                   <div class="huati-neirong">
                         <a href="" class="huati-content-a">{{$value->title}}</a><br>
-                        <a href="" class="huati-content-b">{{$data[$value->id]['vote_count']}}</a>&nbsp;
-                        <a href="" class="huati-content-c topicname">{{$data[$value->id]['name']}}</a>&nbsp;&nbsp;
-                        <span class="huati-content-d">{{$data[$value->id]['a_word']}}</span>
-
-                        <div class="huati-wenzahng">                  
-                                    <p>{{$data[$value->id]['content']}}<a href="">显示全部</a></p>           
+                        @if(isset($data[$value->id]['content']))
+                        <a href="" class="huati-content-b">
+                         @if(!isset($data[$value->id]['vote_count']))
+                                此回答无赞
+                          @else   
+                                {{$data[$value->id]['vote_count']}}赞
+                          @endif
+                        </a>&nbsp;
+                        <a href="" class="huati-content-c topicname">
+                        @if(!isset($data[$value->id]['name']))
+                              匿名用户回答
+                        @else   
+                              {{$data[$value->id]['name']}}
+                        @endif
+                        </a>&nbsp;&nbsp;
+                        <span class="huati-content-d">
+                         @if(!isset($data[$value->id]['a_word']))
+                              用户暂无签名
+                         @else
+                               {{$data[$value->id]['a_word']}}
+                         @endif
+                        </span>
+                        @if(!isset($data[$value->id]['created_at']))
+                               
+                        @else   
+                              {{$data[$value->id]['created_at']}}
+                        @endif
+                        <div class="huati-wenzahng">
+                             <div class="huida_quanbu">
+                               @if(!isset($data[$value->id]['content']))     
+                                    此问题暂时无人回答
+                               @else
+                                    {{$data[$value->id]['content']}}
+                               @endif
+                              </div>
+                                    <div class="allanswer">&nbsp;&nbsp;<a href="">显示全部</a></div>
+                             
                         </div>
+                @else
+                   此问题暂时无人回答                     
+                @endif
                         <div class="huati-wenzhang-lianjie">
                               <a style="cursor:pointer">
                                   <i class="z-icon-follow"></i>
@@ -412,15 +459,9 @@
                                   </span>
                                   
                               </a>&nbsp;
-                              <a href="">
+                              <a class="xiaoshou" v-on:click="onToggleComment({{ $key }})">
                                     <i class="z-icon-comment"></i>
-                                    <span>666条评论</span>
-                                    <span></span>
-                              </a>&nbsp;
-                              <a href="" class="Hidelink">
-                                    <i class="z-icon-thank"></i>
-                                    <span>感谢</span>
-                                    <span></span>
+                                    <span>添加评论</span>
                               </a>&nbsp;
                               <a href="" class="Hidelink">
                                     <i class="z-icon-share"></i>
@@ -432,18 +473,14 @@
                                     <span>收藏</span>
                                     <span></span>
                               </a>
-                              <a href="" class="Hidelink">
-                                    <span class="zg-bull">•&nbsp;</span>
-                                    <span>举报</span>
-                                    <span></span>
-                              </a>
-                              <a href="">
-                                    <span class="zg-bull">•&nbsp;</span>
-                                    <span>禁止转载</span>
-                                    <span></span>
-                              </a>
+                              
                         </div>
                   </div>
+                        @if(!isset($data[$value->id]['id']))
+                               
+                        @else   
+                             <comment-list parent-id="{{ $data[$value->id]['id'] }}" ref="{{ $key }}"></comment-list>
+                        @endif
                   @endforeach           
               </div>
           </div>

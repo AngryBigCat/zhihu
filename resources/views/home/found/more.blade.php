@@ -34,7 +34,7 @@
 					      <img class="media-object" src="/{{$v->qs_img}}" alt="..." width="200px">
 					    </a>
 						<span class="pull-right">
-							{{$v->content}}
+							{{$v->describe}}
 						</span>
 				    </div>
 				  </div>

@@ -1,4 +1,5 @@
 @extends('home.layouts.default')
+@section('title', '话题动态')
 @section('style')
     <style>
         .foot {
@@ -232,6 +233,7 @@
                                     @endif
                                 </a>
                             </div>
+                       
                             @for ($i = 0; $i < 3; $i++)
                                 <div class="huati-guanzhu-d">
                                     <a href="" target="_blank">{{$v->question[$i]->title}}</a>

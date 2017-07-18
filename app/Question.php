@@ -13,7 +13,7 @@ class Question extends Model
     use CanBeFollowed, CanBeSubscribed;
 
     //可写入的字段
-    protected $fillable = ['user_id', 'title', 'topic', 'describe'];
+    protected $fillable = ['user_id', 'title', 'describe'];
 
     /**
      * 问题关联的评论
@@ -39,6 +39,23 @@ class Question extends Model
     public function answers()
     {
         return $this->hasMany('App\Answer');
+    }
+
+    /**
+     * 问题关联的话题
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function tags()
+    {
+        return $this->belongsToMany('App\Tag');
+    }
+
+    /**
+     *
+     */
+    public function saveToTag($topic_ids)
+    {
+        return $this->tags()->attach($topic_ids);
     }
 
     /**

@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
 
         session_start();
 
-        View::composer('home.people.*', function($view) {
+        View()->composer('home.people.*', function($view) {
             $people = new PeopleController();
 
             // 获取当前登录用户的信息

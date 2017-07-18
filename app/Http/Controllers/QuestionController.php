@@ -22,7 +22,11 @@ class QuestionController extends Controller
         $data['user_id'] = Auth::user()->id;
         $question = Question::create($data);
         if ($question) {
-            return route('question.show', $question->id);
+            $question->tags()->attach($data['topic_ids']);
+            return [
+                'msg' => '问题添加成功',
+                'redirect_url' => route('question.show', $question->id)
+            ];
         }
     }
 
