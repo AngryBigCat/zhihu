@@ -2,7 +2,7 @@
 
 @section('title', '话题修改')
 
-@section('')
+@section('content')
 <div class="container-fluid am-cf">
     <div class="row"> 
    	    <div class="am-u-sm-12 am-u-md-12 am-u-lg-12"> 

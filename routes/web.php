@@ -275,6 +275,16 @@ Route::group(['prefix'=>'admin', 'middleware' => 'adminLogin'], function() {
 //后台首页
 Route::get('/admin','admin\AdminController@index');
 
+//后台评论
+Route::group([], function(){
+    //评论列表
+    Route::get('/admin/commentlist','admin\CommentController@index');
+    //评论删除
+    Route::get('/admin/commentdelete/{id}','admin\CommentController@delete');
+    //评论修改
+    Route::post('/admin/commentmodify/{id}','admin\CommentController@modify');
+    
+});
 // 后台话题
 Route::group([], function(){
     //话题列表
@@ -307,6 +317,7 @@ Route::group([], function(){
     Route::get('topicTime/{id}','TopicController@topicTime');
     //关注发送ajax
     Route::get('/ajaxd','TopicController@ajaxd');
+
     Route::POST('/ajaxs','TopicController@ajaxs');
     
 });
