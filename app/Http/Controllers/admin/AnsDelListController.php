@@ -48,4 +48,26 @@ class AnsDelListController extends Controller
             return back()->with('info', '删除失败');
         }
     }
+
+
+    /**
+     * 某个问题下的所有回答
+     */
+    public function que_anslist(Request $request, $id)
+    {   
+        $keywords = $request->keywords;
+        $info = \App\Answer::join('users', 'users.id', '=', 'answers.user_id')
+            ->join('questions', 'questions.id', '=', 'answers.question_id')
+            ->whereNull('answers.deleted_at')
+            ->where('answers.question_id', $id)
+            ->select('answers.*','users.name', 'users.id as uid','questions.title')
+            ->where(function($query)use($keywords){
+                if (!empty($keywords)) {
+                        $query->where('answers.content','like','%'.$keywords.'%');
+                    }
+                })
+            ->paginate($request->input('num',10));
+        // dd($info[0]->title);
+        return view('admin.answer.que_anslist', ['info'=>$info,'data'=>$request->all()]);
+    }
 }

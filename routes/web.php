@@ -171,4 +171,6 @@ Route::group(['prefix'=>'admin', 'middleware' => 'adminLogin'], function() {
     Route::get('rec_answer/{id}', 'admin\AnsDelListController@rec_answer')->name('answer.rec_answer');
     // 彻底删除回答数据
     Route::get('del_answer/{id}', 'admin\AnsDelListController@del_answer');
+    // 某个问题下的所有回答
+    Route::get('que_anslist/{id}', 'admin\AnsDelListController@que_anslist');
 });

@@ -73,7 +73,7 @@
                                 <tr class="even gradeC">
                                     <td class="am-text-middle">{{ $val->id }}</td>
                                     <td class="am-text-middle">{{ $val->name }}({{ $val->uid }})</td> 
-                                    <td class="am-text-middle">{{ $val->title }}</td>
+                                    <td class="am-text-middle"><a href="/admin/que_anslist/{{ $val->question_id }}">{{ $val->title }}</a></td>
                                     <td class="am-text-middle content"><span>{{ $val->content }}</span><input type="text" value="{{$val->content}}" name="content"></td>
                                     <td class="am-text-middle">
                                         <div class="tpl-table-black-operation">

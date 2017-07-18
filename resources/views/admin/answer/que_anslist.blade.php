@@ -1,6 +1,6 @@
 @extends('admin.index')
 
-@section('title', '回答软删除列表')
+@section('title', '回答列表')
 
 @section('css')
     <style type="text/css">
@@ -15,9 +15,6 @@
             color:yellowgreen;
             margin-left:300px;
         }
-        .btn-huanyuan, .btn-del{
-            float:left;
-        }
     </style>
 
 @endsection
@@ -28,7 +25,7 @@
         <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
             <div class="widget am-cf">
                 <div class="widget-head am-cf">
-                    <div class="widget-title  am-cf">回答列表</div>
+                    <div class="widget-title  am-cf"><span style="font-weight:700;color:yellowgreen">{{ $info[0]->title }}</span> 的回答列表</div>
                     <span style="color:red"></span>
                 </div>
                 <div class="widget-body  am-fr">
@@ -76,16 +73,17 @@
                                 <tr class="even gradeC">
                                     <td class="am-text-middle">{{ $val->id }}</td>
                                     <td class="am-text-middle">{{ $val->name }}({{ $val->uid }})</td> 
-                                    <td class="am-text-middle">{{ $val->title }}</td>
-                                    <td class="am-text-middle content"><span>{{ $val->content }}</span></td>
+                                    <td class="am-text-middle"><a href="">{{ $val->title }}</a></td>
+                                    <td class="am-text-middle content"><span>{{ $val->content }}</span><input type="text" value="{{$val->content}}" name="content"></td>
                                     <td class="am-text-middle">
                                         <div class="tpl-table-black-operation">
-                                            <a href="/admin/rec_answer/{{$val->id}}">
-                                                <i class="am-icon-pencil"></i> 还原
-                                            </a>
-                                            <a href="/admin/del_answer/{{$val->id}}" class="tpl-table-black-operation-del">
+                                        <form action="/admin/answer/{{ $val->id }}" method="post">
+                                            {{ csrf_field() }}
+                                            {{ method_field('DELETE') }}
+                                            <button type="submit" class="am-btn-danger">
                                                 <i class="am-icon-trash"></i> 删除
-                                            </a>
+                                            </button>
+                                        </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -105,8 +103,42 @@
 
 @section('script')
     <script type="text/javascript">
+       
+        // ajax更改回答内容
         setTimeout(function() {
-            $('.info').fadeOut(1000);
-        },1500);
+            $('.info').fadeOut(1500);
+        },2000);
+        $('.gradeC .content').dblclick(function() {
+            $(this).find('span').css('display','none');
+            $(this).find('input[name="content"]').css('display','block');
+            $(this).find('input[name="content"]').focus();
+        });
+        $('input[name="content"]').blur(function() {
+            var info = $('.info');
+            var _this = $(this);
+            var val = $(this).val();
+            var ans_id = $(this).parents('.gradeC').find('td:first').html();
+            $.ajax({
+                url : '/admin/answer/'+ans_id,
+                type: 'PUT',
+                data: {
+                    'content' : val,
+                    '_token' : '{{ csrf_token() }}'
+                },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.status == '0') {
+                        _this.css('display','none');
+                        _this.prev('span').css('display','block');
+                        _this.prev('span').html(val);
+                        info.html(data.msg).fadeIn(1500).fadeOut(1500);
+                    } else {
+                        _this.css('display','none');
+                        _this.prev('span').css('display','block');
+                        info.html(data.msg).addClass('color','red').fadeIn(1500).fadeOut(1500);
+                    } 
+                }
+            });
+        });
     </script>
 @endsection
