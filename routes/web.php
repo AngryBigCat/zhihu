@@ -39,11 +39,9 @@ Route::get('/admin/topiccreate',function(){
 Route::any('/admin/listFound','admin\ListFoundController@index')->name('listFound');
 // ajax更新数据
 // Route::get('/amin/listAjax','admin\ListFoundController@index_ajax');
-
 // 发现列表编辑
 Route::any('/admin/edit/{id}/{pag}','admin\ListFoundController@edit')->name('found_edit');
 Route::post('/admin/edit','admin\ListFoundController@do_edit')->name('edit');
-
 // 发现列表删除
 Route::any('admin/del/{id}/{pag}','admin\ListFoundController@del');
 // ajax更新图片
@@ -51,13 +49,22 @@ Route::any('admin/found/ajax','admin\ListFoundController@ajax')->name('found_aja
 
 // 后台问题
 Route::get('admin/listQuestion','admin\ListQuestionController@index')->name('listQuestion');
+
 // 后台收藏
 Route::get('admin/listCollect','admin\ListCollectController@index')->name('listCollect');
 // 收藏修改
 Route::get('admin/colEdit/{id}','admin\ListCollectController@edit');
 Route::post('admin/colEdit','admin\ListCollectController@do_edit')->name('colEdit');
+// 收藏删除
+Route::get('admin/colDel/{id}','admin\ListCollectController@del');
+
 // 后台广告
+Route::get('admin/adAdd','admin\ListAdvertisementController@adAdd')->name('adAdd');
+Route::post('admin/adAdd','admin\ListAdvertisementController@do_adAdd')->name('doAdd');
+Route::post('admin/AD','admin\ListAdvertisementController@editAjax');//ajax更新广告地址
+Route::post('admin/ad/ajax','admin\ListAdvertisementController@ajax');// ajax更新图片
 Route::get('admin/listAD','admin\ListAdvertisementController@index')->name('listAD');
+Route::get('admin/adDel/{id}','admin\ListAdvertisementController@del');
 
 //问题页
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');

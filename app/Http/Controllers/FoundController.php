@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\question_collect;
 use App\Collect;
+use App\Advertisement;
 
 class FoundController extends Controller
 {
@@ -58,6 +59,10 @@ class FoundController extends Controller
             $aa=rand(1,$collect->count()-5);
             $collects = $collect->select('name','id')->where('id','>',$aa)->take(5)->get();
             // dd($res);
+        // 随机广告
+            $ad = new Advertisement;
+            $id = rand(1,$ad->count());
+            $AD = $ad -> select('url','img')->where('id',$id)->first();
         // 返回发现页面
    		return view('home.found.ritui',[
             'questions' => $questions,
@@ -65,6 +70,7 @@ class FoundController extends Controller
             'dayHot' => $dayHot,
             'question_ids' => $question_ids,
             'collects' => $collects,
+            'AD' => $AD,
             'myCollects'=>$myCollects
             ]);
     }
@@ -98,7 +104,14 @@ class FoundController extends Controller
         $authId= Auth::user()->id;
         $collect = new Collect;
         $myCollects = $collect->select('name', 'id')->where('user_id',$authId)->get();
-
+        // 热门收藏
+            // SELECT * FROM table_name ORDER BY rand() LIMIT 5;
+            $aa=rand(1,$collect->count()-5);
+            $collects = $collect->select('name','id')->where('id','>',$aa)->take(5)->get();
+        // 随机广告
+            $ad = new Advertisement;
+            $id = rand(1,$ad->count());
+            $AD = $ad -> select('url','img')->where('id',$id)->first();
         // 登录用户已经关注的问题id
         $tagss = \App\User::find($authId)->followings(\App\Question::class)->get();
             $question_ids = [];
@@ -110,6 +123,8 @@ class FoundController extends Controller
             'questions' => $questions,
             'titles' => $titles,
             'monthHot'=> $monthHot,
+            'collects' => $collects,
+            'AD' => $AD,
             'question_ids' => $question_ids,
             'myCollects'=>$myCollects
             ]);

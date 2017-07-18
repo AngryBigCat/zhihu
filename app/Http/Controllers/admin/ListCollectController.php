@@ -53,32 +53,38 @@ class ListCollectController extends Controller
     {
     	//表单验证  unique唯一
         $this->validate($request, [
-            'name' => 'required',
-            'created_at' => 'required',
-            'topic' =>'required',
+            'name' => 'required|max:60'
             ],[
-            'title.required' => 'sorry！您还未写下您的问题',
-            'title.unique' => 'sorry！您的问题已存在',
-            'create_at.required' => 'sorry！您需要给定一个提问时间',
-            'topic.required' => 'sorry！您需要给您的问题选一个类别'
+            'name.required' => 'sorry！您还未写下您的收藏夹名字',
+            'name.max' => 'sorry！您的名字太长了'
             ]);
 
-        $questions = questions::findOrFail($request->id);
-        $questions -> title = $request->title;
-        $questions -> updated_at = time();
-        $questions -> created_at = $request->created_at;
-        $questions -> topic = $request->topic;
-        $questions -> describe = $request->describe;
+        $col = Collect::findOrFail($request->id);
+        $col -> name = $request->name;
+        $col -> created_at = $request->created_at;
+        $col -> intro = $request->describe;
         // 更新数据库
         // dd($request->pag);
-        if($questions->save()) {
-            if ($request->pag=='qus') {
-                return redirect(route('listQuestion'))->with('info','更新成功');
-            }else{
-                return redirect(route('listFound'))->with('info','更新成功');
-            }
+        if($col->save()) {
+            return redirect(route('listCollect'))->with('info','更新成功');
         }else{
             return back()->with('info','更新失败');
+        }
+    }
+
+     /**
+     * 后台模块中的收藏列表数据的删除
+     *  
+     * @return \Illuminate\Http\Response
+     */
+    public function del(Request $request,$id)
+    {
+        $res = Collect::find($id);
+        // dd($res);
+        if($res->delete()) {
+            return redirect(route('listCollect'))->with('info','删除成功');
+        }else{
+            return back()->with('info','删除失败!!!');
         }
     }
 }

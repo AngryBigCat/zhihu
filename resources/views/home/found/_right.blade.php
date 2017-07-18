@@ -1,7 +1,7 @@
 <div class="col-md-4 right">
 	<!-- src="/img/default-50x50.gif" alt="" -->
-		<a href="http://www.bmw.com.cn/zh/all-models/5-series/sedan/2017/campaign.html?bmw=dis:G38lau:G30:p_zhihu_17-q2-g38-pd-g38_cm_ba_jxbn&mz_ca=2051217&mz_sp=778EM&mz_sb=1#tab-0&bookmark=aHR0cDovL3d3dy5ibXcuY29tLmNuL2NvbnRlbnQvZGFtL2Jtdy9tYXJrZXRDTi9jb21tb24vYWxsLW1vZGVscy81LXNlcmllcy9zZWRhbi8yMDE2L2FkZG9ucy9hZGFwdGl2ZS1sZWQtaGVhZGxpZ2h0cy9pbmRleC5odG1sP2NvbnRlbnQ9L2NvbnRlbnQvZGFtL2Jtdy9tYXJrZXRDTi9jb21tb24vYWxsLW1vZGVscy81LXNlcmllcy9zZWRhbi8yMDE2L2FkZG9ucy9hZGFwdGl2ZS1sZWQtaGVhZGxpZ2h0cy9jb250ZW50X3poLmpzb24=" target="_blank" class="guanggao">
-			<div class="alert alert-warning alert-dismissible fade in " role="alert" style="background: url('/img/12.jpg');background-repeat: no-repeat; ">
+		<a href="{{$AD->url}}" target="_blank" class="guanggao">
+			<div class="alert alert-warning alert-dismissible fade in " role="alert" style="background: url('{{ltrim($AD->img,'.')}}');background-repeat: no-repeat; ">
 			    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 		    </div>
 		</a>

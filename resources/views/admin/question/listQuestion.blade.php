@@ -29,7 +29,7 @@
                                 </div>
                             </div>
                         </div>
-                        <form action="{{route('listFound')}}">
+                        <form action="{{route('listQuestion')}}">
                         <div class="am-u-sm-12 am-u-md-6 am-u-lg-3">
                             <div  class="am-form-group tpl-table-list-select">
                                 <select id="select" size="1" name="num" data-am-selected="{btnSize: 'sm'}">

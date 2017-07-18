@@ -30,7 +30,7 @@
                         <label for="user-name" class="am-u-sm-3 am-form-label">收藏夹名字 <span class="tpl-form-line-small-title">name</span></label>
                         <div class="am-u-sm-9">
                             <input type="text" class="tpl-form-input"  name="name" value="{{$res->name}}" placeholder="请输入收藏夹名字">
-                            <small>请填写10-20字左右文字。</small>
+                            <small>请填写少于20字左右文字。</small>
                         </div>
                     </div>
                     <div class="am-form-group">

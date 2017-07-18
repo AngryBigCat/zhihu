@@ -203,6 +203,7 @@
     </a> 
         <ul class="sidebar-nav sidebar-nav-sub"> 
          <li id="listAD" class="sidebar-nav-link"> <a href="{{route('listAD')}}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 广告列表 </a> </li> 
+         <li id="adAdd" class="sidebar-nav-link"> <a href="{{route('adAdd')}}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 广告添加 </a> </li> 
       </ul> 
     </li> 
 
