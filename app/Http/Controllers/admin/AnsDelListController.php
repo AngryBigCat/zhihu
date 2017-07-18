@@ -23,7 +23,6 @@ class AnsDelListController extends Controller
                     }
                 })
             ->paginate($request->input('num',10));
-            // dd($info);
         return view('admin.answer.del_answer', ['info'=>$info, 'data'=>$request->all()]);
     }
 
@@ -42,6 +41,7 @@ class AnsDelListController extends Controller
     public function del_answer($id)
     {
         $answer =\App\Answer::onlyTrashed()->where('id', $id)->first();
+
         if ($answer->forceDelete()) {
             return back()->with('info', '删除成功');
         } else {
