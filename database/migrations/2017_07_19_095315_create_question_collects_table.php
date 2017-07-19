@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateQuestionCollectTable extends Migration
+class CreateQuestionCollectsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateQuestionCollectTable extends Migration
      */
     public function up()
     {
-        Schema::create('question_collect', function (Blueprint $table) {
+        Schema::create('question_collects', function (Blueprint $table) {
             $table->integer('question_id')->comment('问题id');
             $table->integer('collect_id')->comment('收藏夹id');
             $table->timestamps();
@@ -27,6 +27,6 @@ class CreateQuestionCollectTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('question_collect');
+        Schema::dropIfExists('question_collects');
     }
 }

@@ -56,7 +56,7 @@
 		 <!-- 标题 start -->
 		 <div class="section-title">
 		 	我关注的问题
-		 	<span>（3）</span>
+		 	<span>（{{ Auth::user()->followings( \App\Question::class )->count() }}）</span>
 		 </div>
 		 <!-- 标题 END -->
 		@foreach($qus as $v)

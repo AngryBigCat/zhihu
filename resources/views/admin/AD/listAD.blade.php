@@ -10,26 +10,7 @@
         text-align: center;
         border-radius: 5px;
     }
-    .dbl{
-        display: block;
-        width: 100%;
-        padding: 6px 12px;
-        line-height: 1.42857;
-        background-color: #fff;
-        background-image: none;
-        background: 0 0;
-        text-indent: .5em;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        -o-border-radius: 0;
-        border-radius: 0;
-        color: #fff;
-        box-shadow: none;
-        padding-left: 0;
-        padding-right: 0;
-        font-size: 14px;
-        margin-top: 95px;
-        display: none;
-    }
+    
 </style>
 @stop
 
@@ -84,7 +65,10 @@
                                     <tr class="gradeX">
                                         <td style="height:225px;line-height: 225px">{{$v->id}}</td>
                                         <td style="height:225px;line-height: 225px">{{$v->ad_name}}</td>
-                                        <td style="height:225px;line-height: 225px" class="address" url="{{$v->url}}"><span>{{$v->url}}</span><input type="text" class="dbl" value="{{$v->url}}" ad_id="{{$v->id}}" name="url"></td>
+                                        <td style="height:225px;line-height: 225px" class="address" url="{{$v->url}}">
+                                            <span>{{$v->url}}</span>
+                                            <input type="text" class="dbl" value="{{$v->url}}" ad_id="{{$v->id}}" name="url" style="width: 90%; padding: 6px 12px; line-height: 1.42857; background-color: #fff; background-image: none; background: 0 0; text-indent: .5em; border: 1px solid rgba(255, 255, 255, 0.2); -o-border-radius: 0; border-radius: 0; color: #fff; box-shadow: none; padding-left: 0; padding-right: 0; font-size: 14px; margin-top: 95px; display: none;">
+                                        </td>
                                         <td style="height:225px;line-height: 225px"><form action="" id="photoForm">
                                         <div class="am-form-group am-form-file" style="cursor: pointer">
                                             <img class="ad" src="{{ltrim($v->img,'.')}}" alt="广告图" width="270px" height="225px">
@@ -185,7 +169,7 @@
             processData: false,
             success: function (returndata) {
                 // $('.ad').attr('src',returndata);
-                location.reload()
+                // location.reload()
                 console.log(returndata);
             }
             // error: function (returndata) {

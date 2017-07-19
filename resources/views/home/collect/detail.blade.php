@@ -19,6 +19,7 @@
 		padding:10px 0 0 30px;
 		font-size: 12px;
 		color: #999;
+		/*border:1px solid red;*/
 	}
 	h1{
 		font-size: 30px;
@@ -34,14 +35,14 @@
 		/*border:1px solid red;*/
 		margin-top: 20px;
 		font-size: 12px;
-		height:158px;
+		height:198px;
 	}
 	.lizi a{
 		cursor: pointer;
 	}
 	.lizi>div{
 		border-bottom:1px solid #ddd;
-		height: 120px
+		height: 150px
 
 	}
 	.lizi>div>a{
@@ -62,6 +63,9 @@
 		display: inline-block;
 		display:none;
 	}
+	/*.list_retui{
+		border:1px solid red;
+	}*/
 	</style>
 @stop
 
@@ -73,7 +77,7 @@
         <!-- Nav tabs -->
         <div class="back"><i class="fa fa-angle-double-left" aria-hidden="true"></i><a href="{{route('collect.collections')}}"> 返回{{DB::table('users')->where('id',$collect->user_id)->first()->name}}的收藏 </a></div>
         <div>
-        <div style="height:50px">
+        <div style="height:50px;overflow: hidden;">
         	<h1 class="pull-left">{{$collect->name}}</h1>
     		<div class="pull-right">
         		<button class="btn btn-info follow" col_id="{{$collect->id}}" style="margin: 5px 20px 0 0">
@@ -96,13 +100,13 @@
         <div class="qus">
         @foreach($res as $v)
         	<div class="lizi">
-				<a href="#" >
+				<a href="{{route('question.show',$v->id)}}" >
 					<h5>{{$v->title}}</h5>
 				</a>
 				<div >
 					<a href="#" class="pull-left"><span class="badge" count="{{ \App\Question::find($v->id)->followers()->count() }}">{{ \App\Question::find($v->id)->followers()->count() }}</span></a>
 					<div class="pull-left">
-						<a id="name" href="#">{{$v->name}}</a>
+						<a id="name" href="/people/answer/{{$v->user_id}}">{{$v->name}}</a>
 						<span class="aria-hidden">{{$v->introduction}}</span>
 						<p class="aria-hidden ">
 							{{$v->describe}}

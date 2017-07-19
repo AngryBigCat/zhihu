@@ -26,8 +26,7 @@ class FoundController extends Controller
         ->get();
         // 推荐问题标题
         $titles = DB::table('questions')
-        ->select('questions.title')
-        ->orderBy('questions.visit_count','desc')
+        ->orderBy('visit_count','desc')
         ->take(5)
         ->get();
         // 热推部分问题
@@ -55,7 +54,6 @@ class FoundController extends Controller
                 $question_ids[] = $v->id;
             }
         // 热门收藏
-            // SELECT * FROM table_name ORDER BY rand() LIMIT 5;
             $aa=rand(1,$collect->count()-5);
             $collects = $collect->select('name','id')->where('id','>',$aa)->take(5)->get();
             // dd($res);
@@ -63,7 +61,11 @@ class FoundController extends Controller
             $ad = new Advertisement;
             $id = rand(1,$ad->count());
             $AD = $ad -> select('url','img')->where('id',$id)->first();
+        //热门话题
+        $hotTopic1 = \App\Tag::all()->take(3);
+
         // 返回发现页面
+            // dd($hotTopic1);
    		return view('home.found.ritui',[
             'questions' => $questions,
             'titles' => $titles,
@@ -71,6 +73,7 @@ class FoundController extends Controller
             'question_ids' => $question_ids,
             'collects' => $collects,
             'AD' => $AD,
+            'hotTopic1'=> $hotTopic1,
             'myCollects'=>$myCollects
             ]);
     }
@@ -85,8 +88,7 @@ class FoundController extends Controller
         ->get();
         // 推荐问题标题
         $titles = DB::table('questions')
-        ->select('questions.title')
-        ->orderBy('questions.visit_count','desc')
+        ->orderBy('visit_count','desc')
         ->take(5)
         ->get();
         // 月热
@@ -105,7 +107,6 @@ class FoundController extends Controller
         $collect = new Collect;
         $myCollects = $collect->select('name', 'id')->where('user_id',$authId)->get();
         // 热门收藏
-            // SELECT * FROM table_name ORDER BY rand() LIMIT 5;
             $aa=rand(1,$collect->count()-5);
             $collects = $collect->select('name','id')->where('id','>',$aa)->take(5)->get();
         // 随机广告
@@ -118,6 +119,8 @@ class FoundController extends Controller
             foreach($tagss as $v) {
                 $question_ids[] = $v->id;
             }
+        //热门话题
+        $hotTopic1 = \App\Tag::all()->take(3);
         // 返回数据
         return view('home.found.yuetui',[
             'questions' => $questions,
@@ -125,6 +128,7 @@ class FoundController extends Controller
             'monthHot'=> $monthHot,
             'collects' => $collects,
             'AD' => $AD,
+            'hotTopic1'=>$hotTopic1,
             'question_ids' => $question_ids,
             'myCollects'=>$myCollects
             ]);
@@ -154,8 +158,23 @@ class FoundController extends Controller
         ->orderBy('questions.visit_count','desc')
         ->take(10)
         ->get();
+        // 收藏弹出框收藏夹数据
+        $authId= Auth::user()->id;
+        $collect = new Collect;
+        $myCollects = $collect->select('name', 'id')->where('user_id',$authId)->get();
+        // 热门收藏
+        $aa=rand(1,$collect->count()-5);
+        $collects = $collect->select('name','id')->where('id','>',$aa)->take(5)->get();
+        //热门话题
+        $hotTopic1 = \App\Tag::all()->take(3);
+        // 随机广告
+        $ad = new Advertisement;
+        $id = rand(1,$ad->count());
+        $AD = $ad -> select('url','img')->where('id',$id)->first();
+        //热门话题
+        $hotTopic1 = \App\Tag::all()->take(3);
 
-        return view('home.found.more',['questions'=>$questions]);
+        return view('home.found.more',['questions'=>$questions,'AD'=>$AD,'myCollects'=>$myCollects,'collects'=>$collects,'hotTopic1'=>$hotTopic1]);
     }
 
     /**
@@ -207,6 +226,7 @@ class FoundController extends Controller
         $res = new question_collect;
         $res -> collect_id = $request->collect;
         $res -> question_id = $request->qus_id;
+        // dd($res->save());
         if ($res -> save()) {
             return redirect('/found/ritui')->with('info','收藏成功');
         }else{

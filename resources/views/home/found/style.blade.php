@@ -42,11 +42,11 @@
 		/*border:1px solid red;*/
 		margin-bottom: 20px;
 		font-size: 12px;
-		height:188px;
+		height:198px;
 	}
 	.lizi>div{
 		border-bottom:1px solid #ddd;
-		height: 150px
+		height: 170px
 
 	}
 	.lizi>div>a{
@@ -143,8 +143,8 @@
 		height:250px;
 	}
 	.guanggao>div{
-		margin:0 35px;
-		width:270px;
+		margin:0 20px;
+		width:300px;
 		height:225px;
 		border-radius:7%;
 	}

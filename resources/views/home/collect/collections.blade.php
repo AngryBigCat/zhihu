@@ -31,6 +31,7 @@
         .right-tool a {
             text-decoration: none;
         }
+        
     </style>
     @include('home.layouts._foot_style')
 @stop

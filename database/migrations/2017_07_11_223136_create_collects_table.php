@@ -17,7 +17,7 @@ class CreateCollectsTable extends Migration
             $table->increments('id')->comment('收藏夹id');
             $table->integer('user_id')->comment('用户id');
             $table->string('name')->comment('收藏夹名');
-            $table->text('intro')->comment('描述');
+            $table->text('intro')->nullable()->comment('描述');
             $table->timestamps();
         });
     }

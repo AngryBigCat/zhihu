@@ -22,9 +22,8 @@ class CollectController extends Controller
 		$myCollects = DB::table('collects')->where('user_id',$authId)->get();
 // dd($myCollects);
         // 登录用户已经关注的收藏夹id
-        $authId= Auth::user()->id;
         $col = \App\User::find($authId)->followings(\App\Collect::class)->get();
-        
+        // dd($col);
 		return view('home.collect.collections',compact('myCollects','col'));
 	}
 
