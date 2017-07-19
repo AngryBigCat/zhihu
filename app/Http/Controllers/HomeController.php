@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Question;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -23,7 +24,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-
-        return view('home.index.default');
+        $questions = Question::orderBy('created_at', 'desc')->get();
+        return view('home.index.default', compact('questions'));
     }
 }

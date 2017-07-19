@@ -19,7 +19,6 @@ Auth::routes();
 Route::get('/', 'HomeController@index');
 
 //提交问题
-Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
 //删除问题
 Route::delete('question/{id}', 'QuestionController@delete')->middleware('auth');
 //问题页
@@ -38,6 +37,8 @@ Route::get('question/{id}/followers', 'QuestionController@getFollowersByQuestion
 Route::get('question/{id}/mostthumb', 'QuestionController@mostThumbSort');
 Route::get('question/{id}/latest', 'QuestionController@latestSort');
 Route::get('question/{id}/oldest', 'QuestionController@oldestSort');
+//内容上传
+Route::post('upload', 'UploadController@upload');
 
 //提问时添加话题弹出的话题列表
 Route::get('search/topic/{key?}', 'SearchController@topicSearch');
@@ -119,18 +120,6 @@ Route::post('admin/AD','admin\ListAdvertisementController@editAjax');//ajax更�
 Route::post('admin/ad/ajax','admin\ListAdvertisementController@ajax');// ajax更新图片
 Route::get('admin/listAD','admin\ListAdvertisementController@index')->name('listAD');
 Route::get('admin/adDel/{id}','admin\ListAdvertisementController@del');
-
-//问题页
-Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');
-//关注问题、取消关注问题
-Route::post('question/{id}/toggleFollow', 'QuestionController@toggleFollow')->middleware('auth');
-//排序
-Route::get('question/{id}/{sortType}', 'QuestionController@toggleSort');
-
-//提交回答
-Route::post('answer', 'AnswerController@store')->middleware('auth')->name('answer.store');
-//点赞、取消点赞
-Route::post('answer/{id}/{type}', 'AnswerController@toggleVote')->middleware('auth');
 
 
 
@@ -321,6 +310,3 @@ Route::group([], function(){
     Route::POST('/ajaxs','TopicController@ajaxs');
     
 });
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');

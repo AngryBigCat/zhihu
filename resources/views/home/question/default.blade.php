@@ -323,6 +323,11 @@
             'video',  // 插入视频
         ];
         editor2.customConfig.zIndex = 1;
+        editor2.customConfig.uploadImgServer = '/upload';
+        editor2.customConfig.uploadImgParams = {
+            _token: `{{ csrf_token() }}`
+        };
+        editor2.customConfig.uploadFileName = 'answer_img';
         editor2.create();
 
 

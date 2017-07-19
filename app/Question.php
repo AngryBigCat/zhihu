@@ -51,6 +51,15 @@ class Question extends Model
     }
 
     /**
+     * 关联的用户
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo('App\User');
+    }
+
+    /**
      *
      */
     public function saveToTag($topic_ids)

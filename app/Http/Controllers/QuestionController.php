@@ -8,6 +8,7 @@ use App\Http\Requests\StoreQuestionPost;
 use App\Question;
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class QuestionController extends Controller
 {
