@@ -298,4 +298,8 @@
 		border-bottom: 0px;
 		margin-bottom: -15px;
 	}
+	.foot_lianjie a{
+		color: #666666;
+		text-decoration: none;
+	}
 </style>
