@@ -18,10 +18,10 @@ class commentController extends Controller
             ->where(function($query)use($request){
                 $keyword = $request->input('keyword');
                 if(!empty($keyword)){
-                    $query->where('name','like','%'.$keyword.'%');
+                    $query->where('comments.content','like','%'.$keyword.'%');
                 }
             })
-            ->paginate($request->input('num',10));
+            ->paginate($request->input('num',5));
             
     	return view('admin.comment.commentlist',compact('info','request'));
     }

@@ -42,6 +42,10 @@ class AnsDelListController extends Controller
     {
         $answer =\App\Answer::onlyTrashed()->where('id', $id)->first();
 
+        if (empty($answer)) {
+            return redirect('/admin/answers/ans_list');
+        }
+
         if ($answer->forceDelete()) {
             return back()->with('info', '删除成功');
         } else {

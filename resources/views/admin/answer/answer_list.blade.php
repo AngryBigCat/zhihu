@@ -37,7 +37,7 @@
 
                         </div>
                     </div>
-                    <form action="/admin/answer" method="get">
+                    <form action="/admin/answers/ans_list" method="get">
                       <div class="am-u-sm-12 am-u-md-6 am-u-lg-3">
                           <div class= "am-form-group tpl-table-list-select">
                               <select name="num" data-am-selected="{btnSize: 'sm'}">
@@ -89,9 +89,10 @@
                             @endforeach
                             </tbody>
                         </table>
+                        {{ $info->appends($data)->links() }}
+
                     </div>
                     <div id="pages">    
-                        {{ $info->appends($data)->links() }}
                     </div>
                 </div>
             </div>

@@ -125,6 +125,7 @@ class PeopleController extends Controller
             ->join('user_details','users.id','=','user_details.user_id')
             ->select('users.id','users.name','user_details.headpic','user_details.a_word')
             ->get();
+        // dd($followers);
         return view('home.people.follower', ['followers'=>$followers]);
     }
 
@@ -284,6 +285,9 @@ class PeopleController extends Controller
             $ans_count = $user->answers()->whereNull('answers.deleted_at')->count();
             // 提问数
             $que_count = $user->questions()->whereNull('questions.deleted_at')->count();
+
+            // 关注的问题数
+            $follow_que_count = $user->followings(\App\Question::class)->whereNull('questions.deleted_at')->count();
             // 话题数
             $tag_count = $user->followings(\App\Tag::class)->count();
             // 关注数
@@ -309,7 +313,8 @@ class PeopleController extends Controller
                 'followers_count' => $followers_count,
                 'sex' => $sex,
                 'collect_count' => $collect_count,
-                'follow_col_count' => $follow_col_count
+                'follow_col_count' => $follow_col_count,
+                'follow_que_count' => $follow_que_count
             ];
             return $count;
         }

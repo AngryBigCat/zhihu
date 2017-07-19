@@ -12,7 +12,7 @@
         </div>
 
         <div>
-            <time>{{ date('Y-m-d', strtotime($val->updated_at)) }}</time> • <span> {{ \App\Collect::find($val->id)->questions()->count() }} </span>条内容 • 
+            <time>{{ date('Y-m-d', strtotime($val->updated_at)) }}</time> • <span> {{ \App\Collect::find($val->id)->question()->count() }} </span>条内容 • 
             <span> {{ \App\Collect::find($val->id)->followers()->count() }} </span>个关注
         </div>
     </div>

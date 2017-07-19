@@ -258,7 +258,7 @@ Route::group(['prefix'=>'admin', 'middleware'=>'adminLogin'], function() {
 
 // 回答管理
     // 回答列表
-    Route::get('answer', 'admin\AnswerController@index');
+    Route::get('answers/ans_list', 'admin\AnswerController@index');
     // 删除回答
     Route::post('answer/ans_del/{id}', 'admin\AnswerController@ans_del');
     // 修改回答

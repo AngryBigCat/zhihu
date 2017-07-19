@@ -17,7 +17,7 @@
 	<div class="col-md-13 bg-default right-gongju" >
 		<div class="list-group">
 		  <a href="/people/topics" data-pjax  class="bg list-group-item">关注的话题 <span class="pull-right">{{ $count['tag_count'] }}</span></a>
-		  <a data-pjax href="/people/following/questions" class="list-group-item">关注的问题 <span class="pull-right">{{ $count['que_count'] }}</span></a>
+		  <a data-pjax href="/people/following/questions" class="list-group-item">关注的问题 <span class="pull-right">{{ $count['follow_que_count'] }}</span></a>
 		  <a data-pjax href="/people/following/collections" class="list-group-item">关注的收藏夹 <span class="pull-right">{{ $count['follow_col_count'] }}</span> </a>
 		</div> 
 	</div>	

@@ -32,7 +32,10 @@ class UserDelListcontroller extends Controller
     public function reUser($id)
     {
         $user =User::onlyTrashed()->where('id', $id)->first();
+        $user_de = new \App\User_detail();
+        $user_de->user_id = $id;
         if ($user->restore()) {
+            $user_de->save();
             return back()->with('info','恢复成功');
         } else {
             return back()->with('info','恢复失败');

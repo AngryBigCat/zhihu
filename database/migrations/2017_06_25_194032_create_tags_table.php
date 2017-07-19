@@ -19,7 +19,7 @@ class CreateTagsTable extends Migration
             $table->char('path',50)->default('0')->comment('父id下面的子id连接');
             $table->char('tag_name',50)->comment('话题名称');
             $table->text('description')->comment('话题描述');
-            $table->char('img',255)->comment('话题缩略图');
+            $table->char('img',255)->default('/uploads/topic/149925990240357.png')->comment('话题缩略图');
             $table->timestamps();
         });
     }
