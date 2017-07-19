@@ -42,6 +42,8 @@ class QuestionController extends Controller
         $question = Question::findAndIncre($id); //查找问题 并自增浏览量+1
         $answers = $question->answers()->withTrashed()->get();
         $myAnswer = $question->getLoggedAnswer($answers);
+        //相关问题
+        $aboutQuestion = Question::all()->take(5);
         $sort = [
             'selection' => '默认排序',
             'options' => [
@@ -51,7 +53,7 @@ class QuestionController extends Controller
                 'oldest' => '最早回答',
             ]
         ];
-        return view('home.question.default', compact('question', 'answers', 'sort', 'myAnswer'));
+        return view('home.question.default', compact('question', 'answers', 'sort', 'myAnswer', 'aboutQuestion'));
     }
 
     public function delete($id)
@@ -81,6 +83,8 @@ class QuestionController extends Controller
         $answers = $question->filterAppointAnswers($question->answers, $aid);
         $myAnswer = $question->getLoggedAnswer($question->answers);
         $topAnswer = $question->getAnswer($question->answers, $aid);
+        //相关问题
+        $aboutQuestion = Question::all()->take(5);
         if (!$topAnswer) {
             return redirect()->route('question.show', ['id' => $id]);
         }
@@ -93,7 +97,7 @@ class QuestionController extends Controller
                 'oldest' => '最早回答',
             ]
         ];
-        return view('home.question.showContainAuthor', compact('sort', 'question', 'answers', 'myAnswer', 'topAnswer'));
+        return view('home.question.showContainAuthor', compact('aboutQuestion', 'sort', 'question', 'answers', 'myAnswer', 'topAnswer'));
     }
 
     /**

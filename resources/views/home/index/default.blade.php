@@ -312,19 +312,6 @@
                             class="fa fa-check-square-o"></span> 我关注的问题</a>
                 <a href="#" class="list-group-item"><span class="fa fa-file-o"></span> 邀请我回答的问题</a>
             </ul>
-            <ul class="list-group">
-                <li class="list-group-item"><span class="fa fa-list-ul"></span> 公共编辑动态</li>
-                <li class="list-group-item"><span class="fa fa-home"></span> 社区服务中心</li>
-                <li class="list-group-item"><span class="fa fa-copyright"></span> 版权服务中心</li>
-            </ul>
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">知乎专栏</h3>
-                </div>
-                <ul class="list-group">
-                    <a href="#" class="list-group-item">专栏・发现</a>
-                </ul>
-            </div>
         </div>
         @include('home.component._model')
     </div>
@@ -332,42 +319,6 @@
 
 @section('script')
     <script>
-        function Base() {
-            this.editor = new E('#toolbar', '#editor');
-        }
-
-        /*
-        页面初始化加载
-        */
-        Base.prototype._initLoad = function () {
-            this.editorLoad();
-        };
-        /*
-        编辑器加载
-        */
-        Base.prototype.editorLoad = function () {
-            var menuParamter = [
-                'bold',  // 粗体
-                'italic',  // 斜体
-                'head',  // 标题
-                'quote',  //  引用
-                'code',  // 插入代码
-                'list',  // 列表
-                'emoticon',  // 表情
-                'image',  // 插入图片
-                'video',  // 插入视频
-            ];
-            //配置编辑区域的 z-index
-            this.editor.customConfig.zIndex = 0;
-            // 自定义菜单配置
-            this.editor.customConfig.menus = menuParamter;
-            this.editor.create();
-        };
-
-
-
-        var base = new Base();
-        base._initLoad();
         let editor = new E('#toolbar', '#editor');
         //配置编辑区域的 z-index
         editor.customConfig.zIndex = 1;
@@ -390,4 +341,4 @@
         editor.customConfig.uploadFileName = 'question_img';
         editor.create();
     </script>
-
+@endsection

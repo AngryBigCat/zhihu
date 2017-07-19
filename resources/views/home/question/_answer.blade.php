@@ -37,8 +37,6 @@
                                          'faIcon' => 'fa fa-remove'
                                         ])
                             </li>
-                        @else
-                            <li><a href="#"><span class="fa fa-heart"></span> 感谢</a></li>
                         @endcan
                     @endslot
             @endcomponent

@@ -1,5 +1,5 @@
 <div class="author-info">
-    <a href="">
+    <a href="{{ url("people/answer/$user->id") }}">
         <img class="author-info-img"
              src="{{ isset($user->user_details->headpic) ?
                  '/uploads/headpic/'.$user->user_details->headpic :
@@ -8,7 +8,7 @@
              height="50">
     </a>
     <div class="author-info-dec">
-        <span class="author-info-name"><a href="">{{ $user->name }}</a></span>
+        <span class="author-info-name"><a href="{{ url("people/answer/$user->id") }}">{{ $user->name }}</a></span>
         <span class="author-info-intro">{{ $user->user_details->a_word or '' }}</span>
     </div>
 </div>

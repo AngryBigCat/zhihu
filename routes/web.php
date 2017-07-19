@@ -19,7 +19,7 @@ Auth::routes();
 Route::get('/', 'HomeController@index');
 
 //提交问题
-Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
+Route::post('postQuestion', 'QuestionController@store')->middleware('auth');
 //删除问题
 Route::delete('question/{id}', 'QuestionController@delete')->middleware('auth');
 //问题页
@@ -59,7 +59,7 @@ Route::get('search/topic/{key?}/insert', function ($key) {
 
 
 //提交回答
-Route::post('answer', 'AnswerController@store')->middleware('auth')->name('answer.store');
+Route::post('postAnswer', 'AnswerController@store')->middleware('auth')->name('answer.store');
 //更新回答
 Route::put('answer/{id}', 'AnswerController@update')->middleware('auth')->name('answer.update');
 //删除回答

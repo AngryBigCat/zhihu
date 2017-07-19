@@ -64,11 +64,11 @@
             </div>
             <div class="about-author-bottom">
                 <div class="about-author-counts">
-                    <a href="javascript:void(0);" class="counts-item">
+                    <a href="/people/answer/{{ $topAnswer->id }}" class="counts-item">
                         <span>回答</span>
                         <span>{{ $topAnswer->user->answers()->count() }}</span>
                     </a>
-                    <a href="javascript:void(0);" class="counts-item">
+                    <a href="{{ url("/people/answer/$topAnswer->id") }}" class="counts-item">
                         <span>问题</span>
                         <span>{{ $topAnswer->user->questions()->count() }}</span>
                     </a>

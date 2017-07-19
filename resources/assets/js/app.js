@@ -11,6 +11,7 @@ require('./bootstrap');
 window.Vue = require('vue');
 //富文本编辑器
 window.E = require('wangeditor');
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -69,9 +70,8 @@ let app = new Vue({
             if (editor.txt.text()) {
                 data['describe'] = editor.txt.html()
             }
-            axios.post('/question', data).then(res => {
+            axios.post('/postQuestion', data).then(res => {
                 if (res.status == 200) {
-                    $('.alert-info-box').addClass('alert-success').html(res.data.msg).show('fast');
                     window.location.href = res.data.redirect_url;
                 }
             });
@@ -119,12 +119,15 @@ let app = new Vue({
             }
         }, 1000),
         onToggleComment(key, isQuetion) {
+            console.log(key);
             if (key instanceof Object) {
                 this.$refs.question.toggleShow('question');
             } else if (key === 'topAnswer') {
                 this.$refs.topAnswer.toggleShow('answer');
             } else if (isQuetion === 'question') {
                 this.$refs[key].toggleShow('question');
+            } else {
+                this.$refs[key].toggleShow('answer');
             }
         },
         onGetFollower(type) {

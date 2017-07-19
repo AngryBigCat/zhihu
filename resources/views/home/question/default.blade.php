@@ -3,212 +3,259 @@
 @section('title', $question->title)
 
 @section('style')
-<style>
-    body {
-        background: #f7f8fa;
-        padding-top: 50px;
-    }
-    h1 {
-        padding: 0;
-        margin: 0;
-    }
-    #toolbar {
-        background: #f7f8fa;
-        border-bottom: 1px solid #e7eaf1;
-        border-top: 1px solid #e7eaf1;
-    }
-    #toolbar .w-e-droplist {
-        z-index: 2;
-    }
-    #editor2 {
-        margin-bottom: 10px;
-    }
-    #editor2 .w-e-text {
-        min-height: 150px;
-        overflow-y: hidden;
-    }
-    #editor2 .w-e-text:empty:before {
-        content: '|';
-        color:#bbb;
-    }
-    .navbar, .navbar-default {
-        margin-bottom: 0;
-    }
-    .question-header {
-        background-color: #fff;
-        margin-bottom: 20px;
-        padding: 15px 0;
-    }
-    .question-top {
-        margin-bottom: 15px;
-    }
-    .question-head-tag {
-        margin-bottom: 15px;
-    }
-    .question-head-h1 {
-        font-size: 22px;
-        margin-bottom: 15px;
-    }
-    .question-head-des {
+    <style>
+        body {
+            background: #f7f8fa;
+            padding-top: 50px;
+        }
 
-    }
-    .question-head-counts {
-        display: flex;
-        justify-content: flex-end;
-    }
-    .question-head-counts > a {
-        display: flex;
-        flex-direction: column;
-        padding: 0 20px;
-        text-align: center;
-        border-right: 1px solid #eee;
-        text-decoration: none;
-    }
-    .question-head-counts > a:last-child {
-        border-right: none;
-    }
-    .question-head-btn {
-        display: flex;
-        justify-content: flex-end;
-    }
-    .question-head-btn > a {
-        width: 100px;
-        margin-left: 10px;
-    }
-    .question-head-btn > a.following {
-        background-color: #c3ccd9;
-        border: 1px solid #c3ccd9;
-    }
-    .question-head-btn > a.following:active {
-        background-color: #c3ccd9;
-        border: 1px solid #c3ccd9;
-    }
-    .question-answer-top {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-    }
-    .question-answer-top .btn-group.open .dropdown-toggle {
-        box-shadow: none;
-    }
-      .sort-toggle {
-        box-shadow: none;
-        cursor: pointer;
-    }
-    .question-answer-item {
-        padding: 15px 0;
-        border-top: 1px solid #eee;
-    }
-    .question-answer-item:last-child {
-        padding-bottom: 0;
-    }
-    .item-box {
-        margin-bottom: 10px;
-    }
-    .author-info {
-        display: flex;
-        height: 50px;
-    }
-    .author-info-dec {
-        margin-left: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-    }
-    .author-info-name {
-        font-weight: bold;
-        font-size: 16px;
-    }
-    .answer-thumbs-counts {
-        margin-bottom: 10px;
-    }
-    .answer-thumbs-counts > span {
-        color: #aaa;
-    }
-    .answer-main-box {
-        margin-bottom: 10px;
-    }
-    .item-footer {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0;
-    }
-    .item-footer > li {
-        margin-right: 20px;
-        color: #aaa;
-    }
-    .vote-button > button {
-        background: #ebf3fb;
-        color: #2d84cc;
-        border: none;
-        border-radius: 4px;
-        margin-right: 5px;
-        padding: 5px 10px;
-    }
-    .vote-button > .vote-active {
-        background-color: #2d84cc;
-        color: #eef3f7;
-    }
-    .vote-button > .vote-active:hover {
-        background-color: #1c73bb;
-        color: #eef3f7;
-    }
-    .vote-button > button:hover {
-        background: #e4ebf3;
-        color: #2d84cc;
-    }
-    .about-author-head {
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
-    }
-    .about-author-bottom {
-        padding-top: 15px;
-    }
-    .about-author-counts {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 15px;
-    }
-    .counts-item {
-        text-align: center;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        font-size: 16px;
-    }
-    .about-author-btn {
-        display: flex;
-        justify-content: space-around;
-    }
-    .about-author-btn > a {
-        width: 120px;
-    }
-    .about-author-btn > a.following {
-        background-color: #c3ccd9;
-        border: 1px solid #c3ccd9;
-    }
-    .answeradd-header {
-        padding: 16px 20px;
-    }
-    .editable-box {
-        padding: 15px 20px;
-    }
-    .editable-box-btn {
-        display: flex;
-        justify-content: flex-end;
-    }
-    
-</style>
+        h1 {
+            padding: 0;
+            margin: 0;
+        }
+
+        #toolbar {
+            background: #f7f8fa;
+            border-bottom: 1px solid #e7eaf1;
+            border-top: 1px solid #e7eaf1;
+        }
+
+        #toolbar .w-e-droplist {
+            z-index: 2;
+        }
+
+        #editor2 {
+            margin-bottom: 10px;
+        }
+
+        #editor2 .w-e-text {
+            min-height: 150px;
+            overflow-y: hidden;
+        }
+
+        #editor2 .w-e-text:empty:before {
+            content: '|';
+            color: #bbb;
+        }
+
+        .navbar, .navbar-default {
+            margin-bottom: 0;
+        }
+
+        .question-header {
+            background-color: #fff;
+            margin-bottom: 20px;
+            padding: 15px 0;
+        }
+
+        .question-top {
+            margin-bottom: 15px;
+        }
+
+        .question-head-tag {
+            margin-bottom: 15px;
+        }
+
+        .question-head-h1 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .question-head-des {
+
+        }
+
+        .question-head-counts {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .question-head-counts > a {
+            display: flex;
+            flex-direction: column;
+            padding: 0 20px;
+            text-align: center;
+            border-right: 1px solid #eee;
+            text-decoration: none;
+        }
+
+        .question-head-counts > a:last-child {
+            border-right: none;
+        }
+
+        .question-head-btn {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .question-head-btn > a {
+            width: 100px;
+            margin-left: 10px;
+        }
+
+        .question-head-btn > a.following {
+            background-color: #c3ccd9;
+            border: 1px solid #c3ccd9;
+        }
+
+        .question-head-btn > a.following:active {
+            background-color: #c3ccd9;
+            border: 1px solid #c3ccd9;
+        }
+
+        .question-answer-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .question-answer-top .btn-group.open .dropdown-toggle {
+            box-shadow: none;
+        }
+
+        .sort-toggle {
+            box-shadow: none;
+            cursor: pointer;
+        }
+
+        .question-answer-item {
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+        }
+
+        .question-answer-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .item-box {
+            margin-bottom: 10px;
+        }
+
+        .author-info {
+            display: flex;
+            height: 50px;
+        }
+
+        .author-info-dec {
+            margin-left: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        .author-info-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .answer-thumbs-counts {
+            margin-bottom: 10px;
+        }
+
+        .answer-thumbs-counts > span {
+            color: #aaa;
+        }
+
+        .answer-main-box {
+            margin-bottom: 10px;
+        }
+
+        .item-footer {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0;
+        }
+
+        .item-footer > li {
+            margin-right: 20px;
+            color: #aaa;
+        }
+
+        .vote-button > button {
+            background: #ebf3fb;
+            color: #2d84cc;
+            border: none;
+            border-radius: 4px;
+            margin-right: 5px;
+            padding: 5px 10px;
+        }
+
+        .vote-button > .vote-active {
+            background-color: #2d84cc;
+            color: #eef3f7;
+        }
+
+        .vote-button > .vote-active:hover {
+            background-color: #1c73bb;
+            color: #eef3f7;
+        }
+
+        .vote-button > button:hover {
+            background: #e4ebf3;
+            color: #2d84cc;
+        }
+
+        .about-author-head {
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .about-author-bottom {
+            padding-top: 15px;
+        }
+
+        .about-author-counts {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .counts-item {
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            font-size: 16px;
+        }
+
+        .about-author-btn {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .about-author-btn > a {
+            width: 120px;
+        }
+
+        .about-author-btn > a.following {
+            background-color: #c3ccd9;
+            border: 1px solid #c3ccd9;
+        }
+
+        .answeradd-header {
+            padding: 16px 20px;
+        }
+
+        .editable-box {
+            padding: 15px 20px;
+        }
+
+        .editable-box-btn {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+    </style>
 @endsection
 
 {{-- 问题页面标题部分 --}}
 @section('question-head')
-<div class="question-header">
-    <div class="container">
-        @include('home.question._question-top')
-        @include('home.question._question-bottom')
+    <div class="question-header">
+        <div class="container">
+            @include('home.question._question-top')
+            @include('home.question._question-bottom')
+        </div>
     </div>
-</div>
 @endsection
 {{-- End --}}
 
@@ -231,54 +278,12 @@
         <span id="postAnswerAAA"></span>
         @if(Auth::user())
             @if(!$question->isSubscribe() && !$myAnswer)
-                <div class="panel panel-default answeradd">
-                    <div class="answeradd-header">
-                        @include('home.question._author', ['user' => Auth::user()])
-                    </div>
-                    <div id="toolbar"></div>
-                    <div class="editable-box">
-                        <div id="editor2"></div>
-                        <div class="editable-box-btn">
-                            <a href="{{ route('answer.store') }}" class="btn btn-primary addAnswer">提交回答</a>
-                        </div>
-                    </div>
-                </div>
+                @include('home.question._postAnswer')
             @else
                 @if($myAnswer->trashed())
-                    <div class="panel panel-default">
-                        <div class="panel-heading text-center">
-                            你已经删除了该问题的回答，如果需要修改，请先
-                            <span class="restoreAnswer">
-                                @include('home.question._toggleLink', [
-                                         'text' => '撤销删除',
-                                         'id' => $myAnswer->id,
-                                        ])
-                            </span>
-                        </div>
-                    </div>
+                    @include('home.question._restoreAnswer')
                 @else
-                <div class="panel panel-default">
-                    <div class="panel-heading text-center">
-                        一个问题你只能回答一次，但你可以对
-                        <a class="on-modify-show"
-                           data-toggle="collapse"
-                           data-parent="#accordion"
-                           href="#collapseOne">现有回答</a>
-                        进行修改
-                    </div>
-                    <div  id="collapseOne" class="panel-collapse collapse">
-                        <div class="answeradd-header">
-                            @include('home.question._author', ['user' => Auth::user()])
-                        </div>
-                        <div id="toolbar"></div>
-                        <div class="editable-box">
-                            <div id="editor2"><p>{!! $myAnswer->content !!}</p></div>
- 
-                                <a href="{{ route('answer.update', $myAnswer->id) }}" class="btn btn-primary updateAnswer">更新回答</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    @include('home.question._updateAnswer')
                 @endif
             @endif
         @else
@@ -289,29 +294,17 @@
             </div>
         @endif
     </div>
-
     {{-- 问题页面右半部份 --}}
     <div class="col-md-4">
         @yield('topAuthor')
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">相关问题</h3>
-            </div>
-            <ul class="list-group">
-                <li class="list-group-item">关于王家卫有哪些有趣的故事？ 91 个回答</li>
-                <li class="list-group-item">《云图》讲的是什么？ 137 个回答</li>
-                <li class="list-group-item">如何评价电影《后会无期》？ 2263 个回答</li>
-                <li class="list-group-item">中外有哪些优质的、设计感强的抽象风电影海报？ 28 个回答</li>
-                <li class="list-group-item">如何评价《喜剧之王》这部电影？ 289 个回答</li>
-            </ul>
-        </div>
+        @include('home.question._aboutAnswer')
     </div>
 </div>
 @endsection
 {{-- End --}}
 
 @section('script')
-<script>
+    <script>
         var editor2 = new E('#toolbar', '#editor2');
         editor2.customConfig.menus = [
             'bold',  // 粗体
@@ -395,7 +388,7 @@
         });
 
         /*
-        关注、取消关注问题
+         关注、取消关注问题
          */
         $('.toggleFollow').click(function (event) {
             event.preventDefault();
@@ -404,10 +397,10 @@
             axios.post(this.href).then(function (res) {
                 if (!_.isEmpty(res.data.attached)) {
                     $(_this).html('正在关注').addClass('following');
-                    $('.count-follow').html(parseInt(count) +  1);
+                    $('.count-follow').html(parseInt(count) + 1);
                 } else {
                     $(_this).html('关注问题').removeClass('following');
-                    $('.count-follow').html(parseInt(count) -  1);
+                    $('.count-follow').html(parseInt(count) - 1);
                 }
             });
         });
@@ -424,10 +417,10 @@
             axios.post(url).then(function (res) {
                 if (!_.isEmpty(res.data.attached)) {
                     $(_this).html('取消关注').addClass('following');
-                    $('.follower-count').html(parseInt(count) +  1);
+                    $('.follower-count').html(parseInt(count) + 1);
                 } else {
-                    $(_this).html( "<span class='fa fa-plus'><span>"+ ' 关注TA').removeClass('following');
-                    $('.follower-count').html(parseInt(count) -  1);
+                    $(_this).html("<span class='fa fa-plus'><span>" + ' 关注TA').removeClass('following');
+                    $('.follower-count').html(parseInt(count) - 1);
                 }
             });
         });
@@ -474,5 +467,5 @@
                 }
             });
         });
-</script>
+    </script>
 @endsection

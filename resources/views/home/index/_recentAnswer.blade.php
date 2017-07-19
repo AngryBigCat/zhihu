@@ -22,7 +22,7 @@
                     </span>
                 </div>
                 <div class="media-heading index-topic-title">
-                    <a href="{{ route('question.show', $question->id) }}">{{ $question->title }}</a>
+                    <a href="/question/{{ $question->id }}/answer/{{ $question->answers->first()->id }}">{{ $question->title }}</a>
                 </div>
                 <div class="index-topic-author">
                     <span class="author-name"><a href="#">{{ $question->answers->first()->user->name }}</a></span>
