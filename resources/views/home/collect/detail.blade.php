@@ -19,6 +19,7 @@
 		padding:10px 0 0 30px;
 		font-size: 12px;
 		color: #999;
+		/*border:1px solid red;*/
 	}
 	h1{
 		font-size: 30px;
@@ -34,14 +35,14 @@
 		/*border:1px solid red;*/
 		margin-top: 20px;
 		font-size: 12px;
-		height:158px;
+		height:198px;
 	}
 	.lizi a{
 		cursor: pointer;
 	}
 	.lizi>div{
 		border-bottom:1px solid #ddd;
-		height: 120px
+		height: 150px
 
 	}
 	.lizi>div>a{
@@ -62,6 +63,9 @@
 		display: inline-block;
 		display:none;
 	}
+	/*.list_retui{
+		border:1px solid red;
+	}*/
 	</style>
 @stop
 
@@ -73,7 +77,18 @@
         <!-- Nav tabs -->
         <div class="back"><i class="fa fa-angle-double-left" aria-hidden="true"></i><a href="{{route('collect.collections')}}"> 返回{{DB::table('users')->where('id',$collect->user_id)->first()->name}}的收藏 </a></div>
         <div>
-        	<h1>{{$collect->name}}</h1>
+        <div style="height:50px;overflow: hidden;">
+        	<h1 class="pull-left">{{$collect->name}}</h1>
+    		<div class="pull-right">
+        		<button class="btn btn-info follow" col_id="{{$collect->id}}" style="margin: 5px 20px 0 0">
+					@if(\App\Collect::find($collect->id)->isFollowedBy(\App\User::find(Auth::id())))
+					取消关注
+					@else
+					<i class="fa fa-plus" aria-hidden="true"></i> 关注
+					@endif
+        		</button>
+        	</div>
+        </div>	
         	<div class="describe">
         		@if(empty($collect->intro))
 				收藏夹的主人太懒了，什么都没写^~^
@@ -83,15 +98,15 @@
         	</div>
         </div>
         <div class="qus">
-        @foreach($res as $v)
+        @foreach($res as $key => $v)
         	<div class="lizi">
-				<a href="#" >
+				<a href="{{route('question.show',$v->id)}}" >
 					<h5>{{$v->title}}</h5>
 				</a>
 				<div >
 					<a href="#" class="pull-left"><span class="badge" count="{{ \App\Question::find($v->id)->followers()->count() }}">{{ \App\Question::find($v->id)->followers()->count() }}</span></a>
 					<div class="pull-left">
-						<a id="name" href="#">{{$v->name}}</a>
+						<a id="name" href="/people/answer/{{$v->user_id}}">{{$v->name}}</a>
 						<span class="aria-hidden">{{$v->introduction}}</span>
 						<p class="aria-hidden ">
 							{{$v->describe}}
@@ -110,7 +125,7 @@
 								@endif
 							 </a>
 							<span> . </span>
-							<a class="comment" rel="popover"><i class="fa fa-commenting-o" aria-hidden="true"></i> <span>106</span>条评论 </a>
+							<a class="comment" rel="popover"  v-on:click="onToggleComment({{ $key }}, 'question')"><i class="fa fa-commenting-o" aria-hidden="true"></i> 评论 </a>
 							<span> . </span>
 
 							<div class="lizi_hide">
@@ -124,8 +139,6 @@
 								<div class="dropdown-menu qrcode" aria-labelledby="dLabel" qrcode="{{$v->describe}}" style="padding:10px"></div>
 							</div>
 							<span> . </span>
-							<a class="collect" data-toggle="modal" data-target="#collect" qus_id="{{$v->id}}"><i class="fa fa-bookmark" aria-hidden="true"></i> 收藏 </a>
-							<span> . </span>
 							<a class="no_help"> 没有帮助 </a>
 							</div>
 							<span> . </span>
@@ -135,6 +148,9 @@
 					</div>
 				</div>
 			</div>
+			<!-- 评论 start -->
+			<comment-list parent-id="{{ $v->id }}" ref="{{ $key }}"></comment-list>
+			<!-- 评论 end -->
 			@endforeach
         </div>
         
@@ -167,6 +183,31 @@
 		$('#myModal').on('shown.bs.modal', function () {
 		  	$('#myInput').focus()
 		})
+
+		// 关注收藏夹
+		$('.follow').click(function() {
+		    var col_id = $(this).attr('col_id');
+		    var col = $(this);
+		    $.ajax({
+		        url: "/collect/followAjax",
+		        type: 'GET',
+		        data: { data :col_id },
+		        dataType: 'json',
+		        success: function (data) {
+		            if (data.status==0) {
+		                col.html('<i class="fa fa-plus" aria-hidden="true"></i> 关注');
+		            }else{
+		                col.html('取消关注');
+		            }
+		            // console.log(data);
+		        },
+		        error: function (data) {
+		            console.log(data);
+		        }
+		    });
+		    return false;
+		}); 	
+
 		{{-- 热推下的内容的字数限制 --}}
 	    //限制字符个数
 	    $("p").each(function(){

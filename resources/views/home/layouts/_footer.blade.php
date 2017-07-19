@@ -20,9 +20,8 @@
           <form  action="/suggest" method="post" style="padding:0 50px">
             {{ csrf_field() }}
             <input type="hidden" name="user_id" value="{{Auth::user()->id}}">
-            <textarea name="content" id="" cols="80" rows="10"></textarea>
-            <button type="submit" class="btn btn-primary">确定</button>
-            </div>
+            <textarea name="content" id="" cols="50" rows="10"></textarea>
+            <button type="submit" class="btn btn-primary" style="margin-top:10px ">确定</button>
           </form>
       </div>
     </div>

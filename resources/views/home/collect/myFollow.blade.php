@@ -52,7 +52,7 @@
                 </h4>
                     <div class="#">
                         <div class="down-tool">
-                            由 <a data-hovercard="p$b$gaia-agul" href="#" target="_blank" class="#" data-original_title="愚者">{{DB::table('users')->where('id',202)->get()[0]->name}}</a> 创建<span class="#l">•</span>
+                            由 <a data-hovercard="p$b$gaia-agul" href="#" target="_blank" class="#" data-original_title="愚者">{{DB::table('users')->where('id',$v->id)->get()[0]->name}}</a> 创建<span class="#l">•</span>
                             <span >{{\App\Collect::find($v->id)->question->count()}} 条内容</span>
                             <span class="#">•</span>
                             <a class="#">{{\App\Collect::find($v->id)->followers()->count()}} 人关注</a>

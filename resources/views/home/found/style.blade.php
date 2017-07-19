@@ -25,14 +25,14 @@
 		padding:5px;
 		border-bottom: 1px solid #ddd;
 	}
-	#wenda h4+div img{
+	/*#wenda h4+div img{
 		border-radius: 5px;
-	}
+	}*/
 	#wenda h4+div>span{
-		width:450px;
+		width:90%;
 		display: block;
 		/*border:1px solid blue;*/
-		margin-right: 15px
+		margin:0 15px
 	}
 	#retui{
 		/*border:1px solid red;*/
@@ -42,11 +42,11 @@
 		/*border:1px solid red;*/
 		margin-bottom: 20px;
 		font-size: 12px;
-		height:188px;
+		height:198px;
 	}
 	.lizi>div{
 		border-bottom:1px solid #ddd;
-		height: 150px
+		height: 170px
 
 	}
 	.lizi>div>a{
@@ -143,8 +143,8 @@
 		height:250px;
 	}
 	.guanggao>div{
-		margin:0 35px;
-		width:270px;
+		margin:0 20px;
+		width:300px;
 		height:225px;
 		border-radius:7%;
 	}

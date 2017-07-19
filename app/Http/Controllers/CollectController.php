@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Collect;
 use App\Question;
+use App\User;
 
 class CollectController extends Controller
 {
@@ -21,9 +22,8 @@ class CollectController extends Controller
 		$myCollects = DB::table('collects')->where('user_id',$authId)->get();
 // dd($myCollects);
         // 登录用户已经关注的收藏夹id
-        $authId= Auth::user()->id;
         $col = \App\User::find($authId)->followings(\App\Collect::class)->get();
-        
+        // dd($col);
 		return view('home.collect.collections',compact('myCollects','col'));
 	}
 
@@ -110,6 +110,7 @@ class CollectController extends Controller
         foreach($res as $v) {
             $collect_ids[] = $v->id;
         }
+        
         return view('home.collect.detail',compact('collect','res','collect_ids'));
     }
 }

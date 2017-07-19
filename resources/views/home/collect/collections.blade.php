@@ -31,6 +31,7 @@
         .right-tool a {
             text-decoration: none;
         }
+        
     </style>
     @include('home.layouts._foot_style')
 @stop
@@ -79,30 +80,31 @@
 @stop
 
 @section('script')
-    <script>
-        $('#info').fadeOut(3000);
-        {{-- 取消关注 --}}
-        $('.follow').click(function () {
-            var col_id = $(this).attr('col_id');
-            var col = $(this);
-            $.ajax({
-                url: "/collect/followAjax",
-                type: 'GET',
-                data: {data: col_id},
-                dataType: 'json',
-                success: function (data) {
-                    if (data.status == 0) {
-                        col.html('<i class="fa fa-plus" aria-hidden="true"></i> 关注问题');
-                    } else {
-                        col.html('取消关注');
-                    }
-                    // console.log(data);
-                },
-                error: function (data) {
-                    console.log(data);
-                }
-            });
-            return false;
-        });
-    </script>
+<script>
+$('#info').fadeOut(3000);
+{{-- 取消关注 --}}
+$('.follow').click(function() {
+    var col_id = $(this).attr('col_id');
+    var col = $(this);
+    $.ajax({
+        url: "/collect/followAjax",
+        type: 'GET',
+        data: { data :col_id },
+        dataType: 'json',
+        success: function (data) {
+            if (data.status==0) {
+                col.html('<i class="fa fa-plus" aria-hidden="true"></i> 关注');
+            }else{
+                col.html('取消关注');
+            }
+            // console.log(data);
+        },
+        error: function (data) {
+            console.log(data);
+        }
+    });
+    return false;
+}); 
+</script>
+
 @stop

@@ -119,13 +119,13 @@ let app = new Vue({
                 });
             }
         }, 1000),
-        onToggleComment(key) {
+        onToggleComment(key, isQuetion) {
             if (key instanceof Object) {
                 this.$refs.question.toggleShow('question');
             } else if (key === 'topAnswer') {
                 this.$refs.topAnswer.toggleShow('answer');
-            } else {
-                this.$refs[key].toggleShow('answer');
+            } else if (isQuetion === 'question') {
+                this.$refs[key].toggleShow('question');
             }
         },
         onGetFollower(type) {

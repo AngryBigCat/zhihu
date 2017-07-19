@@ -4,7 +4,7 @@
 <li role="presentation" ><a href="/found/yuetui" >本月最热</a></li>
 @stop
 @section('record')
-@foreach ($dayHot as $v)
+@foreach ($dayHot as $key => $v)
 <div class="lizi">
 	<a href="#" >
 		<h5>{{$v->title}}</h5>
@@ -12,13 +12,12 @@
 	<div >
 		<a href="#" class="pull-left"><span class="badge" count="{{ \App\Question::find($v->id)->followers()->count() }}">{{ \App\Question::find($v->id)->followers()->count() }}</span></a>
 		<div class="pull-left">
-			<a id="name" href="#">{{$v->name}}</a>
-			<span class="aria-hidden">{{$v->introduction}}</span>
+			<a id="name" href="/people/answer/{{$v->user_id}}">{{$v->name}}</a>
+			<span class="aria-hidden">{{$v->intro}}</span>
 			<p class="aria-hidden ">
 				{{$v->describe}}
 
 				作者：{{$v->name}}
-				链接：https://www.zhihu.com/question/55370905/answer/189293359
 				来源：知乎
 				著作权归作者所有，转载请联系作者获得授权。
 			</p>
@@ -31,7 +30,7 @@
 					@endif
 				 </a>
 				<span> . </span>
-				<a class="comment" rel="popover"><i class="fa fa-commenting-o" aria-hidden="true"></i> <span>106</span>条评论 </a>
+				<a class="comment" rel="popover"  v-on:click="onToggleComment({{ $key }}, 'question')"><i class="fa fa-commenting-o" aria-hidden="true"></i> 评论 </a>
 				<span> . </span>
 
 				<div class="lizi_hide">
@@ -56,6 +55,10 @@
 		</div>
 	</div>
 </div>
+<!-- 评论 start -->
+<comment-list parent-id="{{ $v->id }}" ref="{{ $key }}"></comment-list>
+<!-- 评论 end -->
+
 @endforeach
 {{ $dayHot->links() }}
 @stop

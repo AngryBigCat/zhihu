@@ -189,22 +189,18 @@
                 <i class="am-icon-home sidebar-nav-link-logo"></i> 首页
             </a>
         </li>
-        <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title active"> <i
+        <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title "> <i
                         class="am-icon-table sidebar-nav-link-logo"></i> 用户管理 </a>
             <ul class="sidebar-nav sidebar-nav-sub">
-                <li class="sidebar-nav-link"><a class="sub-active" href="{{ url('admin/user') }}"> <span
-                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户列表 </a></li>
+                <li class="sidebar-nav-link"><a  href="{{ url('admin/user') }}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户列表 </a></li>
                 <li class="sidebar-nav-link">
-                    <a class="sub-active" href="{{ route('user.delList') }}"> <span
-                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 删除的用户 </a>
+                    <a  href="{{ route('user.delList') }}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 删除的用户 </a>
                 </li>
                 <li class="sidebar-nav-link">
-                    <a href="{{ url('admin/user/create') }}"> <span
-                                class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户增加 </a></li>
+                    <a href="{{ url('admin/user/create') }}"> <span class="am-icon-angle-right sidebar-nav-link-logo"></span> 用户增加 </a></li>
             </ul>
         </li>
-        <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i
-                        class="am-icon-wpforms sidebar-nav-link-logo"></i> 话题管理 </a>
+        <li class="sidebar-nav-link"><a href="javascript:;" class="sidebar-nav-sub-title"> <i class="am-icon-wpforms sidebar-nav-link-logo"></i> 话题管理 </a>
             <ul class="sidebar-nav sidebar-nav-sub">
                 <li class="sidebar-nav-link"><a href="/admin/listtopic"> <span
                                 class="am-icon-angle-right sidebar-nav-link-logo"></span> 话题列表 </a></li>

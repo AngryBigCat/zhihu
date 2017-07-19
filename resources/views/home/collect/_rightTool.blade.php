@@ -29,7 +29,7 @@
             <!-- value以后改成session的user -->
             <div class="form-group">
             标题：
-              <input type="text" name="name" placeholder="最多输入20字"  required>
+              <input type="text" name="name" class="form-control" placeholder="最多输入20字"  required>
             </div>
             <div class="form-group">
             描述：（可选）

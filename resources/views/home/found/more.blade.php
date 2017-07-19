@@ -20,27 +20,24 @@
 		<div id="wenda" class="clearfix">
 			@foreach($questions as $v)
 			<div>
-				<a href="#"><h5>{{$v->title}}</h5></a>
+				<a href="{{route('question.show',$v->id)}}"><h5>{{$v->title}}</h5></a>
 				<div class="media">
 				  <div class="media-left">
-				    <a href="#">
-				      <img class="media-object" src="{{$v->headpic}}" alt="..." width="40px">
+				    <a href="/people/answer/{{$v->user_id}}">
+				      <img class="media-object" src="/uploads/headPic/{{$v->headpic}}" alt="头像" width="40px">
 				    </a>
 				  </div>
 				  <div class="media-body">
-				    <h4 class="media-heading"><a href="">{{$v->name}}，</a><span>{{$v->job}}，{{$v->introduction}}</span></h4>
+				    <h4 class="media-heading"><a href="/people/answer/{{$v->user_id}}">{{$v->name}}，</a><span>{{$v->job}}，{{$v->intro}}</span></h4>
 				    <div>
-					    <a href="#" class="pull-left">
-					      <img class="media-object" src="/{{$v->qs_img}}" alt="..." width="200px">
-					    </a>
-						<span class="pull-right">
+						<span>
 							{{$v->describe}}
 						</span>
-				    </div>
-				  </div>
-				</div>							
-			</div>
-			@endforeach
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
 		</div>
 	</div>
 	{{-- 发现页面右半部分 --}}

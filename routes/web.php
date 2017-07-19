@@ -19,6 +19,7 @@ Auth::routes();
 Route::get('/', 'HomeController@index');
 
 //提交问题
+Route::post('question', 'QuestionController@store')->middleware('auth')->name('question.store');
 //删除问题
 Route::delete('question/{id}', 'QuestionController@delete')->middleware('auth');
 //问题页
@@ -120,6 +121,8 @@ Route::post('admin/AD','admin\ListAdvertisementController@editAjax');//ajax更�
 Route::post('admin/ad/ajax','admin\ListAdvertisementController@ajax');// ajax更新图片
 Route::get('admin/listAD','admin\ListAdvertisementController@index')->name('listAD');
 Route::get('admin/adDel/{id}','admin\ListAdvertisementController@del');
+Route::get('admin/adEdit/{id}','admin\ListAdvertisementController@adEdit')->name('adEdit');
+Route::post('admin/doAdEdit','admin\ListAdvertisementController@doAdEdit')->name('doAdEdit');
 
 
 

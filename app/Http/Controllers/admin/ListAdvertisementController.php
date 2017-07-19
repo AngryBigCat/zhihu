@@ -49,6 +49,18 @@ class ListAdvertisementController extends Controller
         }
     }
 
+    public function adEdit($id)
+    {
+        // 查找要编辑id的内容
+        $res =Advertisement::find($id);
+        // 将查找到的内容返回页面
+        // dd($res);
+        return view('admin.AD.ADedit',compact('res'));
+    }
+    public function doAdEdit()
+    {
+        return redirect(route('listAD'))->with('info','更新成功');
+    }
     /**
      * 后台模块中的广告图片更新
      *  
