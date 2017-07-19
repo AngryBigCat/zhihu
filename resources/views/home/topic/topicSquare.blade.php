@@ -321,7 +321,7 @@
 						<div class="guangchang-you-shuliang"><span>{{\App\Tag::find($v->id)->followers()->count()}}人关注</span></div>
 					</div>
 
-				<div class="guangchang-you-miaoshu"><a href="" target="_blank">
+				<div class="guangchang-you-miaoshu"><a href="/question/{{$v->question->first()->id}}" target="_blank">
 				@if(isset($v->question->first()->title ))
 					{{$v->question->first()->title }}
 				@else

@@ -5,7 +5,7 @@
 	<div class="dongtai-dongtai">
 	<span>{{$count['sex']}}的回答</span>
 	</div>
-	@foreach($info as $val)
+	@foreach($info as $key => $val)
 	<div class="dongtai-content">
 		<div class="dongtai-content-title">
 			<a href="/question/{{ $val->id }}" target="_blank">{{ $val->title }}</a>
@@ -43,11 +43,12 @@
 			    <input type="radio" name="options" id="option2" autocomplete="off">▼
 			  </label>
 			</div>
-			<button class="dongtai-content-link"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span>  666条评论</button>
+			<button v-on:click="onToggleComment({{ $key }})"  class="dongtai-content-link"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span>  {{ \App\Answer::find($val->ans_id)->comments->count() }}条评论</button>
 			<button class="dongtai-content-link"><span class="fa fa-share-alt"></span> 分享</button>
-			<button class="dongtai-content-link"><span class="fa fa-star"></span> 收藏</button>
-			<button class="dongtai-content-link"><span class="fa fa-heart"></span> 感谢</button>
+	
+			<button class="dongtai-content-link thanks"><span class="fa fa-heart "></span> 感谢</button>
 		</div>
+		<comment-list parent-id="{{ $val->ans_id }}" ref="{{ $key }}"></comment-list>
 	</div>
 	@endforeach
 </div>

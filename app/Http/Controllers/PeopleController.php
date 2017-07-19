@@ -30,10 +30,14 @@ class PeopleController extends Controller
             ->whereIn('qs.id', $qs_id)
             ->select('qs.id','qs.title','qs.describe','users.id as uid','users.name','user_details.headpic','user_details.a_word','answers.id as ans_id','answers.content')
             ->get();
+         // 收藏弹出框----收藏夹数据
+        $collect = new \App\Collect;
+        $myCollects = $collect->select('name', 'id')->where('user_id',$id)->get();
+            
         $user = $this->getUser();
         $count = $this->getCount();
 
-        return view('home.people.answers',['user'=>$user,'info'=>$info,'count'=>$count]);
+        return view('home.people.answers',['myCollects'=>$myCollects ,'user'=>$user,'info'=>$info,'count'=>$count]);
     }
 
     /**
@@ -53,9 +57,13 @@ class PeopleController extends Controller
             ->whereIn('qs.id', $qs_id)
             ->select('qs.id','qs.title','qs.describe','users.id as uid','users.name','user_details.headpic','user_details.a_word','answers.id as ans_id','answers.content')
             ->get();
+
+        // 收藏弹出框----收藏夹数据
+        $collect = new \App\Collect;
+        $myCollects = $collect->select('name', 'id')->where('user_id',$id)->get();
         $user = $this->getUser();
         $count = $this->getCount();
-        return view('home.people.answers',['user'=>$user,'info'=>$info,'count'=>$count]);
+        return view('home.people.answers',['myCollects'=>$myCollects ,'user'=>$user,'info'=>$info,'count'=>$count]);
     }
     /**
      * 我的主页 -- 提问

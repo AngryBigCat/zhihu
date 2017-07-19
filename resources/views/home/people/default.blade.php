@@ -46,6 +46,8 @@
 
 <script type="text/javascript">
 
+
+
     // 查看详细资料
     $('.see_userinfo a').click(function(event) {
         event.stopPropagation();
@@ -83,6 +85,8 @@
         //pjax链接加载完成后隐藏加载动画；
         $("#pjax_loading").css("display", "none");
         $('#pjax-con').css('display', 'block');
+         // 感谢
+        thanks();
 
         pjax_toggleFollow();
         pjax_zhuyeFollow();
@@ -95,6 +99,17 @@
 
     pjax_toggleFollow();
     pjax_zhuyeFollow();
+    thanks();
+    function thanks() {
+        $('.dongtai-content-gongneng .thanks').click(function() {
+            if ($(this).html() == '<span class="fa fa-heart "></span> 感谢') {
+                $(this).html('取消感谢');
+            } else if($(this).html() == '取消感谢') {
+                $(this).html('<span class="fa fa-heart "></span> 感谢');
+            }
+        });
+    }
+
     // 关注和已关注按钮
     function pjax_toggleFollow() {
         $('.tgg-follow .toggle-follow').click(function() {

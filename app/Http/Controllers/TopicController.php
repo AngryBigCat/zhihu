@@ -413,4 +413,5 @@ class TopicController extends Controller
             $user->follow($tag);
             echo json_encode(['status' => 1, 'msg' => '取消关注']);
         }
+    }
 }

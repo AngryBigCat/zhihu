@@ -442,7 +442,7 @@
                                     <!-- 内容 -->
                                      @foreach($res as $key => $value)
                                           <div class="huati-neirong">
-                                                <a href="" class="huati-content-a"  target="_blank">{{$value->title}}</a><br>
+                                                <a href="/question/{{$value->id}}" class="huati-content-a"  target="_blank">{{$value->title}}</a><br>
                                           @if(isset($data[$value->id]['content']))
                                                 <a href="" class="huati-content-b praise" praiseIn=" {{$data[$value->id]['id']}}">
                                                       @if(!isset($data[$value->id]['vote_count']))
@@ -453,7 +453,7 @@
                                                       
                                                 </a>&nbsp;&nbsp;
 
-                                                <a href="" class="huati-content-c">
+                                                <a href="/people/answer/{{$data[$value->id]['id']}}" class="huati-content-c" target="_blank">
                                                       @if(!isset($data[$value->id]['name']))
                                                             匿名用户回答
                                                       @else   

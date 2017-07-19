@@ -236,7 +236,7 @@
                             </div>
                             @for ($i = 0; $i < 3; $i++)
                                 <div class="huati-guanzhu-d">
-                                    <a href="" target="_blank">{{$v->question[$i]->title}}</a>
+                                    <a href="/question/{{$v->question[$i]->id}}" target="_blank">{{$v->question[$i]->title}}</a>
                                 </div>
                             @endfor
                         </div>
