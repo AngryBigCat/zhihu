@@ -7,48 +7,45 @@ use App\User_detail;
 use App\User;
 use DB;
 use Illuminate\Support\Facades\Auth;
+use Overtrue\LaravelFollow\FollowRelation;
 
 class PeopleController extends Controller
 {
-    /**
-     * 我的主页 -- 动态
-     */
-    public function activities()
-    {
-        $_SESSION['id'] = Auth::id();
-        $user_id = User_detail::find(Auth::id());
-        if (empty($user_id)) {
-            User_detail::create(['user_id'=>Auth::id()]);
-        }
-
-        $user = $this->getUser();
-        $count = $this->getCount();
-    	return view('home.people.activities', ['user'=>$user, 'count'=>$count]);
-    }
-
-    /**
-     * 别人的主页 -- 动态
-     */
-    public function activitie($id)
-    {
-        $_SESSION['id'] = $id;
-
-        $user_id = User_detail::find($id);
-        if (empty($user_id)) {
-            User_detail::create(['user_id'=>$id]);
-        }
-        
-        $user = $this->getUser();
-
-        return view('home.people.activities', ['user'=>$user]);
-    }
-
+    
     /**
      * 我的主页 -- 回答
      */
     public function answers()
     {
-        $id = $_SESSION['id'];
+        $_SESSION['id'] = Auth::id();
+        // 获取回答的问题id
+        $id = Auth::id();
+        $qs_id = \App\Answer::where('user_id', $id)->select('question_id')->get();
+        $info = DB::table('questions as qs')
+            ->Join('answers', 'qs.id','=','answers.question_id')
+            ->Join('users', 'answers.user_id','=','users.id')
+            ->Join('user_details', 'answers.user_id', '=', 'user_details.user_id')
+            ->where('answers.user_id', $id)
+            ->whereNull('answers.deleted_at')
+            ->whereIn('qs.id', $qs_id)
+            ->select('qs.id','qs.title','qs.describe','users.id as uid','users.name','user_details.headpic','user_details.a_word','answers.id as ans_id','answers.content')
+            ->get();
+         // 收藏弹出框----收藏夹数据
+        $collect = new \App\Collect;
+        $myCollects = $collect->select('name', 'id')->where('user_id',$id)->get();
+            
+        $user = $this->getUser();
+        $count = $this->getCount();
+
+        return view('home.people.answers',['myCollects'=>$myCollects ,'user'=>$user,'info'=>$info,'count'=>$count]);
+    }
+
+    /**
+     * 用户主页  -- 回答
+     */
+    public function answer($id)
+    {
+        $_SESSION['id'] = $id;
         // 获取回答的问题id
         $qs_id = \App\Answer::where('user_id', $id)->select('question_id')->get();
         $info = DB::table('questions as qs')
@@ -60,7 +57,13 @@ class PeopleController extends Controller
             ->whereIn('qs.id', $qs_id)
             ->select('qs.id','qs.title','qs.describe','users.id as uid','users.name','user_details.headpic','user_details.a_word','answers.id as ans_id','answers.content')
             ->get();
-        return view('home.people.answers',['info'=>$info]);
+
+        // 收藏弹出框----收藏夹数据
+        $collect = new \App\Collect;
+        $myCollects = $collect->select('name', 'id')->where('user_id',$id)->get();
+        $user = $this->getUser();
+        $count = $this->getCount();
+        return view('home.people.answers',['myCollects'=>$myCollects ,'user'=>$user,'info'=>$info,'count'=>$count]);
     }
     /**
      * 我的主页 -- 提问
@@ -86,22 +89,25 @@ class PeopleController extends Controller
         ->get();
         return view('home.people.topics', ['info'=>$info]);
     }
-
-    /**
-     * 我的主页 -- 专栏
-     */
-    public function columns()
-    {
-        return view('home.people.columns');
-    }
     /**
      * 我的主页 -- 收藏
      */
     public function collections()
     {
-        return view('home.people.collections');
+        $id = $_SESSION['id'];
+        $info = User::find($id)->collects;
+        return view('home.people.collections', ['info'=>$info]);
     }
 
+    /**
+     * 我关注的收藏
+     */
+    public function follow_collection()
+    {
+        $id = $_SESSION['id'];
+        $info = User::find($id)->followings(\App\Collect::class)->get();
+        return view('home.people.follow_collections', ['info'=>$info]);
+    }
     /**
      * 我的主页 -- 关注的人
      */
@@ -127,6 +133,7 @@ class PeopleController extends Controller
             ->join('user_details','users.id','=','user_details.user_id')
             ->select('users.id','users.name','user_details.headpic','user_details.a_word')
             ->get();
+        // dd($followers);
         return view('home.people.follower', ['followers'=>$followers]);
     }
 
@@ -286,12 +293,19 @@ class PeopleController extends Controller
             $ans_count = $user->answers()->whereNull('answers.deleted_at')->count();
             // 提问数
             $que_count = $user->questions()->whereNull('questions.deleted_at')->count();
+
+            // 关注的问题数
+            $follow_que_count = $user->followings(\App\Question::class)->whereNull('questions.deleted_at')->count();
             // 话题数
             $tag_count = $user->followings(\App\Tag::class)->count();
             // 关注数
             $followings_count = $user->followings(\App\User::class)->whereNull('users.deleted_at')->count();
             // 关注者数
             $followers_count = $user->followers()->whereNull('users.deleted_at')->count();
+            // 创建的收藏夹数
+            $collect_count = $user->collects()->count();
+            // 关注的收藏夹数
+            $follow_col_count = $user->followings(\App\Collect::class)->count();
             // 性别
             $sex = '';
             if (Auth::id() == $_SESSION['id']) {
@@ -305,7 +319,10 @@ class PeopleController extends Controller
                 'tag_count' => $tag_count,
                 'followings_count' => $followings_count,
                 'followers_count' => $followers_count,
-                'sex' => $sex
+                'sex' => $sex,
+                'collect_count' => $collect_count,
+                'follow_col_count' => $follow_col_count,
+                'follow_que_count' => $follow_que_count
             ];
             return $count;
         }

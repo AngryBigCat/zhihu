@@ -50,9 +50,17 @@
               </div>
 
               <div class="userinfo_footer">
-                <div class="see_userinfo">
-                    <span class="icon glyphicon glyphicon-menu-down" aria-hidden="true"></span>&nbsp;&nbsp;
-                    <a>查看详细资料</a>
+                <div>
+                    <div class="see_userinfo">
+                      <span class="icon glyphicon glyphicon-menu-down" aria-hidden="true"></span>&nbsp;&nbsp;
+                      <a>查看详细资料</a>
+                    </div>
+
+                    <div class="nosee_userinfo">
+                      <span class="icon glyphicon glyphicon-menu-up"></span>&nbsp;&nbsp;
+                      <a>收起详细资料</a>
+                    </div>
+
                     <div class="btn-edit tgg-follow" uid="{{ $_SESSION['id'] }}">
                       <button class="toggle-follow btn btn-guanzhu {{ Auth::user()->isFollowing(\App\User::find($_SESSION['id'])) ? 'btn-info' : 'btn-primary' }}">
                       @if(Auth::user()->isFollowing(\App\User::find($_SESSION['id'])))
@@ -62,21 +70,9 @@
                       @endif
                       </button>
                     </div>
+                    
                 </div>
                 
-                <div class="nosee_userinfo">
-                  <span class="icon glyphicon glyphicon-menu-up"></span>&nbsp;&nbsp;
-                  <a>收起详细资料</a>
-                   <div class="btn-edit tgg-follow" uid="{{ $_SESSION['id'] }}">
-                      <button class="toggle-follow btn btn-guanzhu {{ Auth::user()->isFollowing(\App\User::find($_SESSION['id'])) ? 'btn-info' : 'btn-primary' }}">
-                      @if(Auth::user()->isFollowing(\App\User::find($_SESSION['id'])))
-                          已关注
-                      @else
-                          <span class="glyphicon glyphicon-plus"></span> 关注Ta
-                      @endif
-                      </button>
-                    </div>
-                </div>
               </div>
           </div>  
     </div>

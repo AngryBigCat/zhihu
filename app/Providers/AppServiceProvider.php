@@ -5,7 +5,7 @@ namespace App\Providers;
 use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\PeopleController;
-use Session;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,9 +16,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Carbon::setLocale('zh');
 
+        Schema::defaultStringLength(191);
+        Carbon::setLocale('zh');
+        
         session_start();
+
 
         View()->composer('home.people.*', function($view) {
             $people = new PeopleController();
@@ -31,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
             $count = $people->getCount();
             $view->with('count', $count);
         });
+
     }
 
     /**

@@ -8,6 +8,7 @@ use Overtrue\LaravelFollow\Traits\CanBeFollowed;
 
 class Collect extends Model
 {
+
     //第三方包
     use CanBeFollowed;
 

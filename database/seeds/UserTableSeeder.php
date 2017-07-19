@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Database\Seeder;
+<<<<<<< HEAD
+=======
 // Use Hash;
+>>>>>>> 8d4719490183a0ea5e460ad3129d27b6fb2f3e47
 
 class UserTableSeeder extends Seeder
 {

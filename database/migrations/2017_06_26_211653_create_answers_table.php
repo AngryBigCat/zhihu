@@ -17,6 +17,7 @@ class CreateAnswersTable extends Migration
             $table->increments('id')->comment('回答id');
             $table->integer('user_id')->comment('用户id');
             $table->integer('question_id')->comment('问题id');
+            $table->integer('vote_count')->default(0)->comment('问题赞数');
             $table->text('content')->comment('回答内容');
             $table->softDeletes()->comment('软删除');
             $table->timestamps();

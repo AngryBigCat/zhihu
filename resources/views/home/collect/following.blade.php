@@ -85,6 +85,7 @@
 	</div>
 	@include('home.collect._rightTool')
 	@include('home.layouts._footer')
+
 @endsection
 @section('script')
 	<script>

@@ -23,7 +23,6 @@ class AnsDelListController extends Controller
                     }
                 })
             ->paginate($request->input('num',10));
-            // dd($info);
         return view('admin.answer.del_answer', ['info'=>$info, 'data'=>$request->all()]);
     }
 
@@ -42,10 +41,11 @@ class AnsDelListController extends Controller
     public function del_answer($id)
     {
         $answer =\App\Answer::onlyTrashed()->where('id', $id)->first();
-<<<<<<< HEAD
-            
-=======
->>>>>>> ec363c238e0bc5a832444b6594a6df1c17467022
+
+        if (empty($answer)) {
+            return redirect('/admin/answers/ans_list');
+        }
+
         if ($answer->forceDelete()) {
             return back()->with('info', '删除成功');
         } else {
@@ -71,13 +71,11 @@ class AnsDelListController extends Controller
                     }
                 })
             ->paginate($request->input('num',10));
-<<<<<<< HEAD
+
         if (count($info) <= 0) {
             return redirect('/admin/answer');
         }
-=======
-        // dd($info[0]->title);
->>>>>>> ec363c238e0bc5a832444b6594a6df1c17467022
+
         return view('admin.answer.que_anslist', ['info'=>$info,'data'=>$request->all()]);
     }
 }

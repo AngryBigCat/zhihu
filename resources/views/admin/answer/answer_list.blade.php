@@ -37,7 +37,7 @@
 
                         </div>
                     </div>
-                    <form action="/admin/answer" method="get">
+                    <form action="/admin/answers/ans_list" method="get">
                       <div class="am-u-sm-12 am-u-md-6 am-u-lg-3">
                           <div class= "am-form-group tpl-table-list-select">
                               <select name="num" data-am-selected="{btnSize: 'sm'}">
@@ -77,9 +77,8 @@
                                     <td class="am-text-middle content"><span>{{ $val->content }}</span><input type="text" value="{{$val->content}}" name="content"></td>
                                     <td class="am-text-middle">
                                         <div class="tpl-table-black-operation">
-                                        <form action="/admin/answer/{{ $val->id }}" method="post">
+                                        <form action="/admin/answer/ans_del/{{ $val->id }}" method="post">
                                             {{ csrf_field() }}
-                                            {{ method_field('DELETE') }}
                                             <button type="submit" class="am-btn-danger">
                                                 <i class="am-icon-trash"></i> 删除
                                             </button>
@@ -90,9 +89,10 @@
                             @endforeach
                             </tbody>
                         </table>
+                        {{ $info->appends($data)->links() }}
+
                     </div>
                     <div id="pages">    
-                        {{ $info->appends($data)->links() }}
                     </div>
                 </div>
             </div>
@@ -119,8 +119,8 @@
             var val = $(this).val();
             var ans_id = $(this).parents('.gradeC').find('td:first').html();
             $.ajax({
-                url : '/admin/answer/'+ans_id,
-                type: 'PUT',
+                url : '/admin/answer/update_ans/'+ans_id,
+                type: 'POST',
                 data: {
                     'content' : val,
                     '_token' : '{{ csrf_token() }}'

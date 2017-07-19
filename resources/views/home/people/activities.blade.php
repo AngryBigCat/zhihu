@@ -4,7 +4,6 @@
 	<div role="tabpanel" class="tab-pane active" id="dongtai">
 		<div class="dongtai-dongtai">
 			<span>{{ $count['sex'] }}的动态</span>
-			<!-- <hr> -->
 		</div>
 	    	
 		<div class="dongtai-content">

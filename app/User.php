@@ -11,6 +11,7 @@ use Overtrue\LaravelFollow\Traits\CanFollow;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Overtrue\LaravelFollow\Traits\CanSubscribe;
 
+
 class User extends Authenticatable
 {
     use Notifiable, Vote, CanFollow, CanBeFollowed, CanSubscribe, SoftDeletes;
@@ -52,6 +53,13 @@ class User extends Authenticatable
         return $this->hasMany('App\Question');
     }
 
+    /**
+     * 一对多  用户创建了多少收藏夹
+     */
+    public function collects()
+    {
+        return $this->hasMany('App\Collect');
+    }
     /**
      * 格式化用户的粉丝信息
      * @param $my

@@ -1,5 +1,6 @@
 @extends('home.layouts.default')
 
+
 @section('title', '话题动态')
 
 @section('style')
@@ -433,6 +434,7 @@
                                     </div>
                               </div>
 
+
                               <div class="clearfix"></div>
                                           <!-- 内容 -->
                               <div class="tab-content">
@@ -440,7 +442,7 @@
                                     <!-- 内容 -->
                                      @foreach($res as $key => $value)
                                           <div class="huati-neirong">
-                                                <a href="" class="huati-content-a"  target="_blank">{{$value->title}}</a><br>
+                                                <a href="/question/{{$value->id}}" class="huati-content-a"  target="_blank">{{$value->title}}</a><br>
                                           @if(isset($data[$value->id]['content']))
                                                 <a href="" class="huati-content-b praise" praiseIn=" {{$data[$value->id]['id']}}">
                                                       @if(!isset($data[$value->id]['vote_count']))
@@ -451,7 +453,7 @@
                                                       
                                                 </a>&nbsp;&nbsp;
 
-                                                <a href="" class="huati-content-c">
+                                                <a href="/people/answer/{{$data[$value->id]['id']}}" class="huati-content-c" target="_blank">
                                                       @if(!isset($data[$value->id]['name']))
                                                             匿名用户回答
                                                       @else   
@@ -496,6 +498,7 @@
                                                             @endif
                                                             </span>
                                                       </a>&nbsp;
+
                                                       <a class="xiaoshou" v-on:click="onToggleComment({{ $key }})">
                                                             <i class="z-icon-comment"></i>
                                                             <span>评论</span>
@@ -510,6 +513,7 @@
                                                             <i class="z-icon-collect"></i>
                                                             <span>收藏</span>
                                                             <span></span>
+
                                                       </a> 
                                                 </div>
                                           </div>
@@ -555,44 +559,9 @@
             </div>
       </div>
 
-
-<!-- 
-<div id="tan" class="content" style="display:none">
-      <div class="con-top">
-            <div class="con-img">
-                  <a href=""><img src="/uploads/headPic/1499096092.png"></a>
-            </div>
-            <div class="con-name">
-                  <a href="">名字</a>
-                  <div class="con-name-info"><span>哈哈哈</span> | <span>嘻嘻嘻</span> </div>
-            </div>
-      </div>
-      <div class="con-down">
-            <div class="con-down-count">
-                  <a class="con-down-item" href="">
-                        <span class="con-down-value">34</span>
-                        <span class="con-down-key">回答</span>
-                  </a>
-                  <a class="con-down-item" href="">
-                        <span class="con-down-value">34</span>
-                        <span class="con-down-key">文章</span>
-                  </a>
-                  <a class="con-down-item" href="">
-                        <span class="con-down-value">34K</span>
-                        <span class="con-down-key">关注者</span>
-                  </a>
-            </div>
-            <div class="">
-                  <button class="btn-follow btn btn-success">关注他</button>
-            </div>
-      </div>
-</div> -->
-
 @stop
 @section('script')
 	<script type="text/javascript"> 
-                 
-
             $('.huati-neirong').each(function() {
                   var th = $(this);
                   $(this).hover(
@@ -619,7 +588,6 @@
             $('.follow_que').click(function() {
                   // alert($);ss
                   var que_id = $(this).attr('que_id');
-
                   var th = $(this);
                   $.ajax({
                         url: "/ajaxs",
@@ -662,6 +630,5 @@
             $('.topicDetails').click(function(){
               $(this).css('color','red');
             });
-
 	</script>
 @endsection

@@ -42,6 +42,15 @@ class Question extends Model
     }
 
     /**
+     * 多对多  当前问题都在哪些收藏夹里
+     */
+    public function collects()
+    {
+        return $this->belongsToMany('\App\Collect', 'question_collect', 'question_id', 'collect_id');
+    }
+
+    
+    /**
      * 问题关联的话题
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */

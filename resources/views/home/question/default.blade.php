@@ -197,6 +197,7 @@
         display: flex;
         justify-content: flex-end;
     }
+    
 </style>
 @endsection
 
@@ -227,6 +228,7 @@
                 @endif
             </div>
         </div>
+        <span id="postAnswerAAA"></span>
         @if(Auth::user())
             @if(!$question->isSubscribe() && !$myAnswer)
                 <div class="panel panel-default answeradd">
@@ -271,7 +273,7 @@
                         <div id="toolbar"></div>
                         <div class="editable-box">
                             <div id="editor2"><p>{!! $myAnswer->content !!}</p></div>
-                            <div class="editable-box-btn">
+ 
                                 <a href="{{ route('answer.update', $myAnswer->id) }}" class="btn btn-primary updateAnswer">更新回答</a>
                             </div>
                         </div>

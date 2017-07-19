@@ -2,7 +2,7 @@
 
 @section('title', '评论列表')
 
-<!-- @section('style') -->
+@section('css')
   <style>
      input[name="content"]{
             color:black;
@@ -16,8 +16,8 @@
             margin-left:300px;
         }
   </style>
-<!-- @endsection -->
-@section('')
+@endsection
+@section('content')
 <div class="row-content am-cf">
     <div class="row">
         <div class="am-u-sm-12 am-u-md-12 am-u-lg-12">
@@ -89,7 +89,7 @@
                             </tbody>
 
                         </table>
-
+                        {{ $info->appends($request->all())->links() }}
                     </div>
                     <div id="pages">    
                         

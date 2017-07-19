@@ -16,7 +16,6 @@ class LoginController extends Controller
      */
     public function index()
     {
- 
         return view('admin.index');
     }
     /**
@@ -44,7 +43,7 @@ class LoginController extends Controller
         }
 
         if (Hash::check($request->password, $user->password)) {
-            Session(['uid' => $user->id]);
+            Session(['admin_id' => $user->id]);
             return redirect('/admin');
         } else {
             return back()->with('info', '密码错误');
@@ -54,7 +53,7 @@ class LoginController extends Controller
     // 注销登录
     public function logout(Request $request)
     {
-        $request->session()->forget('uid');
+        $request->session()->forget('admin_id');
         return redirect('admin/login');
     }
 

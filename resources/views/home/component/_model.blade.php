@@ -10,6 +10,7 @@
                 </h4>
             </div>
             <div class="modal-body">
+
                 <div class="form-group" v-bind:class="{ 'has-error': postTitleError }">
                     <label v-show="postTitleError" class="control-label">请在标题的最后包含一个问号</label>
                     <textarea v-model="postTitle" class="postQuestion-title border-normal form-control" placeholder="问题标题"></textarea>
@@ -21,6 +22,7 @@
                                 @{{ tag.text }} <i class="fa fa-close"></i></span>
                         </li>
                     </ul>
+
                     <label v-show="postTopicError" class="control-label">请至少选择一个话题</label>
                     <input v-model="selectTopic" class="postQuestion-topic border-normal form-control" placeholder="添加话题，至少1个，最多选择5个">
                     <!-- 选择话题列表 -->

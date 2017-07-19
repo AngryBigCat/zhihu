@@ -25,7 +25,6 @@ import followerList from './components/follower-list.vue';
 
 
 
-
 let app = new Vue({
     data: {
         postTitleError: false,

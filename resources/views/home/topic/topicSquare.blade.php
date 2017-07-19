@@ -320,7 +320,8 @@
 						<div class="guangchang-you-img"><a href="/topicDetails/{{$v->id}}" target="_blank"><img src="{{$v->img}}" style="border-radius:5px;width:50px; height:50px"></a></div><div class="guangchang-you-biaoti"><a href="/topicDetails/{{$v->id}}" target="_blank">{{$v->tag_name}}</a></div>
 						<div class="guangchang-you-shuliang"><span>{{\App\Tag::find($v->id)->followers()->count()}}人关注</span></div>
 					</div>
-				<div class="guangchang-you-miaoshu"><a href="" target="_blank">
+
+				<div class="guangchang-you-miaoshu"><a href="/question/{{$v->question->first()->id}}" target="_blank">
 				@if(isset($v->question->first()->title ))
 					{{$v->question->first()->title }}
 				@else
@@ -359,7 +360,6 @@
 	            dataType: 'json',
 	            success: function (data) {
 	                th.html(data.msg);
-	                // console.log(data);
 	            },
 	            error: function (data) {
 	                console.log(data);

@@ -35,7 +35,7 @@
                class="btn btn-primary toggleFollow {{ $question->isFollow() ? 'following' : '' }}">
                 {{ $question->isFollow() ? '正在关注' : '关注问题' }}
             </a>
-            <a href="#" class="btn btn-default"><span class="fa fa-pencil"></span> 写回达</a>
+            <a href="#postAnswerAAA" class="btn btn-default"><span class="fa fa-pencil"></span> 写回达</a>
         </div>
     </div>
 </div>

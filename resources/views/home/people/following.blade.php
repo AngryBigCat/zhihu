@@ -9,10 +9,10 @@
     @foreach($followings as $val)
     <div class="zhuan-item" >
         <div class="zhuan-left pull-left" >
-            <a href="/people/activitie/{{ $val->id }}"><img style="width:70px;height:70px;" src="/uploads/headPic/{{ $val->headpic }}"></a>
+            <a href="/people/answer/{{ $val->id }}"><img style="width:70px;height:70px;" src="/uploads/headPic/{{ $val->headpic }}"></a>
         </div>
         <div class="zhuan-right" >
-            <h4><a href="/people/activitie/{{ $val->id }}">{{ $val->name }}</a>
+            <h4><a href="/people/answer/{{ $val->id }}">{{ $val->name }}</a>
             @if(\App\User::find($_SESSION['id'])->isFollowing(\App\User::find($val->id)) && \App\User::find($_SESSION['id'])->isFollowedBy(\App\User::find($val->id)))
             <span class="xianghu">相互关注</span>
             @endif

@@ -2,21 +2,6 @@
 
 @section('title', '话题列表')
 
-<!-- @section('style') -->
-  <style>
-      #pages li {
-          float: left;
-          left:700px;
-          padding-left: 10px;
-          padding-right: 10px;
-          position: relative;
-          padding: 10px 20px 13px;
-          /*background-color: #fff;*/
-          border-radius: 4px;
-          color: #838FA1;
-      }
-  </style>
-<!-- @endsection -->
 @section('content')
 <div class="row-content am-cf">
     <div class="row">

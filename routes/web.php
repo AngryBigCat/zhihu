@@ -44,6 +44,7 @@ Route::post('upload', 'UploadController@upload');
 //提问时添加话题弹出的话题列表
 Route::get('search/topic/{key?}', 'SearchController@topicSearch');
 //测试路由
+Route::get('search/topic/{key?}/insert', 'SearchController@testInsertTopic');
 Route::get('search/topic/{key?}/insert', function ($key) {
     return \App\Tag::create([
         'pid' => 1,
@@ -78,23 +79,12 @@ Route::get('login/refereshcapcha', 'Auth\LoginController@refereshcapcha');
 //关注用户、取消用户
 Route::post('user/{id}/toggleFollow', 'UserController@toggleFollow')->middleware('auth');
 Route::get('user/{id}/followers', 'UserController@getFollowersByAuthorID');
-//后台首页
-Route::get('/admin',function(){
-    return view('admin.index');
-});
-//话题列表
-Route::get('/admin/listtopic',function(){
-    return view('admin.topic.listtopic');
-});
-//话题增加
-Route::get('/admin/topiccreate',function(){
-    return view('admin.topic.topiccreate');
-});
+
+
+
 
 // 发现列表页面
 Route::any('/admin/listFound','admin\ListFoundController@index')->name('listFound');
-// ajax更新数据
-// Route::get('/amin/listAjax','admin\ListFoundController@index_ajax');
 // 发现列表编辑
 Route::any('/admin/edit/{id}/{pag}','admin\ListFoundController@edit')->name('found_edit');
 Route::post('/admin/edit','admin\ListFoundController@do_edit')->name('edit');
@@ -180,6 +170,9 @@ Route::get('collect/following', 'CollectController@follow')->name('collect.follo
 Route::get('collect/myFollow', 'CollectController@myFollow')->name('collect.myFollow');
 
 // 发现
+
+Route::get('found','FoundController@found')->name('found');
+Route::get('retui','FoundController@retui')->name('retui');
 // Route::get('found','FoundController@found')->name('found');
 Route::get('collect','FoundController@collects')->name('found/collects');
 Route::get('found/more','FoundController@more')->name('found/more');
@@ -205,17 +198,17 @@ Route::get('contact',function(){
 
 // 我的主页
 Route::group(['prefix' => 'people', 'middleware' => 'auth'], function () {
-    // 我的主页动态
-    Route::get('activitie/{id}', 'PeopleController@activitie');
-    Route::get('activities', 'PeopleController@activities')->name('people.act');
     // 我的主页回答
     Route::get('answers', 'PeopleController@answers')->name('people.answers');
+    Route::get('answer/{id}', 'PeopleController@answer');
     // 我的主页提问
     Route::get('asks', 'PeopleController@asks')->name('people.asks');
     // 我的主页话题
     Route::get('topics', 'PeopleController@topics')->name('people.topics');
-    Route::get('columns', 'PeopleController@columns')->name('people.columns');
+    // 自己的收藏
     Route::get('collections', 'PeopleController@collections')->name('people.collections');
+    // 关注的收藏
+    Route::get('following/collections', 'PeopleController@follow_collection')->name('people.following.collections');
     // 我的主页关注
     Route::get('following', 'PeopleController@following')->name('people.following');
     // 我的主页被关注
@@ -228,7 +221,7 @@ Route::group(['prefix' => 'people', 'middleware' => 'auth'], function () {
     Route::post('edit_headPic', 'PeopleController@edit_headPic');
     // 修改封面图片
     Route::post('edit_cover', 'PeopleController@edit_cover');
-    // 取消关注
+    // 关注与取消关注
     Route::post('toggle_follow', 'PeopleController@toggle_follow');
 });
 
@@ -239,10 +232,12 @@ Route::get('admin/login', 'admin\LoginController@login')->name('admin.login');
 Route::post('admin/login', 'admin\LoginController@doLogin')->name('admin.dologin');
 
 // 后台路由组中间件检测
-Route::group(['prefix'=>'admin', 'middleware' => 'adminLogin'], function() {
+Route::group(['prefix'=>'admin', 'middleware'=>'adminLogin'], function() {
 
  // 用户管理
     Route::get('/', 'admin\LoginController@index');
+    // 用户注销
+    Route::get('logout', 'admin\LoginController@logout')->name('admin.logout');
     // 用户--后台
     Route::resource('user','admin\UserController');
     // 用户软删除
@@ -251,8 +246,15 @@ Route::group(['prefix'=>'admin', 'middleware' => 'adminLogin'], function() {
     Route::get('users/reco/{id}', 'admin\UserDelListController@reUser');
     // 永久删除模型数据
     Route::get('users/del/{id}', 'admin\UserDelListController@delUser');
-    // 用户注销
-    Route::get('logout', 'admin\LoginController@logout')->name('admin.logout');
+    
+
+// 回答管理
+    // 回答列表
+    Route::get('answers/ans_list', 'admin\AnswerController@index');
+    // 删除回答
+    Route::post('answer/ans_del/{id}', 'admin\AnswerController@ans_del');
+    // 修改回答
+    Route::post('answer/update_ans/{id}', 'admin\AnswerController@update_ans');
 
     // 软删除回答列表
     Route::get('del_answer', 'admin\AnsDelListController@del_answerList')->name('answer.del_answer');
@@ -264,21 +266,12 @@ Route::group(['prefix'=>'admin', 'middleware' => 'adminLogin'], function() {
     Route::get('que_anslist/{id}', 'admin\AnsDelListController@que_anslist');
 });
 
-//后台首页
-Route::get('/admin','admin\AdminController@index');
 
-//后台评论
-Route::group([], function(){
-    //评论列表
-    Route::get('/admin/commentlist','admin\CommentController@index');
-    //评论删除
-    Route::get('/admin/commentdelete/{id}','admin\CommentController@delete');
-    //评论修改
-    Route::post('/admin/commentmodify/{id}','admin\CommentController@modify');
+
+   
     
-});
 // 后台话题
-Route::group([], function(){
+Route::group(['middleware'=>'adminLogin'], function(){
     //话题列表
     Route::get('/admin/listtopic','admin\TopicController@listtopic');
         //话题删除
@@ -291,6 +284,13 @@ Route::group([], function(){
     Route::get('/admin/topicupdate','admin\TopicController@topicupdate');
     //话题更新post操作
     Route::post('/admin/topicupdate','admin\TopicController@update');
+
+     //评论列表
+    Route::get('/admin/commentlist','admin\CommentController@index');
+    //评论删除
+    Route::get('/admin/commentdelete/{id}','admin\CommentController@delete');
+    //评论修改
+    Route::post('/admin/commentmodify/{id}','admin\CommentController@modify');
 });
 
 //前台话题
@@ -309,7 +309,6 @@ Route::group([], function(){
     Route::get('topicTime/{id}','TopicController@topicTime');
     //关注发送ajax
     Route::get('/ajaxd','TopicController@ajaxd');
-
     Route::POST('/ajaxs','TopicController@ajaxs');
     
 });
