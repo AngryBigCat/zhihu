@@ -69,11 +69,11 @@
                                             <span>{{$v->url}}</span>
                                             <input type="text" class="dbl" value="{{$v->url}}" ad_id="{{$v->id}}" name="url" style="width: 90%; padding: 6px 12px; line-height: 1.42857; background-color: #fff; background-image: none; background: 0 0; text-indent: .5em; border: 1px solid rgba(255, 255, 255, 0.2); -o-border-radius: 0; border-radius: 0; color: #fff; box-shadow: none; padding-left: 0; padding-right: 0; font-size: 14px; margin-top: 95px; display: none;">
                                         </td>
-                                        <td style="height:225px;line-height: 225px"><form action="" id="photoForm">
+                                        <td style="height:225px;line-height: 225px"><form action="">
                                         <div class="am-form-group am-form-file" style="cursor: pointer">
                                             <img class="ad" src="{{ltrim($v->img,'.')}}" alt="广告图" width="270px" height="225px">
-                                            <input  type="file" onchange="doUpload()"  id="doc-form-file" name="img">
-                                            <input type="hidden" name="id" value="{{$v->id}}">
+                                            <input  type="file"   name="img" class="ad">
+                                            <input type="hidden" name="id" value="{{$v->id}}" >
                                         </div>
                                         </form>
                                         </td>
@@ -85,9 +85,9 @@
                                                 <a href="javascript:;" class="tpl-table-black-operation-del">
                                                     <i class="am-icon-arrow-circle-up"></i> 置顶
                                                 </a> -->
-                                                <!-- <a href="/admin/colEdit/{{$v->id}}">
+                                                <a href="/admin/adEdit/{{$v->id}}">
                                                     <i class="am-icon-pencil"></i> 编辑
-                                                </a> -->
+                                                </a>
                                                 <a href="/admin/adDel/{{$v->id}}" class="tpl-table-black-operation-del" onClick="delcfm()" type="submit">
                                                     <i class="am-icon-trash"></i> 删除
                                                 </a>
@@ -158,27 +158,31 @@
             });
         // alert(id);
     });
-    {{-- ajax更新图片 --}}
-     function doUpload() {
-        var formData = new FormData($("#photoForm")[0]);
-        $.ajax({
-            url: "/admin/ad/ajax",
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function (returndata) {
-                // $('.ad').attr('src',returndata);
-                // location.reload()
-                console.log(returndata);
-            }
-            // error: function (returndata) {
-            //     alert('上传失败');
-            // }
-        });
-    }
 
-   
+    {{-- ajax更新图片 --}}
+    //  function doUpload() {
+    //     var formData = new FormData($("#photoForm")[0]);
+    //     $.ajax({
+    //         url: "/admin/ad/ajax",
+    //         type: 'POST',
+    //         data: formData,
+    //         contentType: false,
+    //         processData: false,
+    //         success: function (returndata) {
+    //             // $('.ad').attr('src',returndata);
+    //             // location.reload()
+    //             console.log(returndata);
+    //         }
+    //         error: function (returndata) {
+    //             alert('上传失败');
+    //         }
+    //     });
+    // }
+    // $('.ad').change(function(){
+    //     var ad = $('.ad').parents('form');
+    //     // alert(ad);
+    //     console.log(ad);
+    // })   
 
     {{-- 左侧导航栏选中 --}}
     $('#home_page').find('a').removeAttr('class');

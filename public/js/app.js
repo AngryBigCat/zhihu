@@ -1948,2532 +1948,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-
-// CONCATENATED MODULE: ./node_modules/_vue-router@2.6.0@vue-router/dist/vue-router.esm.js
-/**
-  * vue-router v2.6.0
-  * (c) 2017 Evan You
-  * @license MIT
-  */
-/*  */
-
-function assert (condition, message) {
-  if (!condition) {
-    throw new Error(("[vue-router] " + message))
-  }
-}
-
-function warn (condition, message) {
-  if ("development" !== 'production' && !condition) {
-    typeof console !== 'undefined' && console.warn(("[vue-router] " + message));
-  }
-}
-
-var View = {
-  name: 'router-view',
-  functional: true,
-  props: {
-    name: {
-      type: String,
-      default: 'default'
-    }
-  },
-  render: function render (_, ref) {
-    var props = ref.props;
-    var children = ref.children;
-    var parent = ref.parent;
-    var data = ref.data;
-
-    data.routerView = true;
-
-    // directly use parent context's createElement() function
-    // so that components rendered by router-view can resolve named slots
-    var h = parent.$createElement;
-    var name = props.name;
-    var route = parent.$route;
-    var cache = parent._routerViewCache || (parent._routerViewCache = {});
-
-    // determine current view depth, also check to see if the tree
-    // has been toggled inactive but kept-alive.
-    var depth = 0;
-    var inactive = false;
-    while (parent && parent._routerRoot !== parent) {
-      if (parent.$vnode && parent.$vnode.data.routerView) {
-        depth++;
-      }
-      if (parent._inactive) {
-        inactive = true;
-      }
-      parent = parent.$parent;
-    }
-    data.routerViewDepth = depth;
-
-    // render previous view if the tree is inactive and kept-alive
-    if (inactive) {
-      return h(cache[name], data, children)
-    }
-
-    var matched = route.matched[depth];
-    // render empty node if no matched route
-    if (!matched) {
-      cache[name] = null;
-      return h()
-    }
-
-    var component = cache[name] = matched.components[name];
-
-    // attach instance registration hook
-    // this will be called in the instance's injected lifecycle hooks
-    data.registerRouteInstance = function (vm, val) {
-      // val could be undefined for unregistration
-      var current = matched.instances[name];
-      if (
-        (val && current !== vm) ||
-        (!val && current === vm)
-      ) {
-        matched.instances[name] = val;
-      }
-    }
-
-    // also regiseter instance in prepatch hook
-    // in case the same component instance is reused across different routes
-    ;(data.hook || (data.hook = {})).prepatch = function (_, vnode) {
-      matched.instances[name] = vnode.componentInstance;
-    };
-
-    // resolve props
-    data.props = resolveProps(route, matched.props && matched.props[name]);
-
-    return h(component, data, children)
-  }
-};
-
-function resolveProps (route, config) {
-  switch (typeof config) {
-    case 'undefined':
-      return
-    case 'object':
-      return config
-    case 'function':
-      return config(route)
-    case 'boolean':
-      return config ? route.params : undefined
-    default:
-      if (true) {
-        warn(
-          false,
-          "props in \"" + (route.path) + "\" is a " + (typeof config) + ", " +
-          "expecting an object, function or boolean."
-        );
-      }
-  }
-}
-
-/*  */
-
-var encodeReserveRE = /[!'()*]/g;
-var encodeReserveReplacer = function (c) { return '%' + c.charCodeAt(0).toString(16); };
-var commaRE = /%2C/g;
-
-// fixed encodeURIComponent which is more conformant to RFC3986:
-// - escapes [!'()*]
-// - preserve commas
-var encode = function (str) { return encodeURIComponent(str)
-  .replace(encodeReserveRE, encodeReserveReplacer)
-  .replace(commaRE, ','); };
-
-var decode = decodeURIComponent;
-
-function resolveQuery (
-  query,
-  extraQuery,
-  _parseQuery
-) {
-  if ( extraQuery === void 0 ) extraQuery = {};
-
-  var parse = _parseQuery || parseQuery;
-  var parsedQuery;
-  try {
-    parsedQuery = parse(query || '');
-  } catch (e) {
-    "development" !== 'production' && warn(false, e.message);
-    parsedQuery = {};
-  }
-  for (var key in extraQuery) {
-    var val = extraQuery[key];
-    parsedQuery[key] = Array.isArray(val) ? val.slice() : val;
-  }
-  return parsedQuery
-}
-
-function parseQuery (query) {
-  var res = {};
-
-  query = query.trim().replace(/^(\?|#|&)/, '');
-
-  if (!query) {
-    return res
-  }
-
-  query.split('&').forEach(function (param) {
-    var parts = param.replace(/\+/g, ' ').split('=');
-    var key = decode(parts.shift());
-    var val = parts.length > 0
-      ? decode(parts.join('='))
-      : null;
-
-    if (res[key] === undefined) {
-      res[key] = val;
-    } else if (Array.isArray(res[key])) {
-      res[key].push(val);
-    } else {
-      res[key] = [res[key], val];
-    }
-  });
-
-  return res
-}
-
-function stringifyQuery (obj) {
-  var res = obj ? Object.keys(obj).map(function (key) {
-    var val = obj[key];
-
-    if (val === undefined) {
-      return ''
-    }
-
-    if (val === null) {
-      return encode(key)
-    }
-
-    if (Array.isArray(val)) {
-      var result = [];
-      val.forEach(function (val2) {
-        if (val2 === undefined) {
-          return
-        }
-        if (val2 === null) {
-          result.push(encode(key));
-        } else {
-          result.push(encode(key) + '=' + encode(val2));
-        }
-      });
-      return result.join('&')
-    }
-
-    return encode(key) + '=' + encode(val)
-  }).filter(function (x) { return x.length > 0; }).join('&') : null;
-  return res ? ("?" + res) : ''
-}
-
-/*  */
-
-
-var trailingSlashRE = /\/?$/;
-
-function createRoute (
-  record,
-  location,
-  redirectedFrom,
-  router
-) {
-  var stringifyQuery$$1 = router && router.options.stringifyQuery;
-  var route = {
-    name: location.name || (record && record.name),
-    meta: (record && record.meta) || {},
-    path: location.path || '/',
-    hash: location.hash || '',
-    query: location.query || {},
-    params: location.params || {},
-    fullPath: getFullPath(location, stringifyQuery$$1),
-    matched: record ? formatMatch(record) : []
-  };
-  if (redirectedFrom) {
-    route.redirectedFrom = getFullPath(redirectedFrom, stringifyQuery$$1);
-  }
-  return Object.freeze(route)
-}
-
-// the starting route that represents the initial state
-var START = createRoute(null, {
-  path: '/'
-});
-
-function formatMatch (record) {
-  var res = [];
-  while (record) {
-    res.unshift(record);
-    record = record.parent;
-  }
-  return res
-}
-
-function getFullPath (
-  ref,
-  _stringifyQuery
-) {
-  var path = ref.path;
-  var query = ref.query; if ( query === void 0 ) query = {};
-  var hash = ref.hash; if ( hash === void 0 ) hash = '';
-
-  var stringify = _stringifyQuery || stringifyQuery;
-  return (path || '/') + stringify(query) + hash
-}
-
-function isSameRoute (a, b) {
-  if (b === START) {
-    return a === b
-  } else if (!b) {
-    return false
-  } else if (a.path && b.path) {
-    return (
-      a.path.replace(trailingSlashRE, '') === b.path.replace(trailingSlashRE, '') &&
-      a.hash === b.hash &&
-      isObjectEqual(a.query, b.query)
-    )
-  } else if (a.name && b.name) {
-    return (
-      a.name === b.name &&
-      a.hash === b.hash &&
-      isObjectEqual(a.query, b.query) &&
-      isObjectEqual(a.params, b.params)
-    )
-  } else {
-    return false
-  }
-}
-
-function isObjectEqual (a, b) {
-  if ( a === void 0 ) a = {};
-  if ( b === void 0 ) b = {};
-
-  var aKeys = Object.keys(a);
-  var bKeys = Object.keys(b);
-  if (aKeys.length !== bKeys.length) {
-    return false
-  }
-  return aKeys.every(function (key) {
-    var aVal = a[key];
-    var bVal = b[key];
-    // check nested equality
-    if (typeof aVal === 'object' && typeof bVal === 'object') {
-      return isObjectEqual(aVal, bVal)
-    }
-    return String(aVal) === String(bVal)
-  })
-}
-
-function isIncludedRoute (current, target) {
-  return (
-    current.path.replace(trailingSlashRE, '/').indexOf(
-      target.path.replace(trailingSlashRE, '/')
-    ) === 0 &&
-    (!target.hash || current.hash === target.hash) &&
-    queryIncludes(current.query, target.query)
-  )
-}
-
-function queryIncludes (current, target) {
-  for (var key in target) {
-    if (!(key in current)) {
-      return false
-    }
-  }
-  return true
-}
-
-/*  */
-
-// work around weird flow bug
-var toTypes = [String, Object];
-var eventTypes = [String, Array];
-
-var Link = {
-  name: 'router-link',
-  props: {
-    to: {
-      type: toTypes,
-      required: true
-    },
-    tag: {
-      type: String,
-      default: 'a'
-    },
-    exact: Boolean,
-    append: Boolean,
-    replace: Boolean,
-    activeClass: String,
-    exactActiveClass: String,
-    event: {
-      type: eventTypes,
-      default: 'click'
-    }
-  },
-  render: function render (h) {
-    var this$1 = this;
-
-    var router = this.$router;
-    var current = this.$route;
-    var ref = router.resolve(this.to, current, this.append);
-    var location = ref.location;
-    var route = ref.route;
-    var href = ref.href;
-
-    var classes = {};
-    var globalActiveClass = router.options.linkActiveClass;
-    var globalExactActiveClass = router.options.linkExactActiveClass;
-    // Support global empty active class
-    var activeClassFallback = globalActiveClass == null
-            ? 'router-link-active'
-            : globalActiveClass;
-    var exactActiveClassFallback = globalExactActiveClass == null
-            ? 'router-link-exact-active'
-            : globalExactActiveClass;
-    var activeClass = this.activeClass == null
-            ? activeClassFallback
-            : this.activeClass;
-    var exactActiveClass = this.exactActiveClass == null
-            ? exactActiveClassFallback
-            : this.exactActiveClass;
-    var compareTarget = location.path
-      ? createRoute(null, location, null, router)
-      : route;
-
-    classes[exactActiveClass] = isSameRoute(current, compareTarget);
-    classes[activeClass] = this.exact
-      ? classes[exactActiveClass]
-      : isIncludedRoute(current, compareTarget);
-
-    var handler = function (e) {
-      if (guardEvent(e)) {
-        if (this$1.replace) {
-          router.replace(location);
-        } else {
-          router.push(location);
-        }
-      }
-    };
-
-    var on = { click: guardEvent };
-    if (Array.isArray(this.event)) {
-      this.event.forEach(function (e) { on[e] = handler; });
-    } else {
-      on[this.event] = handler;
-    }
-
-    var data = {
-      class: classes
-    };
-
-    if (this.tag === 'a') {
-      data.on = on;
-      data.attrs = { href: href };
-    } else {
-      // find the first <a> child and apply listener and href
-      var a = findAnchor(this.$slots.default);
-      if (a) {
-        // in case the <a> is a static node
-        a.isStatic = false;
-        var extend = _Vue.util.extend;
-        var aData = a.data = extend({}, a.data);
-        aData.on = on;
-        var aAttrs = a.data.attrs = extend({}, a.data.attrs);
-        aAttrs.href = href;
-      } else {
-        // doesn't have <a> child, apply listener to self
-        data.on = on;
-      }
-    }
-
-    return h(this.tag, data, this.$slots.default)
-  }
-};
-
-function guardEvent (e) {
-  // don't redirect with control keys
-  if (e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) { return }
-  // don't redirect when preventDefault called
-  if (e.defaultPrevented) { return }
-  // don't redirect on right click
-  if (e.button !== undefined && e.button !== 0) { return }
-  // don't redirect if `target="_blank"`
-  if (e.currentTarget && e.currentTarget.getAttribute) {
-    var target = e.currentTarget.getAttribute('target');
-    if (/\b_blank\b/i.test(target)) { return }
-  }
-  // this may be a Weex event which doesn't have this method
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
-  return true
-}
-
-function findAnchor (children) {
-  if (children) {
-    var child;
-    for (var i = 0; i < children.length; i++) {
-      child = children[i];
-      if (child.tag === 'a') {
-        return child
-      }
-      if (child.children && (child = findAnchor(child.children))) {
-        return child
-      }
-    }
-  }
-}
-
-var _Vue;
-
-function install (Vue) {
-  if (install.installed) { return }
-  install.installed = true;
-
-  _Vue = Vue;
-
-  var isDef = function (v) { return v !== undefined; };
-
-  var registerInstance = function (vm, callVal) {
-    var i = vm.$options._parentVnode;
-    if (isDef(i) && isDef(i = i.data) && isDef(i = i.registerRouteInstance)) {
-      i(vm, callVal);
-    }
-  };
-
-  Vue.mixin({
-    beforeCreate: function beforeCreate () {
-      if (isDef(this.$options.router)) {
-        this._routerRoot = this;
-        this._router = this.$options.router;
-        this._router.init(this);
-        Vue.util.defineReactive(this, '_route', this._router.history.current);
-      } else {
-        this._routerRoot = (this.$parent && this.$parent._routerRoot) || this;
-      }
-      registerInstance(this, this);
-    },
-    destroyed: function destroyed () {
-      registerInstance(this);
-    }
-  });
-
-  Object.defineProperty(Vue.prototype, '$router', {
-    get: function get () { return this._routerRoot._router }
-  });
-
-  Object.defineProperty(Vue.prototype, '$route', {
-    get: function get () { return this._routerRoot._route }
-  });
-
-  Vue.component('router-view', View);
-  Vue.component('router-link', Link);
-
-  var strats = Vue.config.optionMergeStrategies;
-  // use the same hook merging strategy for route hooks
-  strats.beforeRouteEnter = strats.beforeRouteLeave = strats.created;
-}
-
-/*  */
-
-var inBrowser = typeof window !== 'undefined';
-
-/*  */
-
-function resolvePath (
-  relative,
-  base,
-  append
-) {
-  var firstChar = relative.charAt(0);
-  if (firstChar === '/') {
-    return relative
-  }
-
-  if (firstChar === '?' || firstChar === '#') {
-    return base + relative
-  }
-
-  var stack = base.split('/');
-
-  // remove trailing segment if:
-  // - not appending
-  // - appending to trailing slash (last segment is empty)
-  if (!append || !stack[stack.length - 1]) {
-    stack.pop();
-  }
-
-  // resolve relative path
-  var segments = relative.replace(/^\//, '').split('/');
-  for (var i = 0; i < segments.length; i++) {
-    var segment = segments[i];
-    if (segment === '..') {
-      stack.pop();
-    } else if (segment !== '.') {
-      stack.push(segment);
-    }
-  }
-
-  // ensure leading slash
-  if (stack[0] !== '') {
-    stack.unshift('');
-  }
-
-  return stack.join('/')
-}
-
-function parsePath (path) {
-  var hash = '';
-  var query = '';
-
-  var hashIndex = path.indexOf('#');
-  if (hashIndex >= 0) {
-    hash = path.slice(hashIndex);
-    path = path.slice(0, hashIndex);
-  }
-
-  var queryIndex = path.indexOf('?');
-  if (queryIndex >= 0) {
-    query = path.slice(queryIndex + 1);
-    path = path.slice(0, queryIndex);
-  }
-
-  return {
-    path: path,
-    query: query,
-    hash: hash
-  }
-}
-
-function cleanPath (path) {
-  return path.replace(/\/\//g, '/')
-}
-
-var index$1 = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
-};
-
-/**
- * Expose `pathToRegexp`.
- */
-var index = pathToRegexp;
-var parse_1 = parse;
-var compile_1 = compile;
-var tokensToFunction_1 = tokensToFunction;
-var tokensToRegExp_1 = tokensToRegExp;
-
-/**
- * The main path matching regexp utility.
- *
- * @type {RegExp}
- */
-var PATH_REGEXP = new RegExp([
-  // Match escaped characters that would otherwise appear in future matches.
-  // This allows the user to escape special characters that won't transform.
-  '(\\\\.)',
-  // Match Express-style parameters and un-named parameters with a prefix
-  // and optional suffixes. Matches appear as:
-  //
-  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
-  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
-  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
-  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))'
-].join('|'), 'g');
-
-/**
- * Parse a string for the raw tokens.
- *
- * @param  {string}  str
- * @param  {Object=} options
- * @return {!Array}
- */
-function parse (str, options) {
-  var tokens = [];
-  var key = 0;
-  var index = 0;
-  var path = '';
-  var defaultDelimiter = options && options.delimiter || '/';
-  var res;
-
-  while ((res = PATH_REGEXP.exec(str)) != null) {
-    var m = res[0];
-    var escaped = res[1];
-    var offset = res.index;
-    path += str.slice(index, offset);
-    index = offset + m.length;
-
-    // Ignore already escaped sequences.
-    if (escaped) {
-      path += escaped[1];
-      continue
-    }
-
-    var next = str[index];
-    var prefix = res[2];
-    var name = res[3];
-    var capture = res[4];
-    var group = res[5];
-    var modifier = res[6];
-    var asterisk = res[7];
-
-    // Push the current path onto the tokens.
-    if (path) {
-      tokens.push(path);
-      path = '';
-    }
-
-    var partial = prefix != null && next != null && next !== prefix;
-    var repeat = modifier === '+' || modifier === '*';
-    var optional = modifier === '?' || modifier === '*';
-    var delimiter = res[2] || defaultDelimiter;
-    var pattern = capture || group;
-
-    tokens.push({
-      name: name || key++,
-      prefix: prefix || '',
-      delimiter: delimiter,
-      optional: optional,
-      repeat: repeat,
-      partial: partial,
-      asterisk: !!asterisk,
-      pattern: pattern ? escapeGroup(pattern) : (asterisk ? '.*' : '[^' + escapeString(delimiter) + ']+?')
-    });
-  }
-
-  // Match any characters still remaining.
-  if (index < str.length) {
-    path += str.substr(index);
-  }
-
-  // If the path exists, push it onto the end.
-  if (path) {
-    tokens.push(path);
-  }
-
-  return tokens
-}
-
-/**
- * Compile a string to a template function for the path.
- *
- * @param  {string}             str
- * @param  {Object=}            options
- * @return {!function(Object=, Object=)}
- */
-function compile (str, options) {
-  return tokensToFunction(parse(str, options))
-}
-
-/**
- * Prettier encoding of URI path segments.
- *
- * @param  {string}
- * @return {string}
- */
-function encodeURIComponentPretty (str) {
-  return encodeURI(str).replace(/[\/?#]/g, function (c) {
-    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
-  })
-}
-
-/**
- * Encode the asterisk parameter. Similar to `pretty`, but allows slashes.
- *
- * @param  {string}
- * @return {string}
- */
-function encodeAsterisk (str) {
-  return encodeURI(str).replace(/[?#]/g, function (c) {
-    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
-  })
-}
-
-/**
- * Expose a method for transforming tokens into the path function.
- */
-function tokensToFunction (tokens) {
-  // Compile all the tokens into regexps.
-  var matches = new Array(tokens.length);
-
-  // Compile all the patterns before compilation.
-  for (var i = 0; i < tokens.length; i++) {
-    if (typeof tokens[i] === 'object') {
-      matches[i] = new RegExp('^(?:' + tokens[i].pattern + ')$');
-    }
-  }
-
-  return function (obj, opts) {
-    var path = '';
-    var data = obj || {};
-    var options = opts || {};
-    var encode = options.pretty ? encodeURIComponentPretty : encodeURIComponent;
-
-    for (var i = 0; i < tokens.length; i++) {
-      var token = tokens[i];
-
-      if (typeof token === 'string') {
-        path += token;
-
-        continue
-      }
-
-      var value = data[token.name];
-      var segment;
-
-      if (value == null) {
-        if (token.optional) {
-          // Prepend partial segment prefixes.
-          if (token.partial) {
-            path += token.prefix;
-          }
-
-          continue
-        } else {
-          throw new TypeError('Expected "' + token.name + '" to be defined')
-        }
-      }
-
-      if (index$1(value)) {
-        if (!token.repeat) {
-          throw new TypeError('Expected "' + token.name + '" to not repeat, but received `' + JSON.stringify(value) + '`')
-        }
-
-        if (value.length === 0) {
-          if (token.optional) {
-            continue
-          } else {
-            throw new TypeError('Expected "' + token.name + '" to not be empty')
-          }
-        }
-
-        for (var j = 0; j < value.length; j++) {
-          segment = encode(value[j]);
-
-          if (!matches[i].test(segment)) {
-            throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received `' + JSON.stringify(segment) + '`')
-          }
-
-          path += (j === 0 ? token.prefix : token.delimiter) + segment;
-        }
-
-        continue
-      }
-
-      segment = token.asterisk ? encodeAsterisk(value) : encode(value);
-
-      if (!matches[i].test(segment)) {
-        throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
-      }
-
-      path += token.prefix + segment;
-    }
-
-    return path
-  }
-}
-
-/**
- * Escape a regular expression string.
- *
- * @param  {string} str
- * @return {string}
- */
-function escapeString (str) {
-  return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, '\\$1')
-}
-
-/**
- * Escape the capturing group by escaping special characters and meaning.
- *
- * @param  {string} group
- * @return {string}
- */
-function escapeGroup (group) {
-  return group.replace(/([=!:$\/()])/g, '\\$1')
-}
-
-/**
- * Attach the keys as a property of the regexp.
- *
- * @param  {!RegExp} re
- * @param  {Array}   keys
- * @return {!RegExp}
- */
-function attachKeys (re, keys) {
-  re.keys = keys;
-  return re
-}
-
-/**
- * Get the flags for a regexp from the options.
- *
- * @param  {Object} options
- * @return {string}
- */
-function flags (options) {
-  return options.sensitive ? '' : 'i'
-}
-
-/**
- * Pull out keys from a regexp.
- *
- * @param  {!RegExp} path
- * @param  {!Array}  keys
- * @return {!RegExp}
- */
-function regexpToRegexp (path, keys) {
-  // Use a negative lookahead to match only capturing groups.
-  var groups = path.source.match(/\((?!\?)/g);
-
-  if (groups) {
-    for (var i = 0; i < groups.length; i++) {
-      keys.push({
-        name: i,
-        prefix: null,
-        delimiter: null,
-        optional: false,
-        repeat: false,
-        partial: false,
-        asterisk: false,
-        pattern: null
-      });
-    }
-  }
-
-  return attachKeys(path, keys)
-}
-
-/**
- * Transform an array into a regexp.
- *
- * @param  {!Array}  path
- * @param  {Array}   keys
- * @param  {!Object} options
- * @return {!RegExp}
- */
-function arrayToRegexp (path, keys, options) {
-  var parts = [];
-
-  for (var i = 0; i < path.length; i++) {
-    parts.push(pathToRegexp(path[i], keys, options).source);
-  }
-
-  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options));
-
-  return attachKeys(regexp, keys)
-}
-
-/**
- * Create a path regexp from string input.
- *
- * @param  {string}  path
- * @param  {!Array}  keys
- * @param  {!Object} options
- * @return {!RegExp}
- */
-function stringToRegexp (path, keys, options) {
-  return tokensToRegExp(parse(path, options), keys, options)
-}
-
-/**
- * Expose a function for taking tokens and returning a RegExp.
- *
- * @param  {!Array}          tokens
- * @param  {(Array|Object)=} keys
- * @param  {Object=}         options
- * @return {!RegExp}
- */
-function tokensToRegExp (tokens, keys, options) {
-  if (!index$1(keys)) {
-    options = /** @type {!Object} */ (keys || options);
-    keys = [];
-  }
-
-  options = options || {};
-
-  var strict = options.strict;
-  var end = options.end !== false;
-  var route = '';
-
-  // Iterate over the tokens and create our regexp string.
-  for (var i = 0; i < tokens.length; i++) {
-    var token = tokens[i];
-
-    if (typeof token === 'string') {
-      route += escapeString(token);
-    } else {
-      var prefix = escapeString(token.prefix);
-      var capture = '(?:' + token.pattern + ')';
-
-      keys.push(token);
-
-      if (token.repeat) {
-        capture += '(?:' + prefix + capture + ')*';
-      }
-
-      if (token.optional) {
-        if (!token.partial) {
-          capture = '(?:' + prefix + '(' + capture + '))?';
-        } else {
-          capture = prefix + '(' + capture + ')?';
-        }
-      } else {
-        capture = prefix + '(' + capture + ')';
-      }
-
-      route += capture;
-    }
-  }
-
-  var delimiter = escapeString(options.delimiter || '/');
-  var endsWithDelimiter = route.slice(-delimiter.length) === delimiter;
-
-  // In non-strict mode we allow a slash at the end of match. If the path to
-  // match already ends with a slash, we remove it for consistency. The slash
-  // is valid at the end of a path match, not in the middle. This is important
-  // in non-ending mode, where "/test/" shouldn't match "/test//route".
-  if (!strict) {
-    route = (endsWithDelimiter ? route.slice(0, -delimiter.length) : route) + '(?:' + delimiter + '(?=$))?';
-  }
-
-  if (end) {
-    route += '$';
-  } else {
-    // In non-ending mode, we need the capturing groups to match as much as
-    // possible by using a positive lookahead to the end or next path segment.
-    route += strict && endsWithDelimiter ? '' : '(?=' + delimiter + '|$)';
-  }
-
-  return attachKeys(new RegExp('^' + route, flags(options)), keys)
-}
-
-/**
- * Normalize the given path string, returning a regular expression.
- *
- * An empty array can be passed in for the keys, which will hold the
- * placeholder key descriptions. For example, using `/user/:id`, `keys` will
- * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
- *
- * @param  {(string|RegExp|Array)} path
- * @param  {(Array|Object)=}       keys
- * @param  {Object=}               options
- * @return {!RegExp}
- */
-function pathToRegexp (path, keys, options) {
-  if (!index$1(keys)) {
-    options = /** @type {!Object} */ (keys || options);
-    keys = [];
-  }
-
-  options = options || {};
-
-  if (path instanceof RegExp) {
-    return regexpToRegexp(path, /** @type {!Array} */ (keys))
-  }
-
-  if (index$1(path)) {
-    return arrayToRegexp(/** @type {!Array} */ (path), /** @type {!Array} */ (keys), options)
-  }
-
-  return stringToRegexp(/** @type {string} */ (path), /** @type {!Array} */ (keys), options)
-}
-
-index.parse = parse_1;
-index.compile = compile_1;
-index.tokensToFunction = tokensToFunction_1;
-index.tokensToRegExp = tokensToRegExp_1;
-
-/*  */
-
-var regexpCompileCache = Object.create(null);
-
-function fillParams (
-  path,
-  params,
-  routeMsg
-) {
-  try {
-    var filler =
-      regexpCompileCache[path] ||
-      (regexpCompileCache[path] = index.compile(path));
-    return filler(params || {}, { pretty: true })
-  } catch (e) {
-    if (true) {
-      warn(false, ("missing param for " + routeMsg + ": " + (e.message)));
-    }
-    return ''
-  }
-}
-
-/*  */
-
-function createRouteMap (
-  routes,
-  oldPathList,
-  oldPathMap,
-  oldNameMap
-) {
-  // the path list is used to control path matching priority
-  var pathList = oldPathList || [];
-  var pathMap = oldPathMap || Object.create(null);
-  var nameMap = oldNameMap || Object.create(null);
-
-  routes.forEach(function (route) {
-    addRouteRecord(pathList, pathMap, nameMap, route);
-  });
-
-  // ensure wildcard routes are always at the end
-  for (var i = 0, l = pathList.length; i < l; i++) {
-    if (pathList[i] === '*') {
-      pathList.push(pathList.splice(i, 1)[0]);
-      l--;
-      i--;
-    }
-  }
-
-  return {
-    pathList: pathList,
-    pathMap: pathMap,
-    nameMap: nameMap
-  }
-}
-
-function addRouteRecord (
-  pathList,
-  pathMap,
-  nameMap,
-  route,
-  parent,
-  matchAs
-) {
-  var path = route.path;
-  var name = route.name;
-  if (true) {
-    assert(path != null, "\"path\" is required in a route configuration.");
-    assert(
-      typeof route.component !== 'string',
-      "route config \"component\" for path: " + (String(path || name)) + " cannot be a " +
-      "string id. Use an actual component instead."
-    );
-  }
-
-  var normalizedPath = normalizePath(path, parent);
-  var pathToRegexpOptions = route.pathToRegexpOptions || {};
-
-  if (typeof route.caseSensitive === 'boolean') {
-    pathToRegexpOptions.sensitive = route.caseSensitive;
-  }
-
-  var record = {
-    path: normalizedPath,
-    regex: compileRouteRegex(normalizedPath, pathToRegexpOptions),
-    components: route.components || { default: route.component },
-    instances: {},
-    name: name,
-    parent: parent,
-    matchAs: matchAs,
-    redirect: route.redirect,
-    beforeEnter: route.beforeEnter,
-    meta: route.meta || {},
-    props: route.props == null
-      ? {}
-      : route.components
-        ? route.props
-        : { default: route.props }
-  };
-
-  if (route.children) {
-    // Warn if route is named, does not redirect and has a default child route.
-    // If users navigate to this route by name, the default child will
-    // not be rendered (GH Issue #629)
-    if (true) {
-      if (route.name && !route.redirect && route.children.some(function (child) { return /^\/?$/.test(child.path); })) {
-        warn(
-          false,
-          "Named Route '" + (route.name) + "' has a default child route. " +
-          "When navigating to this named route (:to=\"{name: '" + (route.name) + "'\"), " +
-          "the default child route will not be rendered. Remove the name from " +
-          "this route and use the name of the default child route for named " +
-          "links instead."
-        );
-      }
-    }
-    route.children.forEach(function (child) {
-      var childMatchAs = matchAs
-        ? cleanPath((matchAs + "/" + (child.path)))
-        : undefined;
-      addRouteRecord(pathList, pathMap, nameMap, child, record, childMatchAs);
-    });
-  }
-
-  if (route.alias !== undefined) {
-    var aliases = Array.isArray(route.alias)
-      ? route.alias
-      : [route.alias];
-
-    aliases.forEach(function (alias) {
-      var aliasRoute = {
-        path: alias,
-        children: route.children
-      };
-      addRouteRecord(
-        pathList,
-        pathMap,
-        nameMap,
-        aliasRoute,
-        parent,
-        record.path || '/' // matchAs
-      );
-    });
-  }
-
-  if (!pathMap[record.path]) {
-    pathList.push(record.path);
-    pathMap[record.path] = record;
-  }
-
-  if (name) {
-    if (!nameMap[name]) {
-      nameMap[name] = record;
-    } else if ("development" !== 'production' && !matchAs) {
-      warn(
-        false,
-        "Duplicate named routes definition: " +
-        "{ name: \"" + name + "\", path: \"" + (record.path) + "\" }"
-      );
-    }
-  }
-}
-
-function compileRouteRegex (path, pathToRegexpOptions) {
-  var regex = index(path, [], pathToRegexpOptions);
-  if (true) {
-    var keys = {};
-    regex.keys.forEach(function (key) {
-      warn(!keys[key.name], ("Duplicate param keys in route with path: \"" + path + "\""));
-      keys[key.name] = true;
-    });
-  }
-  return regex
-}
-
-function normalizePath (path, parent) {
-  path = path.replace(/\/$/, '');
-  if (path[0] === '/') { return path }
-  if (parent == null) { return path }
-  return cleanPath(((parent.path) + "/" + path))
-}
-
-/*  */
-
-
-function normalizeLocation (
-  raw,
-  current,
-  append,
-  router
-) {
-  var next = typeof raw === 'string' ? { path: raw } : raw;
-  // named target
-  if (next.name || next._normalized) {
-    return next
-  }
-
-  // relative params
-  if (!next.path && next.params && current) {
-    next = assign({}, next);
-    next._normalized = true;
-    var params = assign(assign({}, current.params), next.params);
-    if (current.name) {
-      next.name = current.name;
-      next.params = params;
-    } else if (current.matched.length) {
-      var rawPath = current.matched[current.matched.length - 1].path;
-      next.path = fillParams(rawPath, params, ("path " + (current.path)));
-    } else if (true) {
-      warn(false, "relative params navigation requires a current route.");
-    }
-    return next
-  }
-
-  var parsedPath = parsePath(next.path || '');
-  var basePath = (current && current.path) || '/';
-  var path = parsedPath.path
-    ? resolvePath(parsedPath.path, basePath, append || next.append)
-    : basePath;
-
-  var query = resolveQuery(
-    parsedPath.query,
-    next.query,
-    router && router.options.parseQuery
-  );
-
-  var hash = next.hash || parsedPath.hash;
-  if (hash && hash.charAt(0) !== '#') {
-    hash = "#" + hash;
-  }
-
-  return {
-    _normalized: true,
-    path: path,
-    query: query,
-    hash: hash
-  }
-}
-
-function assign (a, b) {
-  for (var key in b) {
-    a[key] = b[key];
-  }
-  return a
-}
-
-/*  */
-
-
-function createMatcher (
-  routes,
-  router
-) {
-  var ref = createRouteMap(routes);
-  var pathList = ref.pathList;
-  var pathMap = ref.pathMap;
-  var nameMap = ref.nameMap;
-
-  function addRoutes (routes) {
-    createRouteMap(routes, pathList, pathMap, nameMap);
-  }
-
-  function match (
-    raw,
-    currentRoute,
-    redirectedFrom
-  ) {
-    var location = normalizeLocation(raw, currentRoute, false, router);
-    var name = location.name;
-
-    if (name) {
-      var record = nameMap[name];
-      if (true) {
-        warn(record, ("Route with name '" + name + "' does not exist"));
-      }
-      if (!record) { return _createRoute(null, location) }
-      var paramNames = record.regex.keys
-        .filter(function (key) { return !key.optional; })
-        .map(function (key) { return key.name; });
-
-      if (typeof location.params !== 'object') {
-        location.params = {};
-      }
-
-      if (currentRoute && typeof currentRoute.params === 'object') {
-        for (var key in currentRoute.params) {
-          if (!(key in location.params) && paramNames.indexOf(key) > -1) {
-            location.params[key] = currentRoute.params[key];
-          }
-        }
-      }
-
-      if (record) {
-        location.path = fillParams(record.path, location.params, ("named route \"" + name + "\""));
-        return _createRoute(record, location, redirectedFrom)
-      }
-    } else if (location.path) {
-      location.params = {};
-      for (var i = 0; i < pathList.length; i++) {
-        var path = pathList[i];
-        var record$1 = pathMap[path];
-        if (matchRoute(record$1.regex, location.path, location.params)) {
-          return _createRoute(record$1, location, redirectedFrom)
-        }
-      }
-    }
-    // no match
-    return _createRoute(null, location)
-  }
-
-  function redirect (
-    record,
-    location
-  ) {
-    var originalRedirect = record.redirect;
-    var redirect = typeof originalRedirect === 'function'
-        ? originalRedirect(createRoute(record, location, null, router))
-        : originalRedirect;
-
-    if (typeof redirect === 'string') {
-      redirect = { path: redirect };
-    }
-
-    if (!redirect || typeof redirect !== 'object') {
-      if (true) {
-        warn(
-          false, ("invalid redirect option: " + (JSON.stringify(redirect)))
-        );
-      }
-      return _createRoute(null, location)
-    }
-
-    var re = redirect;
-    var name = re.name;
-    var path = re.path;
-    var query = location.query;
-    var hash = location.hash;
-    var params = location.params;
-    query = re.hasOwnProperty('query') ? re.query : query;
-    hash = re.hasOwnProperty('hash') ? re.hash : hash;
-    params = re.hasOwnProperty('params') ? re.params : params;
-
-    if (name) {
-      // resolved named direct
-      var targetRecord = nameMap[name];
-      if (true) {
-        assert(targetRecord, ("redirect failed: named route \"" + name + "\" not found."));
-      }
-      return match({
-        _normalized: true,
-        name: name,
-        query: query,
-        hash: hash,
-        params: params
-      }, undefined, location)
-    } else if (path) {
-      // 1. resolve relative redirect
-      var rawPath = resolveRecordPath(path, record);
-      // 2. resolve params
-      var resolvedPath = fillParams(rawPath, params, ("redirect route with path \"" + rawPath + "\""));
-      // 3. rematch with existing query and hash
-      return match({
-        _normalized: true,
-        path: resolvedPath,
-        query: query,
-        hash: hash
-      }, undefined, location)
-    } else {
-      if (true) {
-        warn(false, ("invalid redirect option: " + (JSON.stringify(redirect))));
-      }
-      return _createRoute(null, location)
-    }
-  }
-
-  function alias (
-    record,
-    location,
-    matchAs
-  ) {
-    var aliasedPath = fillParams(matchAs, location.params, ("aliased route with path \"" + matchAs + "\""));
-    var aliasedMatch = match({
-      _normalized: true,
-      path: aliasedPath
-    });
-    if (aliasedMatch) {
-      var matched = aliasedMatch.matched;
-      var aliasedRecord = matched[matched.length - 1];
-      location.params = aliasedMatch.params;
-      return _createRoute(aliasedRecord, location)
-    }
-    return _createRoute(null, location)
-  }
-
-  function _createRoute (
-    record,
-    location,
-    redirectedFrom
-  ) {
-    if (record && record.redirect) {
-      return redirect(record, redirectedFrom || location)
-    }
-    if (record && record.matchAs) {
-      return alias(record, location, record.matchAs)
-    }
-    return createRoute(record, location, redirectedFrom, router)
-  }
-
-  return {
-    match: match,
-    addRoutes: addRoutes
-  }
-}
-
-function matchRoute (
-  regex,
-  path,
-  params
-) {
-  var m = path.match(regex);
-
-  if (!m) {
-    return false
-  } else if (!params) {
-    return true
-  }
-
-  for (var i = 1, len = m.length; i < len; ++i) {
-    var key = regex.keys[i - 1];
-    var val = typeof m[i] === 'string' ? decodeURIComponent(m[i]) : m[i];
-    if (key) {
-      params[key.name] = val;
-    }
-  }
-
-  return true
-}
-
-function resolveRecordPath (path, record) {
-  return resolvePath(path, record.parent ? record.parent.path : '/', true)
-}
-
-/*  */
-
-
-var positionStore = Object.create(null);
-
-function setupScroll () {
-  window.addEventListener('popstate', function (e) {
-    saveScrollPosition();
-    if (e.state && e.state.key) {
-      setStateKey(e.state.key);
-    }
-  });
-}
-
-function handleScroll (
-  router,
-  to,
-  from,
-  isPop
-) {
-  if (!router.app) {
-    return
-  }
-
-  var behavior = router.options.scrollBehavior;
-  if (!behavior) {
-    return
-  }
-
-  if (true) {
-    assert(typeof behavior === 'function', "scrollBehavior must be a function");
-  }
-
-  // wait until re-render finishes before scrolling
-  router.app.$nextTick(function () {
-    var position = getScrollPosition();
-    var shouldScroll = behavior(to, from, isPop ? position : null);
-    if (!shouldScroll) {
-      return
-    }
-    var isObject = typeof shouldScroll === 'object';
-    if (isObject && typeof shouldScroll.selector === 'string') {
-      var el = document.querySelector(shouldScroll.selector);
-      if (el) {
-        var offset = shouldScroll.offset && typeof shouldScroll.offset === 'object' ? shouldScroll.offset : {};
-        offset = normalizeOffset(offset);
-        position = getElementPosition(el, offset);
-      } else if (isValidPosition(shouldScroll)) {
-        position = normalizePosition(shouldScroll);
-      }
-    } else if (isObject && isValidPosition(shouldScroll)) {
-      position = normalizePosition(shouldScroll);
-    }
-
-    if (position) {
-      window.scrollTo(position.x, position.y);
-    }
-  });
-}
-
-function saveScrollPosition () {
-  var key = getStateKey();
-  if (key) {
-    positionStore[key] = {
-      x: window.pageXOffset,
-      y: window.pageYOffset
-    };
-  }
-}
-
-function getScrollPosition () {
-  var key = getStateKey();
-  if (key) {
-    return positionStore[key]
-  }
-}
-
-function getElementPosition (el, offset) {
-  var docEl = document.documentElement;
-  var docRect = docEl.getBoundingClientRect();
-  var elRect = el.getBoundingClientRect();
-  return {
-    x: elRect.left - docRect.left - offset.x,
-    y: elRect.top - docRect.top - offset.y
-  }
-}
-
-function isValidPosition (obj) {
-  return isNumber(obj.x) || isNumber(obj.y)
-}
-
-function normalizePosition (obj) {
-  return {
-    x: isNumber(obj.x) ? obj.x : window.pageXOffset,
-    y: isNumber(obj.y) ? obj.y : window.pageYOffset
-  }
-}
-
-function normalizeOffset (obj) {
-  return {
-    x: isNumber(obj.x) ? obj.x : 0,
-    y: isNumber(obj.y) ? obj.y : 0
-  }
-}
-
-function isNumber (v) {
-  return typeof v === 'number'
-}
-
-/*  */
-
-var supportsPushState = inBrowser && (function () {
-  var ua = window.navigator.userAgent;
-
-  if (
-    (ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
-    ua.indexOf('Mobile Safari') !== -1 &&
-    ua.indexOf('Chrome') === -1 &&
-    ua.indexOf('Windows Phone') === -1
-  ) {
-    return false
-  }
-
-  return window.history && 'pushState' in window.history
-})();
-
-// use User Timing api (if present) for more accurate key precision
-var Time = inBrowser && window.performance && window.performance.now
-  ? window.performance
-  : Date;
-
-var _key = genKey();
-
-function genKey () {
-  return Time.now().toFixed(3)
-}
-
-function getStateKey () {
-  return _key
-}
-
-function setStateKey (key) {
-  _key = key;
-}
-
-function pushState (url, replace) {
-  saveScrollPosition();
-  // try...catch the pushState call to get around Safari
-  // DOM Exception 18 where it limits to 100 pushState calls
-  var history = window.history;
-  try {
-    if (replace) {
-      history.replaceState({ key: _key }, '', url);
-    } else {
-      _key = genKey();
-      history.pushState({ key: _key }, '', url);
-    }
-  } catch (e) {
-    window.location[replace ? 'replace' : 'assign'](url);
-  }
-}
-
-function replaceState (url) {
-  pushState(url, true);
-}
-
-/*  */
-
-function runQueue (queue, fn, cb) {
-  var step = function (index) {
-    if (index >= queue.length) {
-      cb();
-    } else {
-      if (queue[index]) {
-        fn(queue[index], function () {
-          step(index + 1);
-        });
-      } else {
-        step(index + 1);
-      }
-    }
-  };
-  step(0);
-}
-
-/*  */
-
-var History = function History (router, base) {
-  this.router = router;
-  this.base = normalizeBase(base);
-  // start with a route object that stands for "nowhere"
-  this.current = START;
-  this.pending = null;
-  this.ready = false;
-  this.readyCbs = [];
-  this.readyErrorCbs = [];
-  this.errorCbs = [];
-};
-
-History.prototype.listen = function listen (cb) {
-  this.cb = cb;
-};
-
-History.prototype.onReady = function onReady (cb, errorCb) {
-  if (this.ready) {
-    cb();
-  } else {
-    this.readyCbs.push(cb);
-    if (errorCb) {
-      this.readyErrorCbs.push(errorCb);
-    }
-  }
-};
-
-History.prototype.onError = function onError (errorCb) {
-  this.errorCbs.push(errorCb);
-};
-
-History.prototype.transitionTo = function transitionTo (location, onComplete, onAbort) {
-    var this$1 = this;
-
-  var route = this.router.match(location, this.current);
-  this.confirmTransition(route, function () {
-    this$1.updateRoute(route);
-    onComplete && onComplete(route);
-    this$1.ensureURL();
-
-    // fire ready cbs once
-    if (!this$1.ready) {
-      this$1.ready = true;
-      this$1.readyCbs.forEach(function (cb) { cb(route); });
-    }
-  }, function (err) {
-    if (onAbort) {
-      onAbort(err);
-    }
-    if (err && !this$1.ready) {
-      this$1.ready = true;
-      this$1.readyErrorCbs.forEach(function (cb) { cb(err); });
-    }
-  });
-};
-
-History.prototype.confirmTransition = function confirmTransition (route, onComplete, onAbort) {
-    var this$1 = this;
-
-  var current = this.current;
-  var abort = function (err) {
-    if (isError(err)) {
-      if (this$1.errorCbs.length) {
-        this$1.errorCbs.forEach(function (cb) { cb(err); });
-      } else {
-        warn(false, 'uncaught error during route navigation:');
-        console.error(err);
-      }
-    }
-    onAbort && onAbort(err);
-  };
-  if (
-    isSameRoute(route, current) &&
-    // in the case the route map has been dynamically appended to
-    route.matched.length === current.matched.length
-  ) {
-    this.ensureURL();
-    return abort()
-  }
-
-  var ref = resolveQueue(this.current.matched, route.matched);
-    var updated = ref.updated;
-    var deactivated = ref.deactivated;
-    var activated = ref.activated;
-
-  var queue = [].concat(
-    // in-component leave guards
-    extractLeaveGuards(deactivated),
-    // global before hooks
-    this.router.beforeHooks,
-    // in-component update hooks
-    extractUpdateHooks(updated),
-    // in-config enter guards
-    activated.map(function (m) { return m.beforeEnter; }),
-    // async components
-    resolveAsyncComponents(activated)
-  );
-
-  this.pending = route;
-  var iterator = function (hook, next) {
-    if (this$1.pending !== route) {
-      return abort()
-    }
-    try {
-      hook(route, current, function (to) {
-        if (to === false || isError(to)) {
-          // next(false) -> abort navigation, ensure current URL
-          this$1.ensureURL(true);
-          abort(to);
-        } else if (
-          typeof to === 'string' ||
-          (typeof to === 'object' && (
-            typeof to.path === 'string' ||
-            typeof to.name === 'string'
-          ))
-        ) {
-          // next('/') or next({ path: '/' }) -> redirect
-          abort();
-          if (typeof to === 'object' && to.replace) {
-            this$1.replace(to);
-          } else {
-            this$1.push(to);
-          }
-        } else {
-          // confirm transition and pass on the value
-          next(to);
-        }
-      });
-    } catch (e) {
-      abort(e);
-    }
-  };
-
-  runQueue(queue, iterator, function () {
-    var postEnterCbs = [];
-    var isValid = function () { return this$1.current === route; };
-    // wait until async components are resolved before
-    // extracting in-component enter guards
-    var enterGuards = extractEnterGuards(activated, postEnterCbs, isValid);
-    var queue = enterGuards.concat(this$1.router.resolveHooks);
-    runQueue(queue, iterator, function () {
-      if (this$1.pending !== route) {
-        return abort()
-      }
-      this$1.pending = null;
-      onComplete(route);
-      if (this$1.router.app) {
-        this$1.router.app.$nextTick(function () {
-          postEnterCbs.forEach(function (cb) { cb(); });
-        });
-      }
-    });
-  });
-};
-
-History.prototype.updateRoute = function updateRoute (route) {
-  var prev = this.current;
-  this.current = route;
-  this.cb && this.cb(route);
-  this.router.afterHooks.forEach(function (hook) {
-    hook && hook(route, prev);
-  });
-};
-
-function normalizeBase (base) {
-  if (!base) {
-    if (inBrowser) {
-      // respect <base> tag
-      var baseEl = document.querySelector('base');
-      base = (baseEl && baseEl.getAttribute('href')) || '/';
-      // strip full URL origin
-      base = base.replace(/^https?:\/\/[^\/]+/, '');
-    } else {
-      base = '/';
-    }
-  }
-  // make sure there's the starting slash
-  if (base.charAt(0) !== '/') {
-    base = '/' + base;
-  }
-  // remove trailing slash
-  return base.replace(/\/$/, '')
-}
-
-function resolveQueue (
-  current,
-  next
-) {
-  var i;
-  var max = Math.max(current.length, next.length);
-  for (i = 0; i < max; i++) {
-    if (current[i] !== next[i]) {
-      break
-    }
-  }
-  return {
-    updated: next.slice(0, i),
-    activated: next.slice(i),
-    deactivated: current.slice(i)
-  }
-}
-
-function extractGuards (
-  records,
-  name,
-  bind,
-  reverse
-) {
-  var guards = flatMapComponents(records, function (def, instance, match, key) {
-    var guard = extractGuard(def, name);
-    if (guard) {
-      return Array.isArray(guard)
-        ? guard.map(function (guard) { return bind(guard, instance, match, key); })
-        : bind(guard, instance, match, key)
-    }
-  });
-  return flatten(reverse ? guards.reverse() : guards)
-}
-
-function extractGuard (
-  def,
-  key
-) {
-  if (typeof def !== 'function') {
-    // extend now so that global mixins are applied.
-    def = _Vue.extend(def);
-  }
-  return def.options[key]
-}
-
-function extractLeaveGuards (deactivated) {
-  return extractGuards(deactivated, 'beforeRouteLeave', bindGuard, true)
-}
-
-function extractUpdateHooks (updated) {
-  return extractGuards(updated, 'beforeRouteUpdate', bindGuard)
-}
-
-function bindGuard (guard, instance) {
-  if (instance) {
-    return function boundRouteGuard () {
-      return guard.apply(instance, arguments)
-    }
-  }
-}
-
-function extractEnterGuards (
-  activated,
-  cbs,
-  isValid
-) {
-  return extractGuards(activated, 'beforeRouteEnter', function (guard, _, match, key) {
-    return bindEnterGuard(guard, match, key, cbs, isValid)
-  })
-}
-
-function bindEnterGuard (
-  guard,
-  match,
-  key,
-  cbs,
-  isValid
-) {
-  return function routeEnterGuard (to, from, next) {
-    return guard(to, from, function (cb) {
-      next(cb);
-      if (typeof cb === 'function') {
-        cbs.push(function () {
-          // #750
-          // if a router-view is wrapped with an out-in transition,
-          // the instance may not have been registered at this time.
-          // we will need to poll for registration until current route
-          // is no longer valid.
-          poll(cb, match.instances, key, isValid);
-        });
-      }
-    })
-  }
-}
-
-function poll (
-  cb, // somehow flow cannot infer this is a function
-  instances,
-  key,
-  isValid
-) {
-  if (instances[key]) {
-    cb(instances[key]);
-  } else if (isValid()) {
-    setTimeout(function () {
-      poll(cb, instances, key, isValid);
-    }, 16);
-  }
-}
-
-function resolveAsyncComponents (matched) {
-  return function (to, from, next) {
-    var hasAsync = false;
-    var pending = 0;
-    var error = null;
-
-    flatMapComponents(matched, function (def, _, match, key) {
-      // if it's a function and doesn't have cid attached,
-      // assume it's an async component resolve function.
-      // we are not using Vue's default async resolving mechanism because
-      // we want to halt the navigation until the incoming component has been
-      // resolved.
-      if (typeof def === 'function' && def.cid === undefined) {
-        hasAsync = true;
-        pending++;
-
-        var resolve = once(function (resolvedDef) {
-          // save resolved on async factory in case it's used elsewhere
-          def.resolved = typeof resolvedDef === 'function'
-            ? resolvedDef
-            : _Vue.extend(resolvedDef);
-          match.components[key] = resolvedDef;
-          pending--;
-          if (pending <= 0) {
-            next();
-          }
-        });
-
-        var reject = once(function (reason) {
-          var msg = "Failed to resolve async component " + key + ": " + reason;
-          "development" !== 'production' && warn(false, msg);
-          if (!error) {
-            error = isError(reason)
-              ? reason
-              : new Error(msg);
-            next(error);
-          }
-        });
-
-        var res;
-        try {
-          res = def(resolve, reject);
-        } catch (e) {
-          reject(e);
-        }
-        if (res) {
-          if (typeof res.then === 'function') {
-            res.then(resolve, reject);
-          } else {
-            // new syntax in Vue 2.3
-            var comp = res.component;
-            if (comp && typeof comp.then === 'function') {
-              comp.then(resolve, reject);
-            }
-          }
-        }
-      }
-    });
-
-    if (!hasAsync) { next(); }
-  }
-}
-
-function flatMapComponents (
-  matched,
-  fn
-) {
-  return flatten(matched.map(function (m) {
-    return Object.keys(m.components).map(function (key) { return fn(
-      m.components[key],
-      m.instances[key],
-      m, key
-    ); })
-  }))
-}
-
-function flatten (arr) {
-  return Array.prototype.concat.apply([], arr)
-}
-
-// in Webpack 2, require.ensure now also returns a Promise
-// so the resolve/reject functions may get called an extra time
-// if the user uses an arrow function shorthand that happens to
-// return that Promise.
-function once (fn) {
-  var called = false;
-  return function () {
-    var args = [], len = arguments.length;
-    while ( len-- ) args[ len ] = arguments[ len ];
-
-    if (called) { return }
-    called = true;
-    return fn.apply(this, args)
-  }
-}
-
-function isError (err) {
-  return Object.prototype.toString.call(err).indexOf('Error') > -1
-}
-
-/*  */
-
-
-var HTML5History = (function (History$$1) {
-  function HTML5History (router, base) {
-    var this$1 = this;
-
-    History$$1.call(this, router, base);
-
-    var expectScroll = router.options.scrollBehavior;
-
-    if (expectScroll) {
-      setupScroll();
-    }
-
-    window.addEventListener('popstate', function (e) {
-      var current = this$1.current;
-      this$1.transitionTo(getLocation(this$1.base), function (route) {
-        if (expectScroll) {
-          handleScroll(router, route, current, true);
-        }
-      });
-    });
-  }
-
-  if ( History$$1 ) HTML5History.__proto__ = History$$1;
-  HTML5History.prototype = Object.create( History$$1 && History$$1.prototype );
-  HTML5History.prototype.constructor = HTML5History;
-
-  HTML5History.prototype.go = function go (n) {
-    window.history.go(n);
-  };
-
-  HTML5History.prototype.push = function push (location, onComplete, onAbort) {
-    var this$1 = this;
-
-    var ref = this;
-    var fromRoute = ref.current;
-    this.transitionTo(location, function (route) {
-      pushState(cleanPath(this$1.base + route.fullPath));
-      handleScroll(this$1.router, route, fromRoute, false);
-      onComplete && onComplete(route);
-    }, onAbort);
-  };
-
-  HTML5History.prototype.replace = function replace (location, onComplete, onAbort) {
-    var this$1 = this;
-
-    var ref = this;
-    var fromRoute = ref.current;
-    this.transitionTo(location, function (route) {
-      replaceState(cleanPath(this$1.base + route.fullPath));
-      handleScroll(this$1.router, route, fromRoute, false);
-      onComplete && onComplete(route);
-    }, onAbort);
-  };
-
-  HTML5History.prototype.ensureURL = function ensureURL (push) {
-    if (getLocation(this.base) !== this.current.fullPath) {
-      var current = cleanPath(this.base + this.current.fullPath);
-      push ? pushState(current) : replaceState(current);
-    }
-  };
-
-  HTML5History.prototype.getCurrentLocation = function getCurrentLocation () {
-    return getLocation(this.base)
-  };
-
-  return HTML5History;
-}(History));
-
-function getLocation (base) {
-  var path = window.location.pathname;
-  if (base && path.indexOf(base) === 0) {
-    path = path.slice(base.length);
-  }
-  return (path || '/') + window.location.search + window.location.hash
-}
-
-/*  */
-
-
-var HashHistory = (function (History$$1) {
-  function HashHistory (router, base, fallback) {
-    History$$1.call(this, router, base);
-    // check history fallback deeplinking
-    if (fallback && checkFallback(this.base)) {
-      return
-    }
-    ensureSlash();
-  }
-
-  if ( History$$1 ) HashHistory.__proto__ = History$$1;
-  HashHistory.prototype = Object.create( History$$1 && History$$1.prototype );
-  HashHistory.prototype.constructor = HashHistory;
-
-  // this is delayed until the app mounts
-  // to avoid the hashchange listener being fired too early
-  HashHistory.prototype.setupListeners = function setupListeners () {
-    var this$1 = this;
-
-    window.addEventListener('hashchange', function () {
-      if (!ensureSlash()) {
-        return
-      }
-      this$1.transitionTo(getHash(), function (route) {
-        replaceHash(route.fullPath);
-      });
-    });
-  };
-
-  HashHistory.prototype.push = function push (location, onComplete, onAbort) {
-    this.transitionTo(location, function (route) {
-      pushHash(route.fullPath);
-      onComplete && onComplete(route);
-    }, onAbort);
-  };
-
-  HashHistory.prototype.replace = function replace (location, onComplete, onAbort) {
-    this.transitionTo(location, function (route) {
-      replaceHash(route.fullPath);
-      onComplete && onComplete(route);
-    }, onAbort);
-  };
-
-  HashHistory.prototype.go = function go (n) {
-    window.history.go(n);
-  };
-
-  HashHistory.prototype.ensureURL = function ensureURL (push) {
-    var current = this.current.fullPath;
-    if (getHash() !== current) {
-      push ? pushHash(current) : replaceHash(current);
-    }
-  };
-
-  HashHistory.prototype.getCurrentLocation = function getCurrentLocation () {
-    return getHash()
-  };
-
-  return HashHistory;
-}(History));
-
-function checkFallback (base) {
-  var location = getLocation(base);
-  if (!/^\/#/.test(location)) {
-    window.location.replace(
-      cleanPath(base + '/#' + location)
-    );
-    return true
-  }
-}
-
-function ensureSlash () {
-  var path = getHash();
-  if (path.charAt(0) === '/') {
-    return true
-  }
-  replaceHash('/' + path);
-  return false
-}
-
-function getHash () {
-  // We can't use window.location.hash here because it's not
-  // consistent across browsers - Firefox will pre-decode it!
-  var href = window.location.href;
-  var index = href.indexOf('#');
-  return index === -1 ? '' : href.slice(index + 1)
-}
-
-function pushHash (path) {
-  window.location.hash = path;
-}
-
-function replaceHash (path) {
-  var href = window.location.href;
-  var i = href.indexOf('#');
-  var base = i >= 0 ? href.slice(0, i) : href;
-  window.location.replace((base + "#" + path));
-}
-
-/*  */
-
-
-var AbstractHistory = (function (History$$1) {
-  function AbstractHistory (router, base) {
-    History$$1.call(this, router, base);
-    this.stack = [];
-    this.index = -1;
-  }
-
-  if ( History$$1 ) AbstractHistory.__proto__ = History$$1;
-  AbstractHistory.prototype = Object.create( History$$1 && History$$1.prototype );
-  AbstractHistory.prototype.constructor = AbstractHistory;
-
-  AbstractHistory.prototype.push = function push (location, onComplete, onAbort) {
-    var this$1 = this;
-
-    this.transitionTo(location, function (route) {
-      this$1.stack = this$1.stack.slice(0, this$1.index + 1).concat(route);
-      this$1.index++;
-      onComplete && onComplete(route);
-    }, onAbort);
-  };
-
-  AbstractHistory.prototype.replace = function replace (location, onComplete, onAbort) {
-    var this$1 = this;
-
-    this.transitionTo(location, function (route) {
-      this$1.stack = this$1.stack.slice(0, this$1.index).concat(route);
-      onComplete && onComplete(route);
-    }, onAbort);
-  };
-
-  AbstractHistory.prototype.go = function go (n) {
-    var this$1 = this;
-
-    var targetIndex = this.index + n;
-    if (targetIndex < 0 || targetIndex >= this.stack.length) {
-      return
-    }
-    var route = this.stack[targetIndex];
-    this.confirmTransition(route, function () {
-      this$1.index = targetIndex;
-      this$1.updateRoute(route);
-    });
-  };
-
-  AbstractHistory.prototype.getCurrentLocation = function getCurrentLocation () {
-    var current = this.stack[this.stack.length - 1];
-    return current ? current.fullPath : '/'
-  };
-
-  AbstractHistory.prototype.ensureURL = function ensureURL () {
-    // noop
-  };
-
-  return AbstractHistory;
-}(History));
-
-/*  */
-
-var VueRouter = function VueRouter (options) {
-  if ( options === void 0 ) options = {};
-
-  this.app = null;
-  this.apps = [];
-  this.options = options;
-  this.beforeHooks = [];
-  this.resolveHooks = [];
-  this.afterHooks = [];
-  this.matcher = createMatcher(options.routes || [], this);
-
-  var mode = options.mode || 'hash';
-  this.fallback = mode === 'history' && !supportsPushState && options.fallback !== false;
-  if (this.fallback) {
-    mode = 'hash';
-  }
-  if (!inBrowser) {
-    mode = 'abstract';
-  }
-  this.mode = mode;
-
-  switch (mode) {
-    case 'history':
-      this.history = new HTML5History(this, options.base);
-      break
-    case 'hash':
-      this.history = new HashHistory(this, options.base, this.fallback);
-      break
-    case 'abstract':
-      this.history = new AbstractHistory(this, options.base);
-      break
-    default:
-      if (true) {
-        assert(false, ("invalid mode: " + mode));
-      }
-  }
-};
-
-var prototypeAccessors = { currentRoute: {} };
-
-VueRouter.prototype.match = function match (
-  raw,
-  current,
-  redirectedFrom
-) {
-  return this.matcher.match(raw, current, redirectedFrom)
-};
-
-prototypeAccessors.currentRoute.get = function () {
-  return this.history && this.history.current
-};
-
-VueRouter.prototype.init = function init (app /* Vue component instance */) {
-    var this$1 = this;
-
-  "development" !== 'production' && assert(
-    install.installed,
-    "not installed. Make sure to call `Vue.use(VueRouter)` " +
-    "before creating root instance."
-  );
-
-  this.apps.push(app);
-
-  // main app already initialized.
-  if (this.app) {
-    return
-  }
-
-  this.app = app;
-
-  var history = this.history;
-
-  if (history instanceof HTML5History) {
-    history.transitionTo(history.getCurrentLocation());
-  } else if (history instanceof HashHistory) {
-    var setupHashListener = function () {
-      history.setupListeners();
-    };
-    history.transitionTo(
-      history.getCurrentLocation(),
-      setupHashListener,
-      setupHashListener
-    );
-  }
-
-  history.listen(function (route) {
-    this$1.apps.forEach(function (app) {
-      app._route = route;
-    });
-  });
-};
-
-VueRouter.prototype.beforeEach = function beforeEach (fn) {
-  return registerHook(this.beforeHooks, fn)
-};
-
-VueRouter.prototype.beforeResolve = function beforeResolve (fn) {
-  return registerHook(this.resolveHooks, fn)
-};
-
-VueRouter.prototype.afterEach = function afterEach (fn) {
-  return registerHook(this.afterHooks, fn)
-};
-
-VueRouter.prototype.onReady = function onReady (cb, errorCb) {
-  this.history.onReady(cb, errorCb);
-};
-
-VueRouter.prototype.onError = function onError (errorCb) {
-  this.history.onError(errorCb);
-};
-
-VueRouter.prototype.push = function push (location, onComplete, onAbort) {
-  this.history.push(location, onComplete, onAbort);
-};
-
-VueRouter.prototype.replace = function replace (location, onComplete, onAbort) {
-  this.history.replace(location, onComplete, onAbort);
-};
-
-VueRouter.prototype.go = function go (n) {
-  this.history.go(n);
-};
-
-VueRouter.prototype.back = function back () {
-  this.go(-1);
-};
-
-VueRouter.prototype.forward = function forward () {
-  this.go(1);
-};
-
-VueRouter.prototype.getMatchedComponents = function getMatchedComponents (to) {
-  var route = to
-    ? to.matched
-      ? to
-      : this.resolve(to).route
-    : this.currentRoute;
-  if (!route) {
-    return []
-  }
-  return [].concat.apply([], route.matched.map(function (m) {
-    return Object.keys(m.components).map(function (key) {
-      return m.components[key]
-    })
-  }))
-};
-
-VueRouter.prototype.resolve = function resolve (
-  to,
-  current,
-  append
-) {
-  var location = normalizeLocation(
-    to,
-    current || this.history.current,
-    append,
-    this
-  );
-  var route = this.match(location, current);
-  var fullPath = route.redirectedFrom || route.fullPath;
-  var base = this.history.base;
-  var href = createHref(base, fullPath, this.mode);
-  return {
-    location: location,
-    route: route,
-    href: href,
-    // for backwards compat
-    normalizedTo: location,
-    resolved: route
-  }
-};
-
-VueRouter.prototype.addRoutes = function addRoutes (routes) {
-  this.matcher.addRoutes(routes);
-  if (this.history.current !== START) {
-    this.history.transitionTo(this.history.getCurrentLocation());
-  }
-};
-
-Object.defineProperties( VueRouter.prototype, prototypeAccessors );
-
-function registerHook (list, fn) {
-  list.push(fn);
-  return function () {
-    var i = list.indexOf(fn);
-    if (i > -1) { list.splice(i, 1); }
-  }
-}
-
-function createHref (base, fullPath, mode) {
-  var path = mode === 'hash' ? '#' + fullPath : fullPath;
-  return base ? cleanPath(base + '/' + path) : path
-}
-
-VueRouter.install = install;
-VueRouter.version = '2.6.0';
-
-if (inBrowser && window.Vue) {
-  window.Vue.use(VueRouter);
-}
-
-/* harmony default export */ var vue_router_esm_defaultExport = (VueRouter);
-
-// CONCATENATED MODULE: ./resources/assets/js/router/search.js
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__("./node_modules/_vue@2.3.4@vue/dist/vue.common.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_components_search_view_content_vue__ = __webpack_require__("./resources/assets/js/components/search-view/_content.vue");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_components_search_view_content_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_components_search_view_content_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_components_search_view_people_vue__ = __webpack_require__("./resources/assets/js/components/search-view/_people.vue");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_components_search_view_people_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_components_search_view_people_vue__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_components_search_view_topic_vue__ = __webpack_require__("./resources/assets/js/components/search-view/_topic.vue");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_components_search_view_topic_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_components_search_view_topic_vue__);
-
-
-__WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(vue_router_esm_defaultExport);
-
-
-
-
-
-var routes = [{ path: '/', redirect: '/content' }, { path: '/content', component: __WEBPACK_IMPORTED_MODULE_2_components_search_view_content_vue___default.a }, { path: '/people', component: __WEBPACK_IMPORTED_MODULE_3_components_search_view_people_vue___default.a }, { path: '/topic', component: __WEBPACK_IMPORTED_MODULE_4_components_search_view_topic_vue___default.a }];
-
-/* harmony default export */ var search_defaultExport = (new vue_router_esm_defaultExport({
-    routes: routes
-}));
-// CONCATENATED MODULE: ./node_modules/_babel-loader@7.1.0@babel-loader/lib?{"cacheDirectory":true,"presets":[["env",{"modules":false,"targets":{"browsers":["> 2%"],"uglify":true}}]]}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/components/search-view/search-view.vue
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__router_search__ = __webpack_require__("./resources/assets/js/router/search.js");
 //
 //
 //
@@ -4489,7 +1964,7 @@ var routes = [{ path: '/', redirect: '/content' }, { path: '/content', component
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    router: search_defaultExport,
+    router: __WEBPACK_IMPORTED_MODULE_0__router_search__["a" /* default */],
     data: function data() {
         return {
             message: 'asd'
@@ -6884,7 +4359,7 @@ if (typeof jQuery === 'undefined') {
 
 /***/ }),
 
-/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-0067a07c\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/follower-list.vue":
+/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1789d469\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_topic.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/lib/css-base.js")(undefined);
@@ -6892,14 +4367,14 @@ exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.
 
 
 // module
-exports.push([module.i, "\n.follower-item[data-v-0067a07c] {\n  border-bottom: 1px solid #eee;\n  padding-bottom: 15px;\n}\n.follower-item[data-v-0067a07c]:last-child {\n    border-bottom: none;\n}\n.follower-item .follower-avatar[data-v-0067a07c] {\n    width: 60px;\n    height: 60px;\n}\n.follower-item count span[data-v-0067a07c] {\n    color: #ccc;\n}\n.follower-item .is-follow[data-v-0067a07c] {\n    background: #c3ccd9;\n    color: #fff;\n}\n.loading[data-v-0067a07c] {\n  text-align: center;\n}\n", ""]);
+exports.push([module.i, "\n.topic-box[data-v-1789d469] {\n  padding-top: 10px;\n  margin-bottom: 10px;\n}\n.topic-box .topic-item[data-v-1789d469] {\n    border-bottom: 1px solid #eee;\n    padding: 10px 0;\n}\n.topic-box .topic-item[data-v-1789d469]:last-child {\n      border-bottom: none;\n}\n.topic-box .topic-item .topic-img[data-v-1789d469] {\n      width: 60px;\n      height: 60px;\n      border-radius: 5px;\n}\n.topic-box .topic-item .topic-title a[data-v-1789d469] {\n      font-size: 16px;\n}\n.topic-box .topic-item .bottom[data-v-1789d469] {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n}\n.topic-box .topic-item .bottom ul li a[data-v-1789d469] {\n        color: #ccc;\n        font-size: 13px;\n}\n", ""]);
 
 // exports
 
 
 /***/ }),
 
-/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4555aad0\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_people.vue":
+/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2538a169\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/follower-list.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/lib/css-base.js")(undefined);
@@ -6907,14 +4382,14 @@ exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.
 
 
 // module
-exports.push([module.i, "\n.people[data-v-4555aad0] {\n  padding-top: 10px;\n}\n.people .people-box[data-v-4555aad0] {\n    margin-bottom: 10px;\n}\n.people .people-box .people-item[data-v-4555aad0] {\n      border-bottom: 1px solid #ddd;\n      padding: 10px 0;\n}\n.people .people-box .people-item[data-v-4555aad0]:last-child {\n        border: none;\n}\n.people .people-box .people-item .people-main[data-v-4555aad0] {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 10px;\n}\n.people .people-box .people-item .people-main .left[data-v-4555aad0] {\n          display: flex;\n}\n.people .people-box .people-item .people-main .left .author-face[data-v-4555aad0] {\n            margin-right: 10px;\n}\n.people .people-box .people-item .people-main .left .author-face img[data-v-4555aad0] {\n              width: 60px;\n              height: 60px;\n              border-radius: 5px;\n}\n.people .people-box .people-item .people-main .left .author-info .name a[data-v-4555aad0] {\n            margin-right: 5px;\n}\n.people .people-box .people-item .people-main .left .author-info .intro[data-v-4555aad0] {\n            color: #bbb;\n}\n.people .people-box .people-item .people-main .right .actions[data-v-4555aad0] {\n          display: flex;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item[data-v-4555aad0] {\n            padding: 0 10px;\n            text-align: center;\n            display: flex;\n            flex-direction: column;\n            border-right: 1px solid #eee;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item[data-v-4555aad0]:last-child {\n              border: none;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item span[data-v-4555aad0]:first-child {\n              font-weight: bold;\n              color: #666;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item span[data-v-4555aad0]:last-child {\n              color: #ccc;\n              font-size: 13px;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item[data-v-4555aad0]:hover {\n              color: #698ebf;\n              text-decoration: none;\n}\n", ""]);
+exports.push([module.i, "\n.follower-item[data-v-2538a169] {\n  border-bottom: 1px solid #eee;\n  padding-bottom: 15px;\n}\n.follower-item[data-v-2538a169]:last-child {\n    border-bottom: none;\n}\n.follower-item .follower-avatar[data-v-2538a169] {\n    width: 60px;\n    height: 60px;\n}\n.follower-item count span[data-v-2538a169] {\n    color: #ccc;\n}\n.follower-item .is-follow[data-v-2538a169] {\n    background: #c3ccd9;\n    color: #fff;\n}\n.loading[data-v-2538a169] {\n  text-align: center;\n}\n", ""]);
 
 // exports
 
 
 /***/ }),
 
-/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4d4e4936\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_topic.vue":
+/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-309f0200\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/comment-list.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/lib/css-base.js")(undefined);
@@ -6922,14 +4397,29 @@ exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.
 
 
 // module
-exports.push([module.i, "\n.topic-box[data-v-4d4e4936] {\n  padding-top: 10px;\n  margin-bottom: 10px;\n}\n.topic-box .topic-item[data-v-4d4e4936] {\n    border-bottom: 1px solid #eee;\n    padding: 10px 0;\n}\n.topic-box .topic-item[data-v-4d4e4936]:last-child {\n      border-bottom: none;\n}\n.topic-box .topic-item .topic-img[data-v-4d4e4936] {\n      width: 60px;\n      height: 60px;\n      border-radius: 5px;\n}\n.topic-box .topic-item .topic-title a[data-v-4d4e4936] {\n      font-size: 16px;\n}\n.topic-box .topic-item .bottom[data-v-4d4e4936] {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n}\n.topic-box .topic-item .bottom ul li a[data-v-4d4e4936] {\n        color: #ccc;\n        font-size: 13px;\n}\n", ""]);
+exports.push([module.i, "\n.fade-enter-active[data-v-309f0200], .fade-leave-active[data-v-309f0200] {\n  transition: opacity .5s;\n}\n.fade-enter[data-v-309f0200], .fade-leave-to[data-v-309f0200] {\n  opacity: 0;\n}\n.list-item[data-v-309f0200] {\n  display: inline-block;\n  margin-right: 10px;\n}\n.list-enter-active[data-v-309f0200], .list-leave-active[data-v-309f0200] {\n  transition: all 1s;\n}\n.list-enter[data-v-309f0200], .list-leave-to[data-v-309f0200] {\n  opacity: 0;\n  transform: translateY(30px);\n}\n.comment-item[data-v-309f0200] {\n  padding-bottom: 10px;\n  margin-bottom: 10px;\n  border-bottom: 1px solid #eee;\n}\n.comment-item[data-v-309f0200]:last-child {\n    border-bottom: none;\n}\n.comment-item .comment-top[data-v-309f0200] {\n    display: flex;\n    justify-content: space-between;\n    margin-bottom: 10px;\n}\n.comment-item .comment-top .comment-face[data-v-309f0200] {\n      height: 30px;\n      width: 30px;\n      margin-right: 10px;\n}\n.comment-item .comment-top .comment-name[data-v-309f0200] {\n      font-weight: bold;\n}\n.comment-footer[data-v-309f0200] {\n  display: flex;\n  justify-content: space-between;\n}\n.comment-footer .comment-submit[data-v-309f0200] {\n    margin-left: 10px;\n}\n", ""]);
 
 // exports
 
 
 /***/ }),
 
-/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-633a38d8\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/search-view.vue":
+/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5a8b05c5\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_people.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/lib/css-base.js")(undefined);
+// imports
+
+
+// module
+exports.push([module.i, "\n.people[data-v-5a8b05c5] {\n  padding-top: 10px;\n}\n.people .people-box[data-v-5a8b05c5] {\n    margin-bottom: 10px;\n}\n.people .people-box .people-item[data-v-5a8b05c5] {\n      border-bottom: 1px solid #ddd;\n      padding: 10px 0;\n}\n.people .people-box .people-item[data-v-5a8b05c5]:last-child {\n        border: none;\n}\n.people .people-box .people-item .people-main[data-v-5a8b05c5] {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 10px;\n}\n.people .people-box .people-item .people-main .left[data-v-5a8b05c5] {\n          display: flex;\n}\n.people .people-box .people-item .people-main .left .author-face[data-v-5a8b05c5] {\n            margin-right: 10px;\n}\n.people .people-box .people-item .people-main .left .author-face img[data-v-5a8b05c5] {\n              width: 60px;\n              height: 60px;\n              border-radius: 5px;\n}\n.people .people-box .people-item .people-main .left .author-info .name a[data-v-5a8b05c5] {\n            margin-right: 5px;\n}\n.people .people-box .people-item .people-main .left .author-info .intro[data-v-5a8b05c5] {\n            color: #bbb;\n}\n.people .people-box .people-item .people-main .right .actions[data-v-5a8b05c5] {\n          display: flex;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item[data-v-5a8b05c5] {\n            padding: 0 10px;\n            text-align: center;\n            display: flex;\n            flex-direction: column;\n            border-right: 1px solid #eee;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item[data-v-5a8b05c5]:last-child {\n              border: none;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item span[data-v-5a8b05c5]:first-child {\n              font-weight: bold;\n              color: #666;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item span[data-v-5a8b05c5]:last-child {\n              color: #ccc;\n              font-size: 13px;\n}\n.people .people-box .people-item .people-main .right .actions .actions-item[data-v-5a8b05c5]:hover {\n              color: #698ebf;\n              text-decoration: none;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8ca53f7e\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/search-view.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/lib/css-base.js")(undefined);
@@ -6944,7 +4434,7 @@ exports.push([module.i, "", ""]);
 
 /***/ }),
 
-/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-749b7bc0\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_content.vue":
+/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-c3bdf39a\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_content.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/lib/css-base.js")(undefined);
@@ -6952,22 +4442,7 @@ exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.
 
 
 // module
-exports.push([module.i, "\n.time-sort[data-v-749b7bc0] {\n  padding: 10px 0;\n}\n.content-item[data-v-749b7bc0] {\n  border-top: 1px solid #ddd;\n  padding-top: 20px;\n  padding-bottom: 10px;\n}\n.content-item h3[data-v-749b7bc0] {\n    font-size: 16px;\n    margin-bottom: 10px;\n}\n.content-item h3 a[data-v-749b7bc0] {\n      font-weight: bold;\n}\n.content-item .item-main[data-v-749b7bc0] {\n    display: flex;\n}\n.content-item .item-main .left[data-v-749b7bc0] {\n      display: flex;\n      width: 50px;\n      margin-right: 10px;\n      flex-direction: column;\n      text-align: center;\n}\n.content-item .item-main .left a[data-v-749b7bc0] {\n        padding: 5px 0;\n        width: 50px;\n        background-color: #eff6fa;\n        color: #698ebf;\n        margin-bottom: 5px;\n        border-radius: 4px;\n        text-decoration: none;\n}\n.content-item .item-main .left a[data-v-749b7bc0]:hover {\n          background-color: #698ebf;\n          color: #fff;\n}\n.content-item .item-main .left a span[data-v-749b7bc0] {\n          display: block;\n}\n.content-item .item-main .right .author-info[data-v-749b7bc0] {\n      margin-bottom: 5px;\n}\n.content-item .item-main .right .author-info .author-name[data-v-749b7bc0] {\n        font-weight: bold;\n}\n.content-item .item-main .right .author-info .author-intro[data-v-749b7bc0] {\n        color: #aaa;\n}\n.content-item .item-main .right .summary[data-v-749b7bc0] {\n      margin-bottom: 5px;\n}\n.content-item .item-main .right .actions li a[data-v-749b7bc0] {\n      color: #ccc;\n      font-size: 13px;\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-
-/***/ "./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d8285ce6\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/comment-list.vue":
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/lib/css-base.js")(undefined);
-// imports
-
-
-// module
-exports.push([module.i, "\n.fade-enter-active[data-v-d8285ce6], .fade-leave-active[data-v-d8285ce6] {\n  transition: opacity .5s;\n}\n.fade-enter[data-v-d8285ce6], .fade-leave-to[data-v-d8285ce6] {\n  opacity: 0;\n}\n.list-item[data-v-d8285ce6] {\n  display: inline-block;\n  margin-right: 10px;\n}\n.list-enter-active[data-v-d8285ce6], .list-leave-active[data-v-d8285ce6] {\n  transition: all 1s;\n}\n.list-enter[data-v-d8285ce6], .list-leave-to[data-v-d8285ce6] {\n  opacity: 0;\n  transform: translateY(30px);\n}\n.comment-item[data-v-d8285ce6] {\n  padding-bottom: 10px;\n  margin-bottom: 10px;\n  border-bottom: 1px solid #eee;\n}\n.comment-item[data-v-d8285ce6]:last-child {\n    border-bottom: none;\n}\n.comment-item .comment-top[data-v-d8285ce6] {\n    display: flex;\n    justify-content: space-between;\n    margin-bottom: 10px;\n}\n.comment-item .comment-top .comment-face[data-v-d8285ce6] {\n      height: 30px;\n      width: 30px;\n      margin-right: 10px;\n}\n.comment-item .comment-top .comment-name[data-v-d8285ce6] {\n      font-weight: bold;\n}\n.comment-footer[data-v-d8285ce6] {\n  display: flex;\n  justify-content: space-between;\n}\n.comment-footer .comment-submit[data-v-d8285ce6] {\n    margin-left: 10px;\n}\n", ""]);
+exports.push([module.i, "\n.time-sort[data-v-c3bdf39a] {\n  padding: 10px 0;\n}\n.content-item[data-v-c3bdf39a] {\n  border-top: 1px solid #ddd;\n  padding-top: 20px;\n  padding-bottom: 10px;\n}\n.content-item h3[data-v-c3bdf39a] {\n    font-size: 16px;\n    margin-bottom: 10px;\n}\n.content-item h3 a[data-v-c3bdf39a] {\n      font-weight: bold;\n}\n.content-item .item-main[data-v-c3bdf39a] {\n    display: flex;\n}\n.content-item .item-main .left[data-v-c3bdf39a] {\n      display: flex;\n      width: 50px;\n      margin-right: 10px;\n      flex-direction: column;\n      text-align: center;\n}\n.content-item .item-main .left a[data-v-c3bdf39a] {\n        padding: 5px 0;\n        width: 50px;\n        background-color: #eff6fa;\n        color: #698ebf;\n        margin-bottom: 5px;\n        border-radius: 4px;\n        text-decoration: none;\n}\n.content-item .item-main .left a[data-v-c3bdf39a]:hover {\n          background-color: #698ebf;\n          color: #fff;\n}\n.content-item .item-main .left a span[data-v-c3bdf39a] {\n          display: block;\n}\n.content-item .item-main .right .author-info[data-v-c3bdf39a] {\n      margin-bottom: 5px;\n}\n.content-item .item-main .right .author-info .author-name[data-v-c3bdf39a] {\n        font-weight: bold;\n}\n.content-item .item-main .right .author-info .author-intro[data-v-c3bdf39a] {\n        color: #aaa;\n}\n.content-item .item-main .right .summary[data-v-c3bdf39a] {\n      margin-bottom: 5px;\n}\n.content-item .item-main .right .actions li a[data-v-c3bdf39a] {\n      color: #ccc;\n      font-size: 13px;\n}\n", ""]);
 
 // exports
 
@@ -7053,3076 +4528,6 @@ function toComment(sourceMap) {
 
 	return '/*# ' + data + ' */';
 }
-
-
-/***/ }),
-
-/***/ "./node_modules/_holderjs@2.9.4@holderjs/holder.js":
-/***/ (function(module, exports, __webpack_require__) {
-
-/*!
-
-Holder - client side image placeholders
-Version 2.9.4+cabil
-© 2016 Ivan Malopinsky - http://imsky.co
-
-Site:     http://holderjs.com
-Issues:   https://github.com/imsky/holder/issues
-License:  MIT
-
-*/
-(function (window) {
-  if (!window.document) return;
-  var document = window.document;
-
-  //https://github.com/inexorabletash/polyfill/blob/master/web.js
-    if (!document.querySelectorAll) {
-      document.querySelectorAll = function (selectors) {
-        var style = document.createElement('style'), elements = [], element;
-        document.documentElement.firstChild.appendChild(style);
-        document._qsa = [];
-
-        style.styleSheet.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}';
-        window.scrollBy(0, 0);
-        style.parentNode.removeChild(style);
-
-        while (document._qsa.length) {
-          element = document._qsa.shift();
-          element.style.removeAttribute('x-qsa');
-          elements.push(element);
-        }
-        document._qsa = null;
-        return elements;
-      };
-    }
-
-    if (!document.querySelector) {
-      document.querySelector = function (selectors) {
-        var elements = document.querySelectorAll(selectors);
-        return (elements.length) ? elements[0] : null;
-      };
-    }
-
-    if (!document.getElementsByClassName) {
-      document.getElementsByClassName = function (classNames) {
-        classNames = String(classNames).replace(/^|\s+/g, '.');
-        return document.querySelectorAll(classNames);
-      };
-    }
-
-  //https://github.com/inexorabletash/polyfill
-  // ES5 15.2.3.14 Object.keys ( O )
-  // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
-  if (!Object.keys) {
-    Object.keys = function (o) {
-      if (o !== Object(o)) { throw TypeError('Object.keys called on non-object'); }
-      var ret = [], p;
-      for (p in o) {
-        if (Object.prototype.hasOwnProperty.call(o, p)) {
-          ret.push(p);
-        }
-      }
-      return ret;
-    };
-  }
-
-  // ES5 15.4.4.18 Array.prototype.forEach ( callbackfn [ , thisArg ] )
-  // From https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/forEach
-  if (!Array.prototype.forEach) {
-    Array.prototype.forEach = function (fun /*, thisp */) {
-      if (this === void 0 || this === null) { throw TypeError(); }
-
-      var t = Object(this);
-      var len = t.length >>> 0;
-      if (typeof fun !== "function") { throw TypeError(); }
-
-      var thisp = arguments[1], i;
-      for (i = 0; i < len; i++) {
-        if (i in t) {
-          fun.call(thisp, t[i], i, t);
-        }
-      }
-    };
-  }
-
-  //https://github.com/inexorabletash/polyfill/blob/master/web.js
-  (function (global) {
-    var B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    global.atob = global.atob || function (input) {
-      input = String(input);
-      var position = 0,
-          output = [],
-          buffer = 0, bits = 0, n;
-
-      input = input.replace(/\s/g, '');
-      if ((input.length % 4) === 0) { input = input.replace(/=+$/, ''); }
-      if ((input.length % 4) === 1) { throw Error('InvalidCharacterError'); }
-      if (/[^+/0-9A-Za-z]/.test(input)) { throw Error('InvalidCharacterError'); }
-
-      while (position < input.length) {
-        n = B64_ALPHABET.indexOf(input.charAt(position));
-        buffer = (buffer << 6) | n;
-        bits += 6;
-
-        if (bits === 24) {
-          output.push(String.fromCharCode((buffer >> 16) & 0xFF));
-          output.push(String.fromCharCode((buffer >>  8) & 0xFF));
-          output.push(String.fromCharCode(buffer & 0xFF));
-          bits = 0;
-          buffer = 0;
-        }
-        position += 1;
-      }
-
-      if (bits === 12) {
-        buffer = buffer >> 4;
-        output.push(String.fromCharCode(buffer & 0xFF));
-      } else if (bits === 18) {
-        buffer = buffer >> 2;
-        output.push(String.fromCharCode((buffer >> 8) & 0xFF));
-        output.push(String.fromCharCode(buffer & 0xFF));
-      }
-
-      return output.join('');
-    };
-
-    global.btoa = global.btoa || function (input) {
-      input = String(input);
-      var position = 0,
-          out = [],
-          o1, o2, o3,
-          e1, e2, e3, e4;
-
-      if (/[^\x00-\xFF]/.test(input)) { throw Error('InvalidCharacterError'); }
-
-      while (position < input.length) {
-        o1 = input.charCodeAt(position++);
-        o2 = input.charCodeAt(position++);
-        o3 = input.charCodeAt(position++);
-
-        // 111111 112222 222233 333333
-        e1 = o1 >> 2;
-        e2 = ((o1 & 0x3) << 4) | (o2 >> 4);
-        e3 = ((o2 & 0xf) << 2) | (o3 >> 6);
-        e4 = o3 & 0x3f;
-
-        if (position === input.length + 2) {
-          e3 = 64; e4 = 64;
-        }
-        else if (position === input.length + 1) {
-          e4 = 64;
-        }
-
-        out.push(B64_ALPHABET.charAt(e1),
-                 B64_ALPHABET.charAt(e2),
-                 B64_ALPHABET.charAt(e3),
-                 B64_ALPHABET.charAt(e4));
-      }
-
-      return out.join('');
-    };
-  }(window));
-
-  //https://gist.github.com/jimeh/332357
-  if (!Object.prototype.hasOwnProperty){
-      /*jshint -W001, -W103 */
-      Object.prototype.hasOwnProperty = function(prop) {
-      var proto = this.__proto__ || this.constructor.prototype;
-      return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
-    };
-      /*jshint +W001, +W103 */
-  }
-
-  // @license http://opensource.org/licenses/MIT
-  // copyright Paul Irish 2015
-
-
-  // Date.now() is supported everywhere except IE8. For IE8 we use the Date.now polyfill
-  //   github.com/Financial-Times/polyfill-service/blob/master/polyfills/Date.now/polyfill.js
-  // as Safari 6 doesn't have support for NavigationTiming, we use a Date.now() timestamp for relative values
-
-  // if you want values similar to what you'd get with real perf.now, place this towards the head of the page
-  // but in reality, you're just getting the delta between now() calls, so it's not terribly important where it's placed
-
-
-  (function(){
-
-    if ('performance' in window === false) {
-        window.performance = {};
-    }
-    
-    Date.now = (Date.now || function () {  // thanks IE8
-      return new Date().getTime();
-    });
-
-    if ('now' in window.performance === false){
-      
-      var nowOffset = Date.now();
-      
-      if (performance.timing && performance.timing.navigationStart){
-        nowOffset = performance.timing.navigationStart;
-      }
-
-      window.performance.now = function now(){
-        return Date.now() - nowOffset;
-      };
-    }
-
-  })();
-
-  //requestAnimationFrame polyfill for older Firefox/Chrome versions
-  if (!window.requestAnimationFrame) {
-    if (window.webkitRequestAnimationFrame && window.webkitCancelAnimationFrame) {
-    //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-webkit.js
-    (function (global) {
-      global.requestAnimationFrame = function (callback) {
-        return webkitRequestAnimationFrame(function () {
-          callback(global.performance.now());
-        });
-      };
-
-      global.cancelAnimationFrame = global.webkitCancelAnimationFrame;
-    }(window));
-    } else if (window.mozRequestAnimationFrame && window.mozCancelAnimationFrame) {
-      //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-moz.js
-    (function (global) {
-      global.requestAnimationFrame = function (callback) {
-        return mozRequestAnimationFrame(function () {
-          callback(global.performance.now());
-        });
-      };
-
-      global.cancelAnimationFrame = global.mozCancelAnimationFrame;
-    }(window));
-    } else {
-    (function (global) {
-      global.requestAnimationFrame = function (callback) {
-        return global.setTimeout(callback, 1000 / 60);
-      };
-
-      global.cancelAnimationFrame = global.clearTimeout;
-    })(window);
-    }
-  }
-})(this);
-
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(true)
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["Holder"] = factory();
-	else
-		root["Holder"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
-/******/ 			return installedModules[moduleId].exports;
-
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			exports: {},
-/******/ 			id: moduleId,
-/******/ 			loaded: false
-/******/ 		};
-
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
-/******/ 		// Flag the module as loaded
-/******/ 		module.loaded = true;
-
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-
-
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(0);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*
-	Holder.js - client side image placeholders
-	(c) 2012-2015 Ivan Malopinsky - http://imsky.co
-	*/
-
-	module.exports = __webpack_require__(1);
-
-
-/***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {/*
-	Holder.js - client side image placeholders
-	(c) 2012-2016 Ivan Malopinsky - http://imsky.co
-	*/
-
-	//Libraries and functions
-	var onDomReady = __webpack_require__(2);
-	var querystring = __webpack_require__(3);
-
-	var SceneGraph = __webpack_require__(6);
-	var utils = __webpack_require__(7);
-	var SVG = __webpack_require__(8);
-	var DOM = __webpack_require__(9);
-	var Color = __webpack_require__(10);
-	var constants = __webpack_require__(11);
-
-	var svgRenderer = __webpack_require__(12);
-	var sgCanvasRenderer = __webpack_require__(15);
-
-	var extend = utils.extend;
-	var dimensionCheck = utils.dimensionCheck;
-
-	//Constants and definitions
-	var SVG_NS = constants.svg_ns;
-
-	var Holder = {
-	    version: constants.version,
-
-	    /**
-	     * Adds a theme to default settings
-	     *
-	     * @param {string} name Theme name
-	     * @param {Object} theme Theme object, with foreground, background, size, font, and fontweight properties.
-	     */
-	    addTheme: function(name, theme) {
-	        name != null && theme != null && (App.settings.themes[name] = theme);
-	        delete App.vars.cache.themeKeys;
-	        return this;
-	    },
-
-	    /**
-	     * Appends a placeholder to an element
-	     *
-	     * @param {string} src Placeholder URL string
-	     * @param el A selector or a reference to a DOM node
-	     */
-	    addImage: function(src, el) {
-	        //todo: use jquery fallback if available for all QSA references
-	        var nodes = DOM.getNodeArray(el);
-	        nodes.forEach(function (node) {
-	            var img = DOM.newEl('img');
-	            var domProps = {};
-	            domProps[App.setup.dataAttr] = src;
-	            DOM.setAttr(img, domProps);
-	            node.appendChild(img);
-	        });
-	        return this;
-	    },
-
-	    /**
-	     * Sets whether or not an image is updated on resize.
-	     * If an image is set to be updated, it is immediately rendered.
-	     *
-	     * @param {Object} el Image DOM element
-	     * @param {Boolean} value Resizable update flag value
-	     */
-	    setResizeUpdate: function(el, value) {
-	        if (el.holderData) {
-	            el.holderData.resizeUpdate = !!value;
-	            if (el.holderData.resizeUpdate) {
-	                updateResizableElements(el);
-	            }
-	        }
-	    },
-
-	    /**
-	     * Runs Holder with options. By default runs Holder on all images with "holder.js" in their source attributes.
-	     *
-	     * @param {Object} userOptions Options object, can contain domain, themes, images, and bgnodes properties
-	     */
-	    run: function(userOptions) {
-	        //todo: split processing into separate queues
-	        userOptions = userOptions || {};
-	        var engineSettings = {};
-	        var options = extend(App.settings, userOptions);
-
-	        App.vars.preempted = true;
-	        App.vars.dataAttr = options.dataAttr || App.setup.dataAttr;
-
-	        engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
-	        if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
-	            engineSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
-	        }
-
-	        var images = DOM.getNodeArray(options.images);
-	        var bgnodes = DOM.getNodeArray(options.bgnodes);
-	        var stylenodes = DOM.getNodeArray(options.stylenodes);
-	        var objects = DOM.getNodeArray(options.objects);
-
-	        engineSettings.stylesheets = [];
-	        engineSettings.svgXMLStylesheet = true;
-	        engineSettings.noFontFallback = !!options.noFontFallback;
-	        engineSettings.noBackgroundSize = !!options.noBackgroundSize;
-
-	        stylenodes.forEach(function (styleNode) {
-	            if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
-	                var href = styleNode.attributes.href.value;
-	                //todo: write isomorphic relative-to-absolute URL function
-	                var proxyLink = DOM.newEl('a');
-	                proxyLink.href = href;
-	                var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
-	                engineSettings.stylesheets.push(stylesheetURL);
-	            }
-	        });
-
-	        bgnodes.forEach(function (bgNode) {
-	            //Skip processing background nodes if getComputedStyle is unavailable, since only modern browsers would be able to use canvas or SVG to render to background
-	            if (!global.getComputedStyle) return;
-	            var backgroundImage = global.getComputedStyle(bgNode, null).getPropertyValue('background-image');
-	            var dataBackgroundImage = bgNode.getAttribute('data-background-src');
-	            var rawURL = dataBackgroundImage || backgroundImage;
-
-	            var holderURL = null;
-	            var holderString = options.domain + '/';
-	            var holderStringIndex = rawURL.indexOf(holderString);
-
-	            if (holderStringIndex === 0) {
-	                holderURL = rawURL;
-	            } else if (holderStringIndex === 1 && rawURL[0] === '?') {
-	                holderURL = rawURL.slice(1);
-	            } else {
-	                var fragment = rawURL.substr(holderStringIndex).match(/([^\"]*)"?\)/);
-	                if (fragment !== null) {
-	                    holderURL = fragment[1];
-	                } else if (rawURL.indexOf('url(') === 0) {
-	                    throw 'Holder: unable to parse background URL: ' + rawURL;
-	                }
-	            }
-
-	            if (holderURL) {
-	                var holderFlags = parseURL(holderURL, options);
-	                if (holderFlags) {
-	                    prepareDOMElement({
-	                        mode: 'background',
-	                        el: bgNode,
-	                        flags: holderFlags,
-	                        engineSettings: engineSettings
-	                    });
-	                }
-	            }
-	        });
-
-	        objects.forEach(function (object) {
-	            var objectAttr = {};
-
-	            try {
-	                objectAttr.data = object.getAttribute('data');
-	                objectAttr.dataSrc = object.getAttribute(App.vars.dataAttr);
-	            } catch (e) {}
-
-	            var objectHasSrcURL = objectAttr.data != null && objectAttr.data.indexOf(options.domain) === 0;
-	            var objectHasDataSrcURL = objectAttr.dataSrc != null && objectAttr.dataSrc.indexOf(options.domain) === 0;
-
-	            if (objectHasSrcURL) {
-	                prepareImageElement(options, engineSettings, objectAttr.data, object);
-	            } else if (objectHasDataSrcURL) {
-	                prepareImageElement(options, engineSettings, objectAttr.dataSrc, object);
-	            }
-	        });
-
-	        images.forEach(function (image) {
-	            var imageAttr = {};
-
-	            try {
-	                imageAttr.src = image.getAttribute('src');
-	                imageAttr.dataSrc = image.getAttribute(App.vars.dataAttr);
-	                imageAttr.rendered = image.getAttribute('data-holder-rendered');
-	            } catch (e) {}
-
-	            var imageHasSrc = imageAttr.src != null;
-	            var imageHasDataSrcURL = imageAttr.dataSrc != null && imageAttr.dataSrc.indexOf(options.domain) === 0;
-	            var imageRendered = imageAttr.rendered != null && imageAttr.rendered == 'true';
-
-	            if (imageHasSrc) {
-	                if (imageAttr.src.indexOf(options.domain) === 0) {
-	                    prepareImageElement(options, engineSettings, imageAttr.src, image);
-	                } else if (imageHasDataSrcURL) {
-	                    //Image has a valid data-src and an invalid src
-	                    if (imageRendered) {
-	                        //If the placeholder has already been render, re-render it
-	                        prepareImageElement(options, engineSettings, imageAttr.dataSrc, image);
-	                    } else {
-	                        //If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
-	                        (function(src, options, engineSettings, dataSrc, image) {
-	                            utils.imageExists(src, function(exists) {
-	                                if (!exists) {
-	                                    prepareImageElement(options, engineSettings, dataSrc, image);
-	                                }
-	                            });
-	                        })(imageAttr.src, options, engineSettings, imageAttr.dataSrc, image);
-	                    }
-	                }
-	            } else if (imageHasDataSrcURL) {
-	                prepareImageElement(options, engineSettings, imageAttr.dataSrc, image);
-	            }
-	        });
-
-	        return this;
-	    }
-	};
-
-	var App = {
-	    settings: {
-	        domain: 'holder.js',
-	        images: 'img',
-	        objects: 'object',
-	        bgnodes: 'body .holderjs',
-	        stylenodes: 'head link.holderjs',
-	        themes: {
-	            'gray': {
-	                bg: '#EEEEEE',
-	                fg: '#AAAAAA'
-	            },
-	            'social': {
-	                bg: '#3a5a97',
-	                fg: '#FFFFFF'
-	            },
-	            'industrial': {
-	                bg: '#434A52',
-	                fg: '#C2F200'
-	            },
-	            'sky': {
-	                bg: '#0D8FDB',
-	                fg: '#FFFFFF'
-	            },
-	            'vine': {
-	                bg: '#39DBAC',
-	                fg: '#1E292C'
-	            },
-	            'lava': {
-	                bg: '#F8591A',
-	                fg: '#1C2846'
-	            }
-	        }
-	    },
-	    defaults: {
-	        size: 10,
-	        units: 'pt',
-	        scale: 1 / 16
-	    }
-	};
-
-	/**
-	 * Processes provided source attribute and sets up the appropriate rendering workflow
-	 *
-	 * @private
-	 * @param options Instance options from Holder.run
-	 * @param renderSettings Instance configuration
-	 * @param src Image URL
-	 * @param el Image DOM element
-	 */
-	function prepareImageElement(options, engineSettings, src, el) {
-	    var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
-	    if (holderFlags) {
-	        prepareDOMElement({
-	            mode: null,
-	            el: el,
-	            flags: holderFlags,
-	            engineSettings: engineSettings
-	        });
-	    }
-	}
-
-	/**
-	 * Processes a Holder URL and extracts configuration from query string
-	 *
-	 * @private
-	 * @param url URL
-	 * @param instanceOptions Instance options from Holder.run
-	 */
-	function parseURL(url, instanceOptions) {
-	    var holder = {
-	        theme: extend(App.settings.themes.gray, null),
-	        stylesheets: instanceOptions.stylesheets,
-	        instanceOptions: instanceOptions
-	    };
-
-	    var firstQuestionMark = url.indexOf('?');
-	    var parts = [url];
-
-	    if (firstQuestionMark !== -1) {
-	        parts = [url.slice(0, firstQuestionMark), url.slice(firstQuestionMark + 1)];
-	    }
-
-	    var basics = parts[0].split('/');
-
-	    holder.holderURL = url;
-
-	    var dimensions = basics[1];
-	    var dimensionData = dimensions.match(/([\d]+p?)x([\d]+p?)/);
-
-	    if (!dimensionData) return false;
-
-	    holder.fluid = dimensions.indexOf('p') !== -1;
-
-	    holder.dimensions = {
-	        width: dimensionData[1].replace('p', '%'),
-	        height: dimensionData[2].replace('p', '%')
-	    };
-
-	    if (parts.length === 2) {
-	        var options = querystring.parse(parts[1]);
-
-	        // Dimensions
-
-	        if (utils.truthy(options.ratio)) {
-	            holder.fluid = true;
-	            var ratioWidth = parseFloat(holder.dimensions.width.replace('%', ''));
-	            var ratioHeight = parseFloat(holder.dimensions.height.replace('%', ''));
-
-	            ratioHeight = Math.floor(100 * (ratioHeight / ratioWidth));
-	            ratioWidth = 100;
-
-	            holder.dimensions.width = ratioWidth + '%';
-	            holder.dimensions.height = ratioHeight + '%';
-	        }
-
-	        holder.auto = utils.truthy(options.auto);
-
-	        // Colors
-
-	        if (options.bg) {
-	            holder.theme.bg = utils.parseColor(options.bg);
-	        }
-
-	        if (options.fg) {
-	            holder.theme.fg = utils.parseColor(options.fg);
-	        }
-
-	        //todo: add automatic foreground to themes without foreground
-	        if (options.bg && !options.fg) {
-	            holder.autoFg = true;
-	        }
-
-	        if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
-	            holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
-	        }
-
-	        // Text
-
-	        if (options.text) {
-	            holder.text = options.text;
-	        }
-
-	        if (options.textmode) {
-	            holder.textmode = options.textmode;
-	        }
-
-	        if (options.size) {
-	            holder.size = options.size;
-	        }
-
-	        if (options.font) {
-	            holder.font = options.font;
-	        }
-
-	        if (options.align) {
-	            holder.align = options.align;
-	        }
-
-	        if (options.lineWrap) {
-	            holder.lineWrap = options.lineWrap;
-	        }
-
-	        holder.nowrap = utils.truthy(options.nowrap);
-
-	        // Miscellaneous
-
-	        holder.outline = utils.truthy(options.outline);
-
-	        if (utils.truthy(options.random)) {
-	            App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
-	            var _theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
-	            holder.theme = extend(holder.instanceOptions.themes[_theme], null);
-	        }
-	    }
-
-	    return holder;
-	}
-
-	/**
-	 * Modifies the DOM to fit placeholders and sets up resizable image callbacks (for fluid and automatically sized placeholders)
-	 *
-	 * @private
-	 * @param settings DOM prep settings
-	 */
-	function prepareDOMElement(prepSettings) {
-	    var mode = prepSettings.mode;
-	    var el = prepSettings.el;
-	    var flags = prepSettings.flags;
-	    var _engineSettings = prepSettings.engineSettings;
-	    var dimensions = flags.dimensions,
-	        theme = flags.theme;
-	    var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
-	    mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
-	    var holderTemplateRe = /holder_([a-z]+)/g;
-	    var dimensionsInText = false;
-
-	    if (flags.text != null) {
-	        theme.text = flags.text;
-
-	        //<object> SVG embedding doesn't parse Unicode properly
-	        if (el.nodeName.toLowerCase() === 'object') {
-	            var textLines = theme.text.split('\\n');
-	            for (var k = 0; k < textLines.length; k++) {
-	                textLines[k] = utils.encodeHtmlEntity(textLines[k]);
-	            }
-	            theme.text = textLines.join('\\n');
-	        }
-	    }
-
-	    if (theme.text) {
-	        var holderTemplateMatches = theme.text.match(holderTemplateRe);
-
-	        if (holderTemplateMatches !== null) {
-	            //todo: optimize template replacement
-	            holderTemplateMatches.forEach(function (match) {
-	                if (match === 'holder_dimensions') {
-	                    theme.text = theme.text.replace(match, dimensionsCaption);
-	                }
-	            });
-	        }
-	    }
-
-	    var holderURL = flags.holderURL;
-	    var engineSettings = extend(_engineSettings, null);
-
-	    if (flags.font) {
-	        /*
-	        If external fonts are used in a <img> placeholder rendered with SVG, Holder falls back to canvas.
-
-	        This is done because Firefox and Chrome disallow embedded SVGs from referencing external assets.
-	        The workaround is either to change the placeholder tag from <img> to <object> or to use the canvas renderer.
-	        */
-	        theme.font = flags.font;
-	        if (!engineSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas && engineSettings.renderer === 'svg') {
-	            engineSettings = extend(engineSettings, {
-	                renderer: 'canvas'
-	            });
-	        }
-	    }
-
-	    //Chrome and Opera require a quick 10ms re-render if web fonts are used with canvas
-	    if (flags.font && engineSettings.renderer == 'canvas') {
-	        engineSettings.reRender = true;
-	    }
-
-	    if (mode == 'background') {
-	        if (el.getAttribute('data-background-src') == null) {
-	            DOM.setAttr(el, {
-	                'data-background-src': holderURL
-	            });
-	        }
-	    } else {
-	        var domProps = {};
-	        domProps[App.vars.dataAttr] = holderURL;
-	        DOM.setAttr(el, domProps);
-	    }
-
-	    flags.theme = theme;
-
-	    //todo consider using all renderSettings in holderData
-	    el.holderData = {
-	        flags: flags,
-	        engineSettings: engineSettings
-	    };
-
-	    if (mode == 'image' || mode == 'fluid') {
-	        DOM.setAttr(el, {
-	            'alt': theme.text ? (dimensionsInText ? theme.text : theme.text + ' [' + dimensionsCaption + ']') : dimensionsCaption
-	        });
-	    }
-
-	    var renderSettings = {
-	        mode: mode,
-	        el: el,
-	        holderSettings: {
-	            dimensions: dimensions,
-	            theme: theme,
-	            flags: flags
-	        },
-	        engineSettings: engineSettings
-	    };
-
-	    if (mode == 'image') {
-	        if (!flags.auto) {
-	            el.style.width = dimensions.width + 'px';
-	            el.style.height = dimensions.height + 'px';
-	        }
-
-	        if (engineSettings.renderer == 'html') {
-	            el.style.backgroundColor = theme.bg;
-	        } else {
-	            render(renderSettings);
-
-	            if (flags.textmode == 'exact') {
-	                el.holderData.resizeUpdate = true;
-	                App.vars.resizableImages.push(el);
-	                updateResizableElements(el);
-	            }
-	        }
-	    } else if (mode == 'background' && engineSettings.renderer != 'html') {
-	        render(renderSettings);
-	    } else if (mode == 'fluid') {
-	        el.holderData.resizeUpdate = true;
-
-	        if (dimensions.height.slice(-1) == '%') {
-	            el.style.height = dimensions.height;
-	        } else if (flags.auto == null || !flags.auto) {
-	            el.style.height = dimensions.height + 'px';
-	        }
-	        if (dimensions.width.slice(-1) == '%') {
-	            el.style.width = dimensions.width;
-	        } else if (flags.auto == null || !flags.auto) {
-	            el.style.width = dimensions.width + 'px';
-	        }
-	        if (el.style.display == 'inline' || el.style.display === '' || el.style.display == 'none') {
-	            el.style.display = 'block';
-	        }
-
-	        setInitialDimensions(el);
-
-	        if (engineSettings.renderer == 'html') {
-	            el.style.backgroundColor = theme.bg;
-	        } else {
-	            App.vars.resizableImages.push(el);
-	            updateResizableElements(el);
-	        }
-	    }
-	}
-
-	/**
-	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
-	 *
-	 * @private
-	 * @param renderSettings Renderer settings
-	 */
-	function render(renderSettings) {
-	    var image = null;
-	    var mode = renderSettings.mode;
-	    var el = renderSettings.el;
-	    var holderSettings = renderSettings.holderSettings;
-	    var engineSettings = renderSettings.engineSettings;
-
-	    switch (engineSettings.renderer) {
-	        case 'svg':
-	            if (!App.setup.supportsSVG) return;
-	            break;
-	        case 'canvas':
-	            if (!App.setup.supportsCanvas) return;
-	            break;
-	        default:
-	            return;
-	    }
-
-	    //todo: move generation of scene up to flag generation to reduce extra object creation
-	    var scene = {
-	        width: holderSettings.dimensions.width,
-	        height: holderSettings.dimensions.height,
-	        theme: holderSettings.theme,
-	        flags: holderSettings.flags
-	    };
-
-	    var sceneGraph = buildSceneGraph(scene);
-
-	    function getRenderedImage() {
-	        var image = null;
-	        switch (engineSettings.renderer) {
-	            case 'canvas':
-	                image = sgCanvasRenderer(sceneGraph, renderSettings);
-	                break;
-	            case 'svg':
-	                image = svgRenderer(sceneGraph, renderSettings);
-	                break;
-	            default:
-	                throw 'Holder: invalid renderer: ' + engineSettings.renderer;
-	        }
-
-	        return image;
-	    }
-
-	    image = getRenderedImage();
-
-	    if (image == null) {
-	        throw 'Holder: couldn\'t render placeholder';
-	    }
-
-	    //todo: add <object> canvas rendering
-	    if (mode == 'background') {
-	        el.style.backgroundImage = 'url(' + image + ')';
-
-	        if (!engineSettings.noBackgroundSize) {
-	            el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
-	        }
-	    } else {
-	        if (el.nodeName.toLowerCase() === 'img') {
-	            DOM.setAttr(el, {
-	                'src': image
-	            });
-	        } else if (el.nodeName.toLowerCase() === 'object') {
-	            DOM.setAttr(el, {
-	                'data': image,
-	                'type': 'image/svg+xml'
-	            });
-	        }
-	        if (engineSettings.reRender) {
-	            global.setTimeout(function () {
-	                var image = getRenderedImage();
-	                if (image == null) {
-	                    throw 'Holder: couldn\'t render placeholder';
-	                }
-	                //todo: refactor this code into a function
-	                if (el.nodeName.toLowerCase() === 'img') {
-	                    DOM.setAttr(el, {
-	                        'src': image
-	                    });
-	                } else if (el.nodeName.toLowerCase() === 'object') {
-	                    DOM.setAttr(el, {
-	                        'data': image,
-	                        'type': 'image/svg+xml'
-	                    });
-	                }
-	            }, 150);
-	        }
-	    }
-	    //todo: account for re-rendering
-	    DOM.setAttr(el, {
-	        'data-holder-rendered': true
-	    });
-	}
-
-	/**
-	 * Core function that takes a Holder scene description and builds a scene graph
-	 *
-	 * @private
-	 * @param scene Holder scene object
-	 */
-	//todo: make this function reusable
-	//todo: merge app defaults and setup properties into the scene argument
-	function buildSceneGraph(scene) {
-	    var fontSize = App.defaults.size;
-	    if (parseFloat(scene.theme.size)) {
-	        fontSize = scene.theme.size;
-	    } else if (parseFloat(scene.flags.size)) {
-	        fontSize = scene.flags.size;
-	    }
-
-	    scene.font = {
-	        family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-	        size: textSize(scene.width, scene.height, fontSize, App.defaults.scale),
-	        units: scene.theme.units ? scene.theme.units : App.defaults.units,
-	        weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
-	    };
-
-	    scene.text = scene.theme.text || Math.floor(scene.width) + 'x' + Math.floor(scene.height);
-
-	    scene.noWrap = scene.theme.nowrap || scene.flags.nowrap;
-
-	    scene.align = scene.theme.align || scene.flags.align || 'center';
-
-	    switch (scene.flags.textmode) {
-	        case 'literal':
-	            scene.text = scene.flags.dimensions.width + 'x' + scene.flags.dimensions.height;
-	            break;
-	        case 'exact':
-	            if (!scene.flags.exactDimensions) break;
-	            scene.text = Math.floor(scene.flags.exactDimensions.width) + 'x' + Math.floor(scene.flags.exactDimensions.height);
-	            break;
-	    }
-
-	    var lineWrap = scene.flags.lineWrap || App.setup.lineWrapRatio;
-	    var sceneMargin = scene.width * lineWrap;
-	    var maxLineWidth = sceneMargin;
-
-	    var sceneGraph = new SceneGraph({
-	        width: scene.width,
-	        height: scene.height
-	    });
-
-	    var Shape = sceneGraph.Shape;
-
-	    var holderBg = new Shape.Rect('holderBg', {
-	        fill: scene.theme.bg
-	    });
-
-	    holderBg.resize(scene.width, scene.height);
-	    sceneGraph.root.add(holderBg);
-
-	    if (scene.flags.outline) {
-	        var outlineColor = new Color(holderBg.properties.fill);
-	        outlineColor = outlineColor.lighten(outlineColor.lighterThan('7f7f7f') ? -0.1 : 0.1);
-	        holderBg.properties.outline = {
-	            fill: outlineColor.toHex(true),
-	            width: 2
-	        };
-	    }
-
-	    var holderTextColor = scene.theme.fg;
-
-	    if (scene.flags.autoFg) {
-	        var holderBgColor = new Color(holderBg.properties.fill);
-	        var lightColor = new Color('fff');
-	        var darkColor = new Color('000', {
-	            'alpha': 0.285714
-	        });
-
-	        holderTextColor = holderBgColor.blendAlpha(holderBgColor.lighterThan('7f7f7f') ? darkColor : lightColor).toHex(true);
-	    }
-
-	    var holderTextGroup = new Shape.Group('holderTextGroup', {
-	        text: scene.text,
-	        align: scene.align,
-	        font: scene.font,
-	        fill: holderTextColor
-	    });
-
-	    holderTextGroup.moveTo(null, null, 1);
-	    sceneGraph.root.add(holderTextGroup);
-
-	    var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
-	    if (!tpdata) {
-	        throw 'Holder: staging fallback not supported yet.';
-	    }
-	    holderTextGroup.properties.leading = tpdata.boundingBox.height;
-
-	    var textNode = null;
-	    var line = null;
-
-	    function finalizeLine(parent, line, width, height) {
-	        line.width = width;
-	        line.height = height;
-	        parent.width = Math.max(parent.width, line.width);
-	        parent.height += line.height;
-	    }
-
-	    if (tpdata.lineCount > 1) {
-	        var offsetX = 0;
-	        var offsetY = 0;
-	        var lineIndex = 0;
-	        var lineKey;
-	        line = new Shape.Group('line' + lineIndex);
-
-	        //Double margin so that left/right-aligned next is not flush with edge of image
-	        if (scene.align === 'left' || scene.align === 'right') {
-	            maxLineWidth = scene.width * (1 - (1 - lineWrap) * 2);
-	        }
-
-	        for (var i = 0; i < tpdata.words.length; i++) {
-	            var word = tpdata.words[i];
-	            textNode = new Shape.Text(word.text);
-	            var newline = word.text == '\\n';
-	            if (!scene.noWrap && (offsetX + word.width >= maxLineWidth || newline === true)) {
-	                finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
-	                holderTextGroup.add(line);
-	                offsetX = 0;
-	                offsetY += holderTextGroup.properties.leading;
-	                lineIndex += 1;
-	                line = new Shape.Group('line' + lineIndex);
-	                line.y = offsetY;
-	            }
-	            if (newline === true) {
-	                continue;
-	            }
-	            textNode.moveTo(offsetX, 0);
-	            offsetX += tpdata.spaceWidth + word.width;
-	            line.add(textNode);
-	        }
-
-	        finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
-	        holderTextGroup.add(line);
-
-	        if (scene.align === 'left') {
-	            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
-	        } else if (scene.align === 'right') {
-	            for (lineKey in holderTextGroup.children) {
-	                line = holderTextGroup.children[lineKey];
-	                line.moveTo(scene.width - line.width, null, null);
-	            }
-
-	            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
-	        } else {
-	            for (lineKey in holderTextGroup.children) {
-	                line = holderTextGroup.children[lineKey];
-	                line.moveTo((holderTextGroup.width - line.width) / 2, null, null);
-	            }
-
-	            holderTextGroup.moveTo((scene.width - holderTextGroup.width) / 2, null, null);
-	        }
-
-	        holderTextGroup.moveTo(null, (scene.height - holderTextGroup.height) / 2, null);
-
-	        //If the text exceeds vertical space, move it down so the first line is visible
-	        if ((scene.height - holderTextGroup.height) / 2 < 0) {
-	            holderTextGroup.moveTo(null, 0, null);
-	        }
-	    } else {
-	        textNode = new Shape.Text(scene.text);
-	        line = new Shape.Group('line0');
-	        line.add(textNode);
-	        holderTextGroup.add(line);
-
-	        if (scene.align === 'left') {
-	            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
-	        } else if (scene.align === 'right') {
-	            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
-	        } else {
-	            holderTextGroup.moveTo((scene.width - tpdata.boundingBox.width) / 2, null, null);
-	        }
-
-	        holderTextGroup.moveTo(null, (scene.height - tpdata.boundingBox.height) / 2, null);
-	    }
-
-	    //todo: renderlist
-	    return sceneGraph;
-	}
-
-	/**
-	 * Adaptive text sizing function
-	 *
-	 * @private
-	 * @param width Parent width
-	 * @param height Parent height
-	 * @param fontSize Requested text size
-	 * @param scale Proportional scale of text
-	 */
-	function textSize(width, height, fontSize, scale) {
-	    var stageWidth = parseInt(width, 10);
-	    var stageHeight = parseInt(height, 10);
-
-	    var bigSide = Math.max(stageWidth, stageHeight);
-	    var smallSide = Math.min(stageWidth, stageHeight);
-
-	    var newHeight = 0.8 * Math.min(smallSide, bigSide * scale);
-	    return Math.round(Math.max(fontSize, newHeight));
-	}
-
-	/**
-	 * Iterates over resizable (fluid or auto) placeholders and renders them
-	 *
-	 * @private
-	 * @param element Optional element selector, specified only if a specific element needs to be re-rendered
-	 */
-	function updateResizableElements(element) {
-	    var images;
-	    if (element == null || element.nodeType == null) {
-	        images = App.vars.resizableImages;
-	    } else {
-	        images = [element];
-	    }
-	    for (var i = 0, l = images.length; i < l; i++) {
-	        var el = images[i];
-	        if (el.holderData) {
-	            var flags = el.holderData.flags;
-	            var dimensions = dimensionCheck(el);
-	            if (dimensions) {
-	                if (!el.holderData.resizeUpdate) {
-	                    continue;
-	                }
-
-	                if (flags.fluid && flags.auto) {
-	                    var fluidConfig = el.holderData.fluidConfig;
-	                    switch (fluidConfig.mode) {
-	                        case 'width':
-	                            dimensions.height = dimensions.width / fluidConfig.ratio;
-	                            break;
-	                        case 'height':
-	                            dimensions.width = dimensions.height * fluidConfig.ratio;
-	                            break;
-	                    }
-	                }
-
-	                var settings = {
-	                    mode: 'image',
-	                    holderSettings: {
-	                        dimensions: dimensions,
-	                        theme: flags.theme,
-	                        flags: flags
-	                    },
-	                    el: el,
-	                    engineSettings: el.holderData.engineSettings
-	                };
-
-	                if (flags.textmode == 'exact') {
-	                    flags.exactDimensions = dimensions;
-	                    settings.holderSettings.dimensions = flags.dimensions;
-	                }
-
-	                render(settings);
-	            } else {
-	                setInvisible(el);
-	            }
-	        }
-	    }
-	}
-
-	/**
-	 * Sets up aspect ratio metadata for fluid placeholders, in order to preserve proportions when resizing
-	 *
-	 * @private
-	 * @param el Image DOM element
-	 */
-	function setInitialDimensions(el) {
-	    if (el.holderData) {
-	        var dimensions = dimensionCheck(el);
-	        if (dimensions) {
-	            var flags = el.holderData.flags;
-
-	            var fluidConfig = {
-	                fluidHeight: flags.dimensions.height.slice(-1) == '%',
-	                fluidWidth: flags.dimensions.width.slice(-1) == '%',
-	                mode: null,
-	                initialDimensions: dimensions
-	            };
-
-	            if (fluidConfig.fluidWidth && !fluidConfig.fluidHeight) {
-	                fluidConfig.mode = 'width';
-	                fluidConfig.ratio = fluidConfig.initialDimensions.width / parseFloat(flags.dimensions.height);
-	            } else if (!fluidConfig.fluidWidth && fluidConfig.fluidHeight) {
-	                fluidConfig.mode = 'height';
-	                fluidConfig.ratio = parseFloat(flags.dimensions.width) / fluidConfig.initialDimensions.height;
-	            }
-
-	            el.holderData.fluidConfig = fluidConfig;
-	        } else {
-	            setInvisible(el);
-	        }
-	    }
-	}
-
-	/**
-	 * Iterates through all current invisible images, and if they're visible, renders them and removes them from further checks. Runs every animation frame.
-	 *
-	 * @private
-	 */
-	function visibilityCheck() {
-	    var renderableImages = [];
-	    var keys = Object.keys(App.vars.invisibleImages);
-	    var el;
-
-	    keys.forEach(function (key) {
-	        el = App.vars.invisibleImages[key];
-	        if (dimensionCheck(el) && el.nodeName.toLowerCase() == 'img') {
-	            renderableImages.push(el);
-	            delete App.vars.invisibleImages[key];
-	        }
-	    });
-
-	    if (renderableImages.length) {
-	        Holder.run({
-	            images: renderableImages
-	        });
-	    }
-
-	    // Done to prevent 100% CPU usage via aggressive calling of requestAnimationFrame
-	    setTimeout(function () {
-	        global.requestAnimationFrame(visibilityCheck);
-	    }, 10);
-	}
-
-	/**
-	 * Starts checking for invisible placeholders if not doing so yet. Does nothing otherwise.
-	 *
-	 * @private
-	 */
-	function startVisibilityCheck() {
-	    if (!App.vars.visibilityCheckStarted) {
-	        global.requestAnimationFrame(visibilityCheck);
-	        App.vars.visibilityCheckStarted = true;
-	    }
-	}
-
-	/**
-	 * Sets a unique ID for an image detected to be invisible and adds it to the map of invisible images checked by visibilityCheck
-	 *
-	 * @private
-	 * @param el Invisible DOM element
-	 */
-	function setInvisible(el) {
-	    if (!el.holderData.invisibleId) {
-	        App.vars.invisibleId += 1;
-	        App.vars.invisibleImages['i' + App.vars.invisibleId] = el;
-	        el.holderData.invisibleId = App.vars.invisibleId;
-	    }
-	}
-
-	//todo: see if possible to convert stagingRenderer to use HTML only
-	var stagingRenderer = (function() {
-	    var svg = null,
-	        stagingText = null,
-	        stagingTextNode = null;
-	    return function(graph) {
-	        var rootNode = graph.root;
-	        if (App.setup.supportsSVG) {
-	            var firstTimeSetup = false;
-	            var tnode = function(text) {
-	                return document.createTextNode(text);
-	            };
-	            if (svg == null || svg.parentNode !== document.body) {
-	                firstTimeSetup = true;
-	            }
-
-	            svg = SVG.initSVG(svg, rootNode.properties.width, rootNode.properties.height);
-	            //Show staging element before staging
-	            svg.style.display = 'block';
-
-	            if (firstTimeSetup) {
-	                stagingText = DOM.newEl('text', SVG_NS);
-	                stagingTextNode = tnode(null);
-	                DOM.setAttr(stagingText, {
-	                    x: 0
-	                });
-	                stagingText.appendChild(stagingTextNode);
-	                svg.appendChild(stagingText);
-	                document.body.appendChild(svg);
-	                svg.style.visibility = 'hidden';
-	                svg.style.position = 'absolute';
-	                svg.style.top = '-100%';
-	                svg.style.left = '-100%';
-	                //todo: workaround for zero-dimension <svg> tag in Opera 12
-	                //svg.setAttribute('width', 0);
-	                //svg.setAttribute('height', 0);
-	            }
-
-	            var holderTextGroup = rootNode.children.holderTextGroup;
-	            var htgProps = holderTextGroup.properties;
-	            DOM.setAttr(stagingText, {
-	                'y': htgProps.font.size,
-	                'style': utils.cssProps({
-	                    'font-weight': htgProps.font.weight,
-	                    'font-size': htgProps.font.size + htgProps.font.units,
-	                    'font-family': htgProps.font.family
-	                })
-	            });
-
-	            //Get bounding box for the whole string (total width and height)
-	            stagingTextNode.nodeValue = htgProps.text;
-	            var stagingTextBBox = stagingText.getBBox();
-
-	            //Get line count and split the string into words
-	            var lineCount = Math.ceil(stagingTextBBox.width / rootNode.properties.width);
-	            var words = htgProps.text.split(' ');
-	            var newlines = htgProps.text.match(/\\n/g);
-	            lineCount += newlines == null ? 0 : newlines.length;
-
-	            //Get bounding box for the string with spaces removed
-	            stagingTextNode.nodeValue = htgProps.text.replace(/[ ]+/g, '');
-	            var computedNoSpaceLength = stagingText.getComputedTextLength();
-
-	            //Compute average space width
-	            var diffLength = stagingTextBBox.width - computedNoSpaceLength;
-	            var spaceWidth = Math.round(diffLength / Math.max(1, words.length - 1));
-
-	            //Get widths for every word with space only if there is more than one line
-	            var wordWidths = [];
-	            if (lineCount > 1) {
-	                stagingTextNode.nodeValue = '';
-	                for (var i = 0; i < words.length; i++) {
-	                    if (words[i].length === 0) continue;
-	                    stagingTextNode.nodeValue = utils.decodeHtmlEntity(words[i]);
-	                    var bbox = stagingText.getBBox();
-	                    wordWidths.push({
-	                        text: words[i],
-	                        width: bbox.width
-	                    });
-	                }
-	            }
-
-	            //Hide staging element after staging
-	            svg.style.display = 'none';
-
-	            return {
-	                spaceWidth: spaceWidth,
-	                lineCount: lineCount,
-	                boundingBox: stagingTextBBox,
-	                words: wordWidths
-	            };
-	        } else {
-	            //todo: canvas fallback for measuring text on android 2.3
-	            return false;
-	        }
-	    };
-	})();
-
-	//Helpers
-
-	/**
-	 * Prevents a function from being called too often, waits until a timer elapses to call it again
-	 *
-	 * @param fn Function to call
-	 */
-	function debounce(fn) {
-	    if (!App.vars.debounceTimer) fn.call(this);
-	    if (App.vars.debounceTimer) global.clearTimeout(App.vars.debounceTimer);
-	    App.vars.debounceTimer = global.setTimeout(function() {
-	        App.vars.debounceTimer = null;
-	        fn.call(this);
-	    }, App.setup.debounce);
-	}
-
-	/**
-	 * Holder-specific resize/orientation change callback, debounced to prevent excessive execution
-	 */
-	function resizeEvent() {
-	    debounce(function() {
-	        updateResizableElements(null);
-	    });
-	}
-
-	//Set up flags
-
-	for (var flag in App.flags) {
-	    if (!App.flags.hasOwnProperty(flag)) continue;
-	    App.flags[flag].match = function(val) {
-	        return val.match(this.regex);
-	    };
-	}
-
-	//Properties set once on setup
-
-	App.setup = {
-	    renderer: 'html',
-	    debounce: 100,
-	    ratio: 1,
-	    supportsCanvas: false,
-	    supportsSVG: false,
-	    lineWrapRatio: 0.9,
-	    dataAttr: 'data-src',
-	    renderers: ['html', 'canvas', 'svg']
-	};
-
-	//Properties modified during runtime
-
-	App.vars = {
-	    preempted: false,
-	    resizableImages: [],
-	    invisibleImages: {},
-	    invisibleId: 0,
-	    visibilityCheckStarted: false,
-	    debounceTimer: null,
-	    cache: {}
-	};
-
-	//Pre-flight
-
-	(function() {
-	    var canvas = DOM.newEl('canvas');
-
-	    if (canvas.getContext) {
-	        if (canvas.toDataURL('image/png').indexOf('data:image/png') != -1) {
-	            App.setup.renderer = 'canvas';
-	            App.setup.supportsCanvas = true;
-	        }
-	    }
-
-	    if (!!document.createElementNS && !!document.createElementNS(SVG_NS, 'svg').createSVGRect) {
-	        App.setup.renderer = 'svg';
-	        App.setup.supportsSVG = true;
-	    }
-	})();
-
-	//Starts checking for invisible placeholders
-	startVisibilityCheck();
-
-	if (onDomReady) {
-	    onDomReady(function() {
-	        if (!App.vars.preempted) {
-	            Holder.run();
-	        }
-	        if (global.addEventListener) {
-	            global.addEventListener('resize', resizeEvent, false);
-	            global.addEventListener('orientationchange', resizeEvent, false);
-	        } else {
-	            global.attachEvent('onresize', resizeEvent);
-	        }
-
-	        if (typeof global.Turbolinks == 'object') {
-	            global.document.addEventListener('page:change', function() {
-	                Holder.run();
-	            });
-	        }
-	    });
-	}
-
-	module.exports = Holder;
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	/*!
-	 * onDomReady.js 1.4.0 (c) 2013 Tubal Martin - MIT license
-	 *
-	 * Specially modified to work with Holder.js
-	 */
-
-	function _onDomReady(win) {
-	    //Lazy loading fix for Firefox < 3.6
-	    //http://webreflection.blogspot.com/2009/11/195-chars-to-help-lazy-loading.html
-	    if (document.readyState == null && document.addEventListener) {
-	        document.addEventListener("DOMContentLoaded", function DOMContentLoaded() {
-	            document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
-	            document.readyState = "complete";
-	        }, false);
-	        document.readyState = "loading";
-	    }
-	    
-	    var doc = win.document,
-	        docElem = doc.documentElement,
-	    
-	        LOAD = "load",
-	        FALSE = false,
-	        ONLOAD = "on"+LOAD,
-	        COMPLETE = "complete",
-	        READYSTATE = "readyState",
-	        ATTACHEVENT = "attachEvent",
-	        DETACHEVENT = "detachEvent",
-	        ADDEVENTLISTENER = "addEventListener",
-	        DOMCONTENTLOADED = "DOMContentLoaded",
-	        ONREADYSTATECHANGE = "onreadystatechange",
-	        REMOVEEVENTLISTENER = "removeEventListener",
-	    
-	        // W3C Event model
-	        w3c = ADDEVENTLISTENER in doc,
-	        _top = FALSE,
-	    
-	        // isReady: Is the DOM ready to be used? Set to true once it occurs.
-	        isReady = FALSE,
-	    
-	        // Callbacks pending execution until DOM is ready
-	        callbacks = [];
-	    
-	    // Handle when the DOM is ready
-	    function ready( fn ) {
-	        if ( !isReady ) {
-	    
-	            // Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-	            if ( !doc.body ) {
-	                return defer( ready );
-	            }
-	    
-	            // Remember that the DOM is ready
-	            isReady = true;
-	    
-	            // Execute all callbacks
-	            while ( fn = callbacks.shift() ) {
-	                defer( fn );
-	            }
-	        }
-	    }
-	    
-	    // The ready event handler
-	    function completed( event ) {
-	        // readyState === "complete" is good enough for us to call the dom ready in oldIE
-	        if ( w3c || event.type === LOAD || doc[READYSTATE] === COMPLETE ) {
-	            detach();
-	            ready();
-	        }
-	    }
-	    
-	    // Clean-up method for dom ready events
-	    function detach() {
-	        if ( w3c ) {
-	            doc[REMOVEEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
-	            win[REMOVEEVENTLISTENER]( LOAD, completed, FALSE );
-	        } else {
-	            doc[DETACHEVENT]( ONREADYSTATECHANGE, completed );
-	            win[DETACHEVENT]( ONLOAD, completed );
-	        }
-	    }
-	    
-	    // Defers a function, scheduling it to run after the current call stack has cleared.
-	    function defer( fn, wait ) {
-	        // Allow 0 to be passed
-	        setTimeout( fn, +wait >= 0 ? wait : 1 );
-	    }
-	    
-	    // Attach the listeners:
-	    
-	    // Catch cases where onDomReady is called after the browser event has already occurred.
-	    // we once tried to use readyState "interactive" here, but it caused issues like the one
-	    // discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
-	    if ( doc[READYSTATE] === COMPLETE ) {
-	        // Handle it asynchronously to allow scripts the opportunity to delay ready
-	        defer( ready );
-	    
-	    // Standards-based browsers support DOMContentLoaded
-	    } else if ( w3c ) {
-	        // Use the handy event callback
-	        doc[ADDEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
-	    
-	        // A fallback to window.onload, that will always work
-	        win[ADDEVENTLISTENER]( LOAD, completed, FALSE );
-	    
-	    // If IE event model is used
-	    } else {
-	        // Ensure firing before onload, maybe late but safe also for iframes
-	        doc[ATTACHEVENT]( ONREADYSTATECHANGE, completed );
-	    
-	        // A fallback to window.onload, that will always work
-	        win[ATTACHEVENT]( ONLOAD, completed );
-	    
-	        // If IE and not a frame
-	        // continually check to see if the document is ready
-	        try {
-	            _top = win.frameElement == null && docElem;
-	        } catch(e) {}
-	    
-	        if ( _top && _top.doScroll ) {
-	            (function doScrollCheck() {
-	                if ( !isReady ) {
-	                    try {
-	                        // Use the trick by Diego Perini
-	                        // http://javascript.nwbox.com/IEContentLoaded/
-	                        _top.doScroll("left");
-	                    } catch(e) {
-	                        return defer( doScrollCheck, 50 );
-	                    }
-	    
-	                    // detach all dom ready events
-	                    detach();
-	    
-	                    // and execute any waiting functions
-	                    ready();
-	                }
-	            })();
-	        }
-	    }
-	    
-	    function onDomReady( fn ) {
-	        // If DOM is ready, execute the function (async), otherwise wait
-	        isReady ? defer( fn ) : callbacks.push( fn );
-	    }
-	    
-	    // Add version
-	    onDomReady.version = "1.4.0";
-	    // Add method to check if DOM is ready
-	    onDomReady.isReady = function(){
-	        return isReady;
-	    };
-
-	    return onDomReady;
-	}
-
-	module.exports = typeof window !== "undefined" && _onDomReady(window);
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	//Modified version of component/querystring
-	//Changes: updated dependencies, dot notation parsing, JSHint fixes
-	//Fork at https://github.com/imsky/querystring
-
-	/**
-	 * Module dependencies.
-	 */
-
-	var encode = encodeURIComponent;
-	var decode = decodeURIComponent;
-	var trim = __webpack_require__(4);
-	var type = __webpack_require__(5);
-
-	var arrayRegex = /(\w+)\[(\d+)\]/;
-	var objectRegex = /\w+\.\w+/;
-
-	/**
-	 * Parse the given query `str`.
-	 *
-	 * @param {String} str
-	 * @return {Object}
-	 * @api public
-	 */
-
-	exports.parse = function(str){
-	  if ('string' !== typeof str) return {};
-
-	  str = trim(str);
-	  if ('' === str) return {};
-	  if ('?' === str.charAt(0)) str = str.slice(1);
-
-	  var obj = {};
-	  var pairs = str.split('&');
-	  for (var i = 0; i < pairs.length; i++) {
-	    var parts = pairs[i].split('=');
-	    var key = decode(parts[0]);
-	    var m, ctx, prop;
-
-	    if (m = arrayRegex.exec(key)) {
-	      obj[m[1]] = obj[m[1]] || [];
-	      obj[m[1]][m[2]] = decode(parts[1]);
-	      continue;
-	    }
-
-	    if (m = objectRegex.test(key)) {
-	      m = key.split('.');
-	      ctx = obj;
-	      
-	      while (m.length) {
-	        prop = m.shift();
-
-	        if (!prop.length) continue;
-
-	        if (!ctx[prop]) {
-	          ctx[prop] = {};
-	        } else if (ctx[prop] && typeof ctx[prop] !== 'object') {
-	          break;
-	        }
-
-	        if (!m.length) {
-	          ctx[prop] = decode(parts[1]);
-	        }
-
-	        ctx = ctx[prop];
-	      }
-
-	      continue;
-	    }
-
-	    obj[parts[0]] = null == parts[1] ? '' : decode(parts[1]);
-	  }
-
-	  return obj;
-	};
-
-	/**
-	 * Stringify the given `obj`.
-	 *
-	 * @param {Object} obj
-	 * @return {String}
-	 * @api public
-	 */
-
-	exports.stringify = function(obj){
-	  if (!obj) return '';
-	  var pairs = [];
-
-	  for (var key in obj) {
-	    var value = obj[key];
-
-	    if ('array' == type(value)) {
-	      for (var i = 0; i < value.length; ++i) {
-	        pairs.push(encode(key + '[' + i + ']') + '=' + encode(value[i]));
-	      }
-	      continue;
-	    }
-
-	    pairs.push(encode(key) + '=' + encode(obj[key]));
-	  }
-
-	  return pairs.join('&');
-	};
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	
-	exports = module.exports = trim;
-
-	function trim(str){
-	  return str.replace(/^\s*|\s*$/g, '');
-	}
-
-	exports.left = function(str){
-	  return str.replace(/^\s*/, '');
-	};
-
-	exports.right = function(str){
-	  return str.replace(/\s*$/, '');
-	};
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	/**
-	 * toString ref.
-	 */
-
-	var toString = Object.prototype.toString;
-
-	/**
-	 * Return the type of `val`.
-	 *
-	 * @param {Mixed} val
-	 * @return {String}
-	 * @api public
-	 */
-
-	module.exports = function(val){
-	  switch (toString.call(val)) {
-	    case '[object Date]': return 'date';
-	    case '[object RegExp]': return 'regexp';
-	    case '[object Arguments]': return 'arguments';
-	    case '[object Array]': return 'array';
-	    case '[object Error]': return 'error';
-	  }
-
-	  if (val === null) return 'null';
-	  if (val === undefined) return 'undefined';
-	  if (val !== val) return 'nan';
-	  if (val && val.nodeType === 1) return 'element';
-
-	  if (isBuffer(val)) return 'buffer';
-
-	  val = val.valueOf
-	    ? val.valueOf()
-	    : Object.prototype.valueOf.apply(val);
-
-	  return typeof val;
-	};
-
-	// code borrowed from https://github.com/feross/is-buffer/blob/master/index.js
-	function isBuffer(obj) {
-	  return !!(obj != null &&
-	    (obj._isBuffer || // For Safari 5-7 (missing Object.prototype.constructor)
-	      (obj.constructor &&
-	      typeof obj.constructor.isBuffer === 'function' &&
-	      obj.constructor.isBuffer(obj))
-	    ))
-	}
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	var SceneGraph = function(sceneProperties) {
-	    var nodeCount = 1;
-
-	    //todo: move merge to helpers section
-	    function merge(parent, child) {
-	        for (var prop in child) {
-	            parent[prop] = child[prop];
-	        }
-	        return parent;
-	    }
-
-	    var SceneNode = function(name) {
-	        nodeCount++;
-	        this.parent = null;
-	        this.children = {};
-	        this.id = nodeCount;
-	        this.name = 'n' + nodeCount;
-	        if (typeof name !== 'undefined') {
-	            this.name = name;
-	        }
-	        this.x = this.y = this.z = 0;
-	        this.width = this.height = 0;
-	    };
-
-	    SceneNode.prototype.resize = function(width, height) {
-	        if (width != null) {
-	            this.width = width;
-	        }
-	        if (height != null) {
-	            this.height = height;
-	        }
-	    };
-
-	    SceneNode.prototype.moveTo = function(x, y, z) {
-	        this.x = x != null ? x : this.x;
-	        this.y = y != null ? y : this.y;
-	        this.z = z != null ? z : this.z;
-	    };
-
-	    SceneNode.prototype.add = function(child) {
-	        var name = child.name;
-	        if (typeof this.children[name] === 'undefined') {
-	            this.children[name] = child;
-	            child.parent = this;
-	        } else {
-	            throw 'SceneGraph: child already exists: ' + name;
-	        }
-	    };
-
-	    var RootNode = function() {
-	        SceneNode.call(this, 'root');
-	        this.properties = sceneProperties;
-	    };
-
-	    RootNode.prototype = new SceneNode();
-
-	    var Shape = function(name, props) {
-	        SceneNode.call(this, name);
-	        this.properties = {
-	            'fill': '#000000'
-	        };
-	        if (typeof props !== 'undefined') {
-	            merge(this.properties, props);
-	        } else if (typeof name !== 'undefined' && typeof name !== 'string') {
-	            throw 'SceneGraph: invalid node name';
-	        }
-	    };
-
-	    Shape.prototype = new SceneNode();
-
-	    var Group = function() {
-	        Shape.apply(this, arguments);
-	        this.type = 'group';
-	    };
-
-	    Group.prototype = new Shape();
-
-	    var Rect = function() {
-	        Shape.apply(this, arguments);
-	        this.type = 'rect';
-	    };
-
-	    Rect.prototype = new Shape();
-
-	    var Text = function(text) {
-	        Shape.call(this);
-	        this.type = 'text';
-	        this.properties.text = text;
-	    };
-
-	    Text.prototype = new Shape();
-
-	    var root = new RootNode();
-
-	    this.Shape = {
-	        'Rect': Rect,
-	        'Text': Text,
-	        'Group': Group
-	    };
-
-	    this.root = root;
-	    return this;
-	};
-
-	module.exports = SceneGraph;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {/**
-	 * Shallow object clone and merge
-	 *
-	 * @param a Object A
-	 * @param b Object B
-	 * @returns {Object} New object with all of A's properties, and all of B's properties, overwriting A's properties
-	 */
-	exports.extend = function(a, b) {
-	    var c = {};
-	    for (var x in a) {
-	        if (a.hasOwnProperty(x)) {
-	            c[x] = a[x];
-	        }
-	    }
-	    if (b != null) {
-	        for (var y in b) {
-	            if (b.hasOwnProperty(y)) {
-	                c[y] = b[y];
-	            }
-	        }
-	    }
-	    return c;
-	};
-
-	/**
-	 * Takes a k/v list of CSS properties and returns a rule
-	 *
-	 * @param props CSS properties object
-	 */
-	exports.cssProps = function(props) {
-	    var ret = [];
-	    for (var p in props) {
-	        if (props.hasOwnProperty(p)) {
-	            ret.push(p + ':' + props[p]);
-	        }
-	    }
-	    return ret.join(';');
-	};
-
-	/**
-	 * Encodes HTML entities in a string
-	 *
-	 * @param str Input string
-	 */
-	exports.encodeHtmlEntity = function(str) {
-	    var buf = [];
-	    var charCode = 0;
-	    for (var i = str.length - 1; i >= 0; i--) {
-	        charCode = str.charCodeAt(i);
-	        if (charCode > 128) {
-	            buf.unshift(['&#', charCode, ';'].join(''));
-	        } else {
-	            buf.unshift(str[i]);
-	        }
-	    }
-	    return buf.join('');
-	};
-
-	/**
-	 * Checks if an image exists
-	 *
-	 * @param src URL of image
-	 * @param callback Callback to call once image status has been found
-	 */
-	exports.imageExists = function(src, callback) {
-	    var image = new Image();
-	    image.onerror = function() {
-	        callback.call(this, false);
-	    };
-	    image.onload = function() {
-	        callback.call(this, true);
-	    };
-	    image.src = src;
-	};
-
-	/**
-	 * Decodes HTML entities in a string
-	 *
-	 * @param str Input string
-	 */
-	exports.decodeHtmlEntity = function(str) {
-	    return str.replace(/&#(\d+);/g, function(match, dec) {
-	        return String.fromCharCode(dec);
-	    });
-	};
-
-
-	/**
-	 * Returns an element's dimensions if it's visible, `false` otherwise.
-	 *
-	 * @param el DOM element
-	 */
-	exports.dimensionCheck = function(el) {
-	    var dimensions = {
-	        height: el.clientHeight,
-	        width: el.clientWidth
-	    };
-
-	    if (dimensions.height && dimensions.width) {
-	        return dimensions;
-	    } else {
-	        return false;
-	    }
-	};
-
-
-	/**
-	 * Returns true if value is truthy or if it is "semantically truthy"
-	 * @param val
-	 */
-	exports.truthy = function(val) {
-	    if (typeof val === 'string') {
-	        return val === 'true' || val === 'yes' || val === '1' || val === 'on' || val === '✓';
-	    }
-	    return !!val;
-	};
-
-	/**
-	 * Parses input into a well-formed CSS color
-	 * @param val
-	 */
-	exports.parseColor = function(val) {
-	    var hexre = /(^(?:#?)[0-9a-f]{6}$)|(^(?:#?)[0-9a-f]{3}$)/i;
-	    var rgbre = /^rgb\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
-	    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0\.\d{1,}|1)\)$/;
-
-	    var match = val.match(hexre);
-	    var retval;
-
-	    if (match !== null) {
-	        retval = match[1] || match[2];
-	        if (retval[0] !== '#') {
-	            return '#' + retval;
-	        } else {
-	            return retval;
-	        }
-	    }
-
-	    match = val.match(rgbre);
-
-	    if (match !== null) {
-	        retval = 'rgb(' + match.slice(1).join(',') + ')';
-	        return retval;
-	    }
-
-	    match = val.match(rgbare);
-
-	    if (match !== null) {
-	        retval = 'rgba(' + match.slice(1).join(',') + ')';
-	        return retval;
-	    }
-
-	    return null;
-	};
-
-	/**
-	 * Provides the correct scaling ratio for canvas drawing operations on HiDPI screens (e.g. Retina displays)
-	 */
-	exports.canvasRatio = function () {
-	    var devicePixelRatio = 1;
-	    var backingStoreRatio = 1;
-
-	    if (global.document) {
-	        var canvas = global.document.createElement('canvas');
-	        if (canvas.getContext) {
-	            var ctx = canvas.getContext('2d');
-	            devicePixelRatio = global.devicePixelRatio || 1;
-	            backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
-	        }
-	    }
-
-	    return devicePixelRatio / backingStoreRatio;
-	};
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {var DOM = __webpack_require__(9);
-
-	var SVG_NS = 'http://www.w3.org/2000/svg';
-	var NODE_TYPE_COMMENT = 8;
-
-	/**
-	 * Generic SVG element creation function
-	 *
-	 * @param svg SVG context, set to null if new
-	 * @param width Document width
-	 * @param height Document height
-	 */
-	exports.initSVG = function(svg, width, height) {
-	    var defs, style, initialize = false;
-
-	    if (svg && svg.querySelector) {
-	        style = svg.querySelector('style');
-	        if (style === null) {
-	            initialize = true;
-	        }
-	    } else {
-	        svg = DOM.newEl('svg', SVG_NS);
-	        initialize = true;
-	    }
-
-	    if (initialize) {
-	        defs = DOM.newEl('defs', SVG_NS);
-	        style = DOM.newEl('style', SVG_NS);
-	        DOM.setAttr(style, {
-	            'type': 'text/css'
-	        });
-	        defs.appendChild(style);
-	        svg.appendChild(defs);
-	    }
-
-	    //IE throws an exception if this is set and Chrome requires it to be set
-	    if (svg.webkitMatchesSelector) {
-	        svg.setAttribute('xmlns', SVG_NS);
-	    }
-
-	    //Remove comment nodes
-	    for (var i = 0; i < svg.childNodes.length; i++) {
-	        if (svg.childNodes[i].nodeType === NODE_TYPE_COMMENT) {
-	            svg.removeChild(svg.childNodes[i]);
-	        }
-	    }
-
-	    //Remove CSS
-	    while (style.childNodes.length) {
-	        style.removeChild(style.childNodes[0]);
-	    }
-
-	    DOM.setAttr(svg, {
-	        'width': width,
-	        'height': height,
-	        'viewBox': '0 0 ' + width + ' ' + height,
-	        'preserveAspectRatio': 'none'
-	    });
-
-	    return svg;
-	};
-
-	/**
-	 * Converts serialized SVG to a string suitable for data URI use
-	 * @param svgString Serialized SVG string
-	 * @param [base64] Use base64 encoding for data URI
-	 */
-	exports.svgStringToDataURI = function() {
-	    var rawPrefix = 'data:image/svg+xml;charset=UTF-8,';
-	    var base64Prefix = 'data:image/svg+xml;charset=UTF-8;base64,';
-
-	    return function(svgString, base64) {
-	        if (base64) {
-	            return base64Prefix + btoa(global.unescape(encodeURIComponent(svgString)));
-	        } else {
-	            return rawPrefix + encodeURIComponent(svgString);
-	        }
-	    };
-	}();
-
-	/**
-	 * Returns serialized SVG with XML processing instructions
-	 *
-	 * @param svg SVG context
-	 * @param stylesheets CSS stylesheets to include
-	 */
-	exports.serializeSVG = function(svg, engineSettings) {
-	    if (!global.XMLSerializer) return;
-	    var serializer = new XMLSerializer();
-	    var svgCSS = '';
-	    var stylesheets = engineSettings.stylesheets;
-
-	    //External stylesheets: Processing Instruction method
-	    if (engineSettings.svgXMLStylesheet) {
-	        var xml = DOM.createXML();
-	        //Add <?xml-stylesheet ?> directives
-	        for (var i = stylesheets.length - 1; i >= 0; i--) {
-	            var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="' + stylesheets[i] + '" rel="stylesheet"');
-	            xml.insertBefore(csspi, xml.firstChild);
-	        }
-
-	        xml.removeChild(xml.documentElement);
-	        svgCSS = serializer.serializeToString(xml);
-	    }
-
-	    var svgText = serializer.serializeToString(svg);
-	    svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, '&$1');
-	    return svgCSS + svgText;
-	};
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 9 */
-/***/ function(module, exports) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {/**
-	 * Generic new DOM element function
-	 *
-	 * @param tag Tag to create
-	 * @param namespace Optional namespace value
-	 */
-	exports.newEl = function(tag, namespace) {
-	    if (!global.document) return;
-
-	    if (namespace == null) {
-	        return global.document.createElement(tag);
-	    } else {
-	        return global.document.createElementNS(namespace, tag);
-	    }
-	};
-
-	/**
-	 * Generic setAttribute function
-	 *
-	 * @param el Reference to DOM element
-	 * @param attrs Object with attribute keys and values
-	 */
-	exports.setAttr = function (el, attrs) {
-	    for (var a in attrs) {
-	        el.setAttribute(a, attrs[a]);
-	    }
-	};
-
-	/**
-	 * Creates a XML document
-	 * @private
-	 */
-	exports.createXML = function() {
-	    if (!global.DOMParser) return;
-	    return new DOMParser().parseFromString('<xml />', 'application/xml');
-	};
-
-	/**
-	 * Converts a value into an array of DOM nodes
-	 *
-	 * @param val A string, a NodeList, a Node, or an HTMLCollection
-	 */
-	exports.getNodeArray = function(val) {
-	    var retval = null;
-	    if (typeof(val) == 'string') {
-	        retval = document.querySelectorAll(val);
-	    } else if (global.NodeList && val instanceof global.NodeList) {
-	        retval = val;
-	    } else if (global.Node && val instanceof global.Node) {
-	        retval = [val];
-	    } else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
-	        retval = val;
-	    } else if (val instanceof Array) {
-	        retval = val;
-	    } else if (val === null) {
-	        retval = [];
-	    }
-
-	    retval = Array.prototype.slice.call(retval);
-
-	    return retval;
-	};
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 10 */
-/***/ function(module, exports) {
-
-	var Color = function(color, options) {
-	    //todo: support rgba, hsla, and rrggbbaa notation
-	    //todo: use CIELAB internally
-	    //todo: add clamp function (with sign)
-	    if (typeof color !== 'string') return;
-
-	    this.original = color;
-
-	    if (color.charAt(0) === '#') {
-	        color = color.slice(1);
-	    }
-
-	    if (/[^a-f0-9]+/i.test(color)) return;
-
-	    if (color.length === 3) {
-	        color = color.replace(/./g, '$&$&');
-	    }
-
-	    if (color.length !== 6) return;
-
-	    this.alpha = 1;
-
-	    if (options && options.alpha) {
-	        this.alpha = options.alpha;
-	    }
-
-	    this.set(parseInt(color, 16));
-	};
-
-	//todo: jsdocs
-	Color.rgb2hex = function(r, g, b) {
-	    function format (decimal) {
-	        var hex = (decimal | 0).toString(16);
-	        if (decimal < 16) {
-	            hex = '0' + hex;
-	        }
-	        return hex;
-	    }
-
-	    return [r, g, b].map(format).join('');
-	};
-
-	//todo: jsdocs
-	Color.hsl2rgb = function (h, s, l) {
-	    var H = h / 60;
-	    var C = (1 - Math.abs(2 * l - 1)) * s;
-	    var X = C * (1 - Math.abs(parseInt(H) % 2 - 1));
-	    var m = l - (C / 2);
-
-	    var r = 0, g = 0, b = 0;
-
-	    if (H >= 0 && H < 1) {
-	        r = C;
-	        g = X;
-	    } else if (H >= 1 && H < 2) {
-	        r = X;
-	        g = C;
-	    } else if (H >= 2 && H < 3) {
-	        g = C;
-	        b = X;
-	    } else if (H >= 3 && H < 4) {
-	        g = X;
-	        b = C;
-	    } else if (H >= 4 && H < 5) {
-	        r = X;
-	        b = C;
-	    } else if (H >= 5 && H < 6) {
-	        r = C;
-	        b = X;
-	    }
-
-	    r += m;
-	    g += m;
-	    b += m;
-
-	    r = parseInt(r * 255);
-	    g = parseInt(g * 255);
-	    b = parseInt(b * 255);
-
-	    return [r, g, b];
-	};
-
-	/**
-	 * Sets the color from a raw RGB888 integer
-	 * @param raw RGB888 representation of color
-	 */
-	//todo: refactor into a static method
-	//todo: factor out individual color spaces
-	//todo: add HSL, CIELAB, and CIELUV
-	Color.prototype.set = function (val) {
-	    this.raw = val;
-
-	    var r = (this.raw & 0xFF0000) >> 16;
-	    var g = (this.raw & 0x00FF00) >> 8;
-	    var b = (this.raw & 0x0000FF);
-
-	    // BT.709
-	    var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-	    var u = -0.09991 * r - 0.33609 * g + 0.436 * b;
-	    var v = 0.615 * r - 0.55861 * g - 0.05639 * b;
-
-	    this.rgb = {
-	        r: r,
-	        g: g,
-	        b: b
-	    };
-
-	    this.yuv = {
-	        y: y,
-	        u: u,
-	        v: v
-	    };
-
-	    return this;
-	};
-
-	/**
-	 * Lighten or darken a color
-	 * @param multiplier Amount to lighten or darken (-1 to 1)
-	 */
-	Color.prototype.lighten = function(multiplier) {
-	    var cm = Math.min(1, Math.max(0, Math.abs(multiplier))) * (multiplier < 0 ? -1 : 1);
-	    var bm = (255 * cm) | 0;
-	    var cr = Math.min(255, Math.max(0, this.rgb.r + bm));
-	    var cg = Math.min(255, Math.max(0, this.rgb.g + bm));
-	    var cb = Math.min(255, Math.max(0, this.rgb.b + bm));
-	    var hex = Color.rgb2hex(cr, cg, cb);
-	    return new Color(hex);
-	};
-
-	/**
-	 * Output color in hex format
-	 * @param addHash Add a hash character to the beginning of the output
-	 */
-	Color.prototype.toHex = function(addHash) {
-	    return (addHash ? '#' : '') + this.raw.toString(16);
-	};
-
-	/**
-	 * Returns whether or not current color is lighter than another color
-	 * @param color Color to compare against
-	 */
-	Color.prototype.lighterThan = function(color) {
-	    if (!(color instanceof Color)) {
-	        color = new Color(color);
-	    }
-
-	    return this.yuv.y > color.yuv.y;
-	};
-
-	/**
-	 * Returns the result of mixing current color with another color
-	 * @param color Color to mix with
-	 * @param multiplier How much to mix with the other color
-	 */
-	/*
-	Color.prototype.mix = function (color, multiplier) {
-	    if (!(color instanceof Color)) {
-	        color = new Color(color);
-	    }
-
-	    var r = this.rgb.r;
-	    var g = this.rgb.g;
-	    var b = this.rgb.b;
-	    var a = this.alpha;
-
-	    var m = typeof multiplier !== 'undefined' ? multiplier : 0.5;
-
-	    //todo: write a lerp function
-	    r = r + m * (color.rgb.r - r);
-	    g = g + m * (color.rgb.g - g);
-	    b = b + m * (color.rgb.b - b);
-	    a = a + m * (color.alpha - a);
-
-	    return new Color(Color.rgbToHex(r, g, b), {
-	        'alpha': a
-	    });
-	};
-	*/
-
-	/**
-	 * Returns the result of blending another color on top of current color with alpha
-	 * @param color Color to blend on top of current color, i.e. "Ca"
-	 */
-	//todo: see if .blendAlpha can be merged into .mix
-	Color.prototype.blendAlpha = function(color) {
-	    if (!(color instanceof Color)) {
-	        color = new Color(color);
-	    }
-
-	    var Ca = color;
-	    var Cb = this;
-
-	    //todo: write alpha blending function
-	    var r = Ca.alpha * Ca.rgb.r + (1 - Ca.alpha) * Cb.rgb.r;
-	    var g = Ca.alpha * Ca.rgb.g + (1 - Ca.alpha) * Cb.rgb.g;
-	    var b = Ca.alpha * Ca.rgb.b + (1 - Ca.alpha) * Cb.rgb.b;
-
-	    return new Color(Color.rgb2hex(r, g, b));
-	};
-
-	module.exports = Color;
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  'version': '2.9.4',
-	  'svg_ns': 'http://www.w3.org/2000/svg'
-	};
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var shaven = __webpack_require__(13);
-
-	var SVG = __webpack_require__(8);
-	var constants = __webpack_require__(11);
-	var utils = __webpack_require__(7);
-
-	var SVG_NS = constants.svg_ns;
-
-	var templates = {
-	  'element': function (options) {
-	    var tag = options.tag;
-	    var content = options.content || '';
-	    delete options.tag;
-	    delete options.content;
-	    return  [tag, content, options];
-	  }
-	};
-
-	//todo: deprecate tag arg, infer tag from shape object
-	function convertShape (shape, tag) {
-	  return templates.element({
-	    'tag': tag,
-	    'width': shape.width,
-	    'height': shape.height,
-	    'fill': shape.properties.fill
-	  });
-	}
-
-	function textCss (properties) {
-	  return utils.cssProps({
-	    'fill': properties.fill,
-	    'font-weight': properties.font.weight,
-	    'font-family': properties.font.family + ', monospace',
-	    'font-size': properties.font.size + properties.font.units
-	  });
-	}
-
-	function outlinePath (bgWidth, bgHeight, outlineWidth) {
-	  var outlineOffsetWidth = outlineWidth / 2;
-
-	  return [
-	    'M', outlineOffsetWidth, outlineOffsetWidth,
-	    'H', bgWidth - outlineOffsetWidth,
-	    'V', bgHeight - outlineOffsetWidth,
-	    'H', outlineOffsetWidth,
-	    'V', 0,
-	    'M', 0, outlineOffsetWidth,
-	    'L', bgWidth, bgHeight - outlineOffsetWidth,
-	    'M', 0, bgHeight - outlineOffsetWidth,
-	    'L', bgWidth, outlineOffsetWidth
-	  ].join(' ');
-	}
-
-	module.exports = function (sceneGraph, renderSettings) {
-	  var engineSettings = renderSettings.engineSettings;
-	  var stylesheets = engineSettings.stylesheets;
-	  var stylesheetXml = stylesheets.map(function (stylesheet) {
-	    return '<?xml-stylesheet rel="stylesheet" href="' + stylesheet + '"?>';
-	  }).join('\n');
-
-	  var holderId = 'holder_' + Number(new Date()).toString(16);
-
-	  var root = sceneGraph.root;
-	  var textGroup = root.children.holderTextGroup;
-
-	  var css = '#' + holderId + ' text { ' + textCss(textGroup.properties) + ' } ';
-
-	  // push text down to be equally vertically aligned with canvas renderer
-	  textGroup.y += textGroup.textPositionData.boundingBox.height * 0.8;
-
-	  var wordTags = [];
-
-	  Object.keys(textGroup.children).forEach(function (lineKey) {
-	    var line = textGroup.children[lineKey];
-
-	    Object.keys(line.children).forEach(function (wordKey) {
-	      var word = line.children[wordKey];
-	      var x = textGroup.x + line.x + word.x;
-	      var y = textGroup.y + line.y + word.y;
-
-	      var wordTag = templates.element({
-	        'tag': 'text',
-	        'content': word.properties.text,
-	        'x': x,
-	        'y': y
-	      });
-
-	      wordTags.push(wordTag);
-	    });
-	  });
-
-	  var text = templates.element({
-	    'tag': 'g',
-	    'content': wordTags
-	  });
-
-	  var outline = null;
-
-	  if (root.children.holderBg.properties.outline) {
-	    var outlineProperties = root.children.holderBg.properties.outline;
-	    outline = templates.element({
-	      'tag': 'path',
-	      'd': outlinePath(root.children.holderBg.width, root.children.holderBg.height, outlineProperties.width),
-	      'stroke-width': outlineProperties.width,
-	      'stroke': outlineProperties.fill,
-	      'fill': 'none'
-	    });
-	  }
-
-	  var bg = convertShape(root.children.holderBg, 'rect');
-
-	  var sceneContent = [];
-
-	  sceneContent.push(bg);
-	  if (outlineProperties) {
-	    sceneContent.push(outline);
-	  }
-	  sceneContent.push(text);
-
-	  var scene = templates.element({
-	    'tag': 'g',
-	    'id': holderId,
-	    'content': sceneContent
-	  });
-
-	  var style = templates.element({
-	    'tag': 'style',
-	    //todo: figure out how to add CDATA directive
-	    'content': css,
-	    'type': 'text/css'
-	  });
-
-	  var defs = templates.element({
-	    'tag': 'defs',
-	    'content': style
-	  });
-
-	  var svg = templates.element({
-	    'tag': 'svg',
-	    'content': [defs, scene],
-	    'width': root.properties.width,
-	    'height': root.properties.height,
-	    'xmlns': SVG_NS,
-	    'viewBox': [0, 0, root.properties.width, root.properties.height].join(' '),
-	    'preserveAspectRatio': 'none'
-	  });
-
-	  var output = shaven(svg);
-	  
-	  output = stylesheetXml + output[0];
-
-	  var svgString = SVG.svgStringToDataURI(output, renderSettings.mode === 'background');
-	  return svgString;
-	};
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var escape = __webpack_require__(14)
-
-	// TODO: remove namespace
-
-	module.exports = function shaven (array, namespace, returnObject) {
-
-		'use strict'
-
-		var i = 1
-		var doesEscape = true
-		var HTMLString
-		var attributeKey
-		var callback
-		var key
-
-
-		returnObject = returnObject || {}
-
-
-		function createElement (sugarString) {
-
-			var tags = sugarString.match(/^[\w-]+/)
-			var element = {
-				tag: tags ? tags[0] : 'div',
-				attr: {},
-				children: []
-			}
-			var id = sugarString.match(/#([\w-]+)/)
-			var reference = sugarString.match(/\$([\w-]+)/)
-			var classNames = sugarString.match(/\.[\w-]+/g)
-
-
-			// Assign id if is set
-			if (id) {
-				element.attr.id = id[1]
-
-				// Add element to the return object
-				returnObject[id[1]] = element
-			}
-
-			if (reference)
-				returnObject[reference[1]] = element
-
-			if (classNames)
-				element.attr.class = classNames.join(' ').replace(/\./g, '')
-
-			if (sugarString.match(/&$/g))
-				doesEscape = false
-
-			return element
-		}
-
-		function replacer (key, value) {
-
-			if (value === null || value === false || value === undefined)
-				return
-
-			if (typeof value !== 'string' && typeof value !== 'object')
-				return String(value)
-
-			return value
-		}
-
-		function escapeAttribute (string) {
-			return (string || string === 0) ?
-				String(string)
-					.replace(/&/g, '&amp;')
-					.replace(/"/g, '&quot;') :
-				''
-		}
-
-		function escapeHTML (string) {
-			return String(string)
-				.replace(/&/g, '&amp;')
-				.replace(/"/g, '&quot;')
-				.replace(/'/g, '&apos;')
-				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;')
-		}
-
-
-		if (typeof array[0] === 'string')
-			array[0] = createElement(array[0])
-
-		else if (Array.isArray(array[0]))
-			i = 0
-
-		else
-			throw new Error(
-				'First element of array must be a string, ' +
-				'or an array and not ' + JSON.stringify(array[0])
-			)
-
-
-		for (; i < array.length; i++) {
-
-			// Don't render element if value is false or null
-			if (array[i] === false || array[i] === null) {
-				array[0] = false
-				break
-			}
-
-			// Continue with next array value if current value is undefined or true
-			else if (array[i] === undefined || array[i] === true) {
-				continue
-			}
-
-			else if (typeof array[i] === 'string') {
-				if (doesEscape)
-					array[i] = escapeHTML(array[i])
-
-				array[0].children.push(array[i])
-			}
-
-			else if (typeof array[i] === 'number') {
-
-				array[0].children.push(array[i])
-			}
-
-			else if (Array.isArray(array[i])) {
-
-				if (Array.isArray(array[i][0])) {
-					array[i].reverse().forEach(function (subArray) {
-						array.splice(i + 1, 0, subArray)
-					})
-
-					if (i !== 0)
-						continue
-					i++
-				}
-
-				shaven(array[i], namespace, returnObject)
-
-				if (array[i][0])
-					array[0].children.push(array[i][0])
-			}
-
-			else if (typeof array[i] === 'function')
-				callback = array[i]
-
-
-			else if (typeof array[i] === 'object') {
-				for (attributeKey in array[i])
-					if (array[i].hasOwnProperty(attributeKey))
-						if (array[i][attributeKey] !== null &&
-							array[i][attributeKey] !== false)
-							if (attributeKey === 'style' &&
-								typeof array[i][attributeKey] === 'object')
-								array[0].attr[attributeKey] = JSON
-									.stringify(array[i][attributeKey], replacer)
-									.slice(2, -2)
-									.replace(/","/g, ';')
-									.replace(/":"/g, ':')
-									.replace(/\\"/g, '\'')
-
-							else
-								array[0].attr[attributeKey] = array[i][attributeKey]
-			}
-
-			else
-				throw new TypeError('"' + array[i] + '" is not allowed as a value.')
-		}
-
-
-		if (array[0] !== false) {
-
-			HTMLString = '<' + array[0].tag
-
-			for (key in array[0].attr)
-				if (array[0].attr.hasOwnProperty(key))
-					HTMLString += ' ' + key + '="' +
-						escapeAttribute(array[0].attr[key]) + '"'
-
-			HTMLString += '>'
-
-			array[0].children.forEach(function (child) {
-				HTMLString += child
-			})
-
-			HTMLString += '</' + array[0].tag + '>'
-
-			array[0] = HTMLString
-		}
-
-		// Return root element on index 0
-		returnObject[0] = array[0]
-
-		if (callback)
-			callback(array[0])
-
-		// returns object containing all elements with an id and the root element
-		return returnObject
-	}
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports) {
-
-	/*!
-	 * escape-html
-	 * Copyright(c) 2012-2013 TJ Holowaychuk
-	 * Copyright(c) 2015 Andreas Lubbe
-	 * Copyright(c) 2015 Tiancheng "Timothy" Gu
-	 * MIT Licensed
-	 */
-
-	'use strict';
-
-	/**
-	 * Module variables.
-	 * @private
-	 */
-
-	var matchHtmlRegExp = /["'&<>]/;
-
-	/**
-	 * Module exports.
-	 * @public
-	 */
-
-	module.exports = escapeHtml;
-
-	/**
-	 * Escape special characters in the given string of html.
-	 *
-	 * @param  {string} string The string to escape for inserting into HTML
-	 * @return {string}
-	 * @public
-	 */
-
-	function escapeHtml(string) {
-	  var str = '' + string;
-	  var match = matchHtmlRegExp.exec(str);
-
-	  if (!match) {
-	    return str;
-	  }
-
-	  var escape;
-	  var html = '';
-	  var index = 0;
-	  var lastIndex = 0;
-
-	  for (index = match.index; index < str.length; index++) {
-	    switch (str.charCodeAt(index)) {
-	      case 34: // "
-	        escape = '&quot;';
-	        break;
-	      case 38: // &
-	        escape = '&amp;';
-	        break;
-	      case 39: // '
-	        escape = '&#39;';
-	        break;
-	      case 60: // <
-	        escape = '&lt;';
-	        break;
-	      case 62: // >
-	        escape = '&gt;';
-	        break;
-	      default:
-	        continue;
-	    }
-
-	    if (lastIndex !== index) {
-	      html += str.substring(lastIndex, index);
-	    }
-
-	    lastIndex = index + 1;
-	    html += escape;
-	  }
-
-	  return lastIndex !== index
-	    ? html + str.substring(lastIndex, index)
-	    : html;
-	}
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var DOM = __webpack_require__(9);
-	var utils = __webpack_require__(7);
-
-	module.exports = (function() {
-	    var canvas = DOM.newEl('canvas');
-	    var ctx = null;
-
-	    return function(sceneGraph) {
-	        if (ctx == null) {
-	            ctx = canvas.getContext('2d');
-	        }
-
-	        var dpr = utils.canvasRatio();
-	        var root = sceneGraph.root;
-	        canvas.width = dpr * root.properties.width;
-	        canvas.height = dpr * root.properties.height ;
-	        ctx.textBaseline = 'middle';
-
-	        var bg = root.children.holderBg;
-	        var bgWidth = dpr * bg.width;
-	        var bgHeight = dpr * bg.height;
-	        //todo: parametrize outline width (e.g. in scene object)
-	        var outlineWidth = 2;
-	        var outlineOffsetWidth = outlineWidth / 2;
-
-	        ctx.fillStyle = bg.properties.fill;
-	        ctx.fillRect(0, 0, bgWidth, bgHeight);
-
-	        if (bg.properties.outline) {
-	            //todo: abstract this into a method
-	            ctx.strokeStyle = bg.properties.outline.fill;
-	            ctx.lineWidth = bg.properties.outline.width;
-	            ctx.moveTo(outlineOffsetWidth, outlineOffsetWidth);
-	            // TL, TR, BR, BL
-	            ctx.lineTo(bgWidth - outlineOffsetWidth, outlineOffsetWidth);
-	            ctx.lineTo(bgWidth - outlineOffsetWidth, bgHeight - outlineOffsetWidth);
-	            ctx.lineTo(outlineOffsetWidth, bgHeight - outlineOffsetWidth);
-	            ctx.lineTo(outlineOffsetWidth, outlineOffsetWidth);
-	            // Diagonals
-	            ctx.moveTo(0, outlineOffsetWidth);
-	            ctx.lineTo(bgWidth, bgHeight - outlineOffsetWidth);
-	            ctx.moveTo(0, bgHeight - outlineOffsetWidth);
-	            ctx.lineTo(bgWidth, outlineOffsetWidth);
-	            ctx.stroke();
-	        }
-
-	        var textGroup = root.children.holderTextGroup;
-	        ctx.font = textGroup.properties.font.weight + ' ' + (dpr * textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
-	        ctx.fillStyle = textGroup.properties.fill;
-
-	        for (var lineKey in textGroup.children) {
-	            var line = textGroup.children[lineKey];
-	            for (var wordKey in line.children) {
-	                var word = line.children[wordKey];
-	                var x = dpr * (textGroup.x + line.x + word.x);
-	                var y = dpr * (textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
-
-	                ctx.fillText(word.properties.text, x, y);
-	            }
-	        }
-
-	        return canvas.toDataURL('image/png');
-	    };
-	})();
-
-/***/ }
-/******/ ])
-});
-;
-(function(ctx, isMeteorPackage) {
-    if (isMeteorPackage) {
-        Holder = ctx.Holder;
-    }
-})(this, typeof Meteor !== 'undefined' && typeof Package !== 'undefined');
 
 
 /***/ }),
@@ -37770,7 +32175,72 @@ module.exports = function normalizeComponent (
 
 /***/ }),
 
-/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-0067a07c\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/follower-list.vue":
+/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-1789d469\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_topic.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _vm._m(0)
+},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "topic"
+  }, [_c('div', {
+    staticClass: "topic-box"
+  }, [_c('div', {
+    staticClass: "media topic-item"
+  }, [_c('div', {
+    staticClass: "media-left"
+  }, [_c('a', {
+    attrs: {
+      "href": "#"
+    }
+  }, [_c('img', {
+    staticClass: "media-object topic-img",
+    attrs: {
+      "src": "img/avatar04.png"
+    }
+  })])]), _c('div', {
+    staticClass: "media-body"
+  }, [_c('h4', {
+    staticClass: "media-heading topic-title"
+  }, [_c('a', {
+    attrs: {
+      "href": "#"
+    }
+  }, [_vm._v("互联网")])]), _c('div', [_vm._v("互联网（英语：Internet），是网络与网络之间所串连成的庞大网络，这些网络以一组标准的网络TCP/IP协议族相连，链接全世界几十亿个设备，形成逻辑上的单一巨大国际网络。这是一个网络的网络，它是由从地方到全球范围内几百万个私人的，学术界的，企业的和政府的网络所构成，通过电子，无线和光纤网络技术等等一系列广泛的技术联系在一起.这种将计算机网络互相联接在一起的方法可称作“网络互联”，在这基础上发展出覆盖全世界的全球性互联网络称互联网，即是互相连接一起的网络。")]), _c('div', {
+    staticClass: "bottom"
+  }, [_c('ul', {
+    staticClass: "list-unstyled list-inline"
+  }, [_c('li', [_c('a', {
+    attrs: {
+      "href": "#"
+    }
+  }, [_c('span', {
+    staticClass: "fa fa-comment"
+  }), _vm._v(" 127683 个问题")])]), _c('li', [_c('a', {
+    attrs: {
+      "href": "#"
+    }
+  }, [_c('span', {
+    staticClass: "fa fa-user"
+  }), _vm._v(" 10279107 个关注")])])]), _c('a', {
+    staticClass: "btn btn-primary btn-sm"
+  }, [_vm._v("关注")])])])])]), _c('div', {
+    staticClass: "topic-bottom"
+  }, [_c('a', {
+    staticClass: "btn btn-default btn-md btn-block"
+  }, [_vm._v("更多")])])])
+}]}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-1789d469", module.exports)
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-2538a169\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/follower-list.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -37847,13 +32317,107 @@ module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-0067a07c", module.exports)
+     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-2538a169", module.exports)
   }
 }
 
 /***/ }),
 
-/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-4555aad0\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_people.vue":
+/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-309f0200\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/comment-list.vue":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('transition', {
+    attrs: {
+      "name": "fade"
+    }
+  }, [_c('div', {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: (_vm.show),
+      expression: "show"
+    }],
+    staticClass: "panel panel-default"
+  }, [_c('div', {
+    staticClass: "panel-heading"
+  }, [_vm._v(_vm._s(_vm.commentData.length ? _vm.commentData.length + '条评论' : '评论'))]), _vm._v(" "), _c('div', {
+    staticClass: "panel-body"
+  }, [(_vm.commentData.length != 0) ? [_c('transition-group', {
+    attrs: {
+      "name": "list",
+      "tag": "div"
+    }
+  }, _vm._l((_vm.commentData), function(item, index) {
+    return _c('div', {
+      key: index,
+      staticClass: "comment-item"
+    }, [_c('div', {
+      staticClass: "comment-top"
+    }, [_c('div', {
+      staticClass: "comment-user"
+    }, [_c('img', {
+      staticClass: "comment-face",
+      attrs: {
+        "src": "/img/avatar04.png"
+      }
+    }), _vm._v(" "), _c('span', {
+      staticClass: "comment-name"
+    }, [_vm._v(_vm._s(item.name))])]), _vm._v(" "), _c('div', {
+      staticClass: "comment-time"
+    }, [_vm._v(_vm._s(item.time))])]), _vm._v(" "), _c('div', {
+      staticClass: "comment-content"
+    }, [_vm._v(_vm._s(item.content))])])
+  }))] : [_c('div', {
+    staticClass: "text-center"
+  }, [(_vm.loading) ? _c('img', {
+    attrs: {
+      "src": "/img/loading.gif",
+      "alt": ""
+    }
+  }) : _c('span', [_vm._v("这里还没有评论...")])])]], 2), _vm._v(" "), _c('div', {
+    staticClass: "panel-footer comment-footer"
+  }, [_c('input', {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: (_vm.content),
+      expression: "content"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      "type": "text",
+      "placeholder": "写下你的评论..."
+    },
+    domProps: {
+      "value": (_vm.content)
+    },
+    on: {
+      "input": function($event) {
+        if ($event.target.composing) { return; }
+        _vm.content = $event.target.value
+      }
+    }
+  }), _vm._v(" "), (_vm.commentBtn) ? _c('button', {
+    staticClass: "btn btn-primary comment-submit",
+    on: {
+      "click": _vm.postComment
+    }
+  }, [_vm._v("评论")]) : _c('button', {
+    staticClass: "btn btn-primary comment-submit"
+  }, [_vm._v("........")])])])])
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-309f0200", module.exports)
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-5a8b05c5\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_people.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -37928,78 +32492,13 @@ module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-4555aad0", module.exports)
+     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-5a8b05c5", module.exports)
   }
 }
 
 /***/ }),
 
-/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-4d4e4936\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_topic.vue":
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _vm._m(0)
-},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('div', {
-    staticClass: "topic"
-  }, [_c('div', {
-    staticClass: "topic-box"
-  }, [_c('div', {
-    staticClass: "media topic-item"
-  }, [_c('div', {
-    staticClass: "media-left"
-  }, [_c('a', {
-    attrs: {
-      "href": "#"
-    }
-  }, [_c('img', {
-    staticClass: "media-object topic-img",
-    attrs: {
-      "src": "img/avatar04.png"
-    }
-  })])]), _c('div', {
-    staticClass: "media-body"
-  }, [_c('h4', {
-    staticClass: "media-heading topic-title"
-  }, [_c('a', {
-    attrs: {
-      "href": "#"
-    }
-  }, [_vm._v("互联网")])]), _c('div', [_vm._v("互联网（英语：Internet），是网络与网络之间所串连成的庞大网络，这些网络以一组标准的网络TCP/IP协议族相连，链接全世界几十亿个设备，形成逻辑上的单一巨大国际网络。这是一个网络的网络，它是由从地方到全球范围内几百万个私人的，学术界的，企业的和政府的网络所构成，通过电子，无线和光纤网络技术等等一系列广泛的技术联系在一起.这种将计算机网络互相联接在一起的方法可称作“网络互联”，在这基础上发展出覆盖全世界的全球性互联网络称互联网，即是互相连接一起的网络。")]), _c('div', {
-    staticClass: "bottom"
-  }, [_c('ul', {
-    staticClass: "list-unstyled list-inline"
-  }, [_c('li', [_c('a', {
-    attrs: {
-      "href": "#"
-    }
-  }, [_c('span', {
-    staticClass: "fa fa-comment"
-  }), _vm._v(" 127683 个问题")])]), _c('li', [_c('a', {
-    attrs: {
-      "href": "#"
-    }
-  }, [_c('span', {
-    staticClass: "fa fa-user"
-  }), _vm._v(" 10279107 个关注")])])]), _c('a', {
-    staticClass: "btn btn-primary btn-sm"
-  }, [_vm._v("关注")])])])])]), _c('div', {
-    staticClass: "topic-bottom"
-  }, [_c('a', {
-    staticClass: "btn btn-default btn-md btn-block"
-  }, [_vm._v("更多")])])])
-}]}
-module.exports.render._withStripped = true
-if (false) {
-  module.hot.accept()
-  if (module.hot.data) {
-     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-4d4e4936", module.exports)
-  }
-}
-
-/***/ }),
-
-/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-633a38d8\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/search-view.vue":
+/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-8ca53f7e\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/search-view.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -38029,13 +32528,13 @@ module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-633a38d8", module.exports)
+     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-8ca53f7e", module.exports)
   }
 }
 
 /***/ }),
 
-/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-749b7bc0\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_content.vue":
+/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-c3bdf39a\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_content.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
@@ -38150,123 +32649,29 @@ module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-749b7bc0", module.exports)
+     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-c3bdf39a", module.exports)
   }
 }
 
 /***/ }),
 
-/***/ "./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-d8285ce6\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/comment-list.vue":
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('transition', {
-    attrs: {
-      "name": "fade"
-    }
-  }, [_c('div', {
-    directives: [{
-      name: "show",
-      rawName: "v-show",
-      value: (_vm.show),
-      expression: "show"
-    }],
-    staticClass: "panel panel-default"
-  }, [_c('div', {
-    staticClass: "panel-heading"
-  }, [_vm._v(_vm._s(_vm.commentData.length ? _vm.commentData.length + '条评论' : '评论'))]), _vm._v(" "), _c('div', {
-    staticClass: "panel-body"
-  }, [(_vm.commentData.length != 0) ? [_c('transition-group', {
-    attrs: {
-      "name": "list",
-      "tag": "div"
-    }
-  }, _vm._l((_vm.commentData), function(item, index) {
-    return _c('div', {
-      key: index,
-      staticClass: "comment-item"
-    }, [_c('div', {
-      staticClass: "comment-top"
-    }, [_c('div', {
-      staticClass: "comment-user"
-    }, [_c('img', {
-      staticClass: "comment-face",
-      attrs: {
-        "src": "/img/avatar04.png"
-      }
-    }), _vm._v(" "), _c('span', {
-      staticClass: "comment-name"
-    }, [_vm._v(_vm._s(item.name))])]), _vm._v(" "), _c('div', {
-      staticClass: "comment-time"
-    }, [_vm._v(_vm._s(item.time))])]), _vm._v(" "), _c('div', {
-      staticClass: "comment-content"
-    }, [_vm._v(_vm._s(item.content))])])
-  }))] : [_c('div', {
-    staticClass: "text-center"
-  }, [(_vm.loading) ? _c('img', {
-    attrs: {
-      "src": "/img/loading.gif",
-      "alt": ""
-    }
-  }) : _c('span', [_vm._v("这里还没有评论...")])])]], 2), _vm._v(" "), _c('div', {
-    staticClass: "panel-footer comment-footer"
-  }, [_c('input', {
-    directives: [{
-      name: "model",
-      rawName: "v-model",
-      value: (_vm.content),
-      expression: "content"
-    }],
-    staticClass: "form-control",
-    attrs: {
-      "type": "text",
-      "placeholder": "写下你的评论..."
-    },
-    domProps: {
-      "value": (_vm.content)
-    },
-    on: {
-      "input": function($event) {
-        if ($event.target.composing) { return; }
-        _vm.content = $event.target.value
-      }
-    }
-  }), _vm._v(" "), (_vm.commentBtn) ? _c('button', {
-    staticClass: "btn btn-primary comment-submit",
-    on: {
-      "click": _vm.postComment
-    }
-  }, [_vm._v("评论")]) : _c('button', {
-    staticClass: "btn btn-primary comment-submit"
-  }, [_vm._v("........")])])])])
-},staticRenderFns: []}
-module.exports.render._withStripped = true
-if (false) {
-  module.hot.accept()
-  if (module.hot.data) {
-     require("vue-loader/node_modules/vue-hot-reload-api").rerender("data-v-d8285ce6", module.exports)
-  }
-}
-
-/***/ }),
-
-/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-0067a07c\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/follower-list.vue":
+/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1789d469\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_topic.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-0067a07c\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/follower-list.vue");
+var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1789d469\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_topic.vue");
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("20542c47", content, false);
+var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("19d71028", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-0067a07c\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./follower-list.vue", function() {
-     var newContent = require("!!../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-0067a07c\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./follower-list.vue");
+   module.hot.accept("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1789d469\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_topic.vue", function() {
+     var newContent = require("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1789d469\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_topic.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -38277,23 +32682,23 @@ if(false) {
 
 /***/ }),
 
-/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4555aad0\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_people.vue":
+/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2538a169\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/follower-list.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4555aad0\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_people.vue");
+var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2538a169\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/follower-list.vue");
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("1993985b", content, false);
+var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("c80201f0", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4555aad0\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_people.vue", function() {
-     var newContent = require("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4555aad0\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_people.vue");
+   module.hot.accept("!!../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2538a169\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./follower-list.vue", function() {
+     var newContent = require("!!../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2538a169\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./follower-list.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -38304,23 +32709,23 @@ if(false) {
 
 /***/ }),
 
-/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4d4e4936\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_topic.vue":
+/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-309f0200\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/comment-list.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4d4e4936\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_topic.vue");
+var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-309f0200\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/comment-list.vue");
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("02908777", content, false);
+var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("9d820738", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4d4e4936\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_topic.vue", function() {
-     var newContent = require("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4d4e4936\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_topic.vue");
+   module.hot.accept("!!../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-309f0200\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./comment-list.vue", function() {
+     var newContent = require("!!../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-309f0200\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./comment-list.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -38331,23 +32736,23 @@ if(false) {
 
 /***/ }),
 
-/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-633a38d8\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/search-view.vue":
+/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5a8b05c5\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_people.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-633a38d8\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/search-view.vue");
+var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5a8b05c5\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_people.vue");
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("444e12ff", content, false);
+var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("0b11c03b", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-633a38d8\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./search-view.vue", function() {
-     var newContent = require("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-633a38d8\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./search-view.vue");
+   module.hot.accept("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5a8b05c5\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_people.vue", function() {
+     var newContent = require("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5a8b05c5\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_people.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -38358,23 +32763,23 @@ if(false) {
 
 /***/ }),
 
-/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-749b7bc0\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_content.vue":
+/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8ca53f7e\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/search-view.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-749b7bc0\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_content.vue");
+var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8ca53f7e\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/search-view.vue");
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("79c44402", content, false);
+var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("2a71c5bb", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-749b7bc0\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_content.vue", function() {
-     var newContent = require("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-749b7bc0\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_content.vue");
+   module.hot.accept("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8ca53f7e\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./search-view.vue", function() {
+     var newContent = require("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8ca53f7e\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./search-view.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -38385,23 +32790,23 @@ if(false) {
 
 /***/ }),
 
-/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d8285ce6\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/comment-list.vue":
+/***/ "./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-c3bdf39a\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_content.vue":
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d8285ce6\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/comment-list.vue");
+var content = __webpack_require__("./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-c3bdf39a\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_content.vue");
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("aa2bb45e", content, false);
+var update = __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/lib/addStylesClient.js")("17d9d36b", content, false);
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d8285ce6\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./comment-list.vue", function() {
-     var newContent = require("!!../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d8285ce6\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./comment-list.vue");
+   module.hot.accept("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-c3bdf39a\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_content.vue", function() {
+     var newContent = require("!!../../../../../node_modules/_css-loader@0.28.4@css-loader/index.js!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-c3bdf39a\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../../node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!../../../../../node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./_content.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -48368,7 +42773,7 @@ module.exports = Vue$3;
 
 /***/ }),
 
-/***/ "./node_modules/_wangeditor@3.0.3@wangeditor/release/wangEditor.js":
+/***/ "./node_modules/_wangeditor@3.0.4@wangeditor/release/wangEditor.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 (function (global, factory) {
@@ -48877,6 +43282,16 @@ var config = {
     // 默认菜单配置
     menus: ['head', 'bold', 'italic', 'underline', 'strikeThrough', 'foreColor', 'backColor', 'link', 'list', 'justify', 'quote', 'emoticon', 'image', 'table', 'video', 'code', 'undo', 'redo'],
 
+    // // 语言配置
+    // lang: {
+    //     '设置标题': 'title',
+    //     '正文': 'p',
+    //     '链接文字': 'link text',
+    //     '链接': 'link',
+    //     '插入': 'insert',
+    //     '创建': 'init'
+    // },
+
     // 编辑区域的 z-index
     zIndex: 10000,
 
@@ -48949,6 +43364,7 @@ var config = {
             // 图片上传超时时触发
         }
     }
+
 };
 
 /*
@@ -49069,6 +43485,28 @@ Bold.prototype = {
 };
 
 /*
+    替换多语言
+ */
+
+var replaceLang = function (editor, str) {
+    var langArgs = editor.config.langArgs || [];
+    var result = str;
+
+    langArgs.forEach(function (item) {
+        var reg = item.reg;
+        var val = item.val;
+
+        if (reg.test(result)) {
+            result = result.replace(reg, function () {
+                return val;
+            });
+        }
+    });
+
+    return result;
+};
+
+/*
     droplist
 */
 var _emptyFn = function _emptyFn() {};
@@ -49078,6 +43516,7 @@ function DropList(menu, opt) {
     var _this = this;
 
     // droplist 所依附的菜单
+    var editor = menu.editor;
     this.menu = menu;
     this.opt = opt;
     // 容器
@@ -49085,7 +43524,13 @@ function DropList(menu, opt) {
 
     // 标题
     var $title = opt.$title;
+    var titleHtml = void 0;
     if ($title) {
+        // 替换多语言
+        titleHtml = $title.html();
+        titleHtml = replaceLang(editor, titleHtml);
+        $title.html(titleHtml);
+
         $title.addClass('w-e-dp-title');
         $container.append($title);
     }
@@ -49099,6 +43544,12 @@ function DropList(menu, opt) {
     $container.append($list);
     list.forEach(function (item) {
         var $elem = item.$elem;
+
+        // 替换多语言
+        var elemHtml = $elem.html();
+        elemHtml = replaceLang(editor, elemHtml);
+        $elem.html(elemHtml);
+
         var value = item.value;
         var $li = $('<li class="w-e-item"></li>');
         if ($elem) {
@@ -49302,6 +43753,10 @@ Panel.prototype = {
             }
             var title = tab.title || '';
             var tpl = tab.tpl || '';
+
+            // 替换多语言
+            title = replaceLang(editor, title);
+            tpl = replaceLang(editor, tpl);
 
             // 添加到 DOM
             var $title = $('<li class="w-e-item">' + title + '</li>');
@@ -50838,7 +45293,7 @@ Image.prototype = {
 
         // 判断 tabs 的显示
         var tabsConfigResult = [];
-        if ((config.uploadImgShowBase64 || config.uploadImgServer) && window.FileReader) {
+        if ((config.uploadImgShowBase64 || config.uploadImgServer || config.customUploadImg) && window.FileReader) {
             // 显示“上传图片”
             tabsConfigResult.push(tabsConfig[0]);
         }
@@ -50957,9 +45412,14 @@ Menus.prototype = {
         var editor = this.editor;
         var $toolbarElem = editor.$toolbarElem;
         var menus = this.menus;
+        var config = editor.config;
+        // config.zIndex 是配置的编辑区域的 z-index，菜单的 z-index 得在其基础上 +1
+        var zIndex = config.zIndex + 1;
         objForEach(menus, function (key, menu) {
             var $elem = menu.$elem;
             if ($elem) {
+                // 设置 z-index
+                $elem.css('z-index', zIndex);
                 $toolbarElem.append($elem);
             }
         });
@@ -51722,18 +46182,22 @@ API.prototype = {
             return;
         }
 
-        // 目前只支持 webkit 内核
-        if (UA.isWebkit()) {
-            // 插入 &#8203
-            editor.cmd.do('insertHTML', '&#8203;');
-            // 修改 offset 位置
-            range.setEnd(range.endContainer, range.endOffset + 1);
-            // 存储
-            this.saveRange(range);
-        } else {
-            $elem = $('<strong>&#8203;</strong>');
-            editor.cmd.do('insertElem', $elem);
-            this.createRangeByElem($elem, true);
+        try {
+            // 目前只支持 webkit 内核
+            if (UA.isWebkit()) {
+                // 插入 &#8203
+                editor.cmd.do('insertHTML', '&#8203;');
+                // 修改 offset 位置
+                range.setEnd(range.endContainer, range.endOffset + 1);
+                // 存储
+                this.saveRange(range);
+            } else {
+                $elem = $('<strong>&#8203;</strong>');
+                editor.cmd.do('insertElem', $elem);
+                this.createRangeByElem($elem, true);
+            }
+        } catch (ex) {
+            // 部分情况下会报错，兼容一下
         }
     },
 
@@ -51851,11 +46315,16 @@ UploadImg.prototype = {
     _alert: function _alert(alertInfo, debugInfo) {
         var editor = this.editor;
         var debug = editor.config.debug;
+        var customAlert = editor.config.customAlert;
 
         if (debug) {
             throw new Error('wangEditor: ' + (debugInfo || alertInfo));
         } else {
-            alert(alertInfo);
+            if (customAlert && typeof customAlert === 'function') {
+                customAlert(alertInfo);
+            } else {
+                alert(alertInfo);
+            }
         }
     },
 
@@ -51910,6 +46379,7 @@ UploadImg.prototype = {
         if (withCredentials == null) {
             withCredentials = false;
         }
+        var customUploadImg = config.customUploadImg;
 
         // ------------------------------ 验证文件信息 ------------------------------
         var resultFiles = [];
@@ -51917,6 +46387,12 @@ UploadImg.prototype = {
         arrForEach(files, function (file) {
             var name = file.name;
             var size = file.size;
+
+            // chrome 低版本 name === undefined
+            if (!name || !size) {
+                return;
+            }
+
             if (/\.(jpg|jpeg|png|bmp|gif)$/i.test(name) === false) {
                 // 后缀名不合法，不是图片
                 errInfo.push('\u3010' + name + '\u3011\u4E0D\u662F\u56FE\u7247');
@@ -51938,6 +46414,14 @@ UploadImg.prototype = {
         }
         if (resultFiles.length > maxLength) {
             this._alert('一次最多上传' + maxLength + '张图片');
+            return;
+        }
+
+        // ------------------------------ 自定义上传 ------------------------------
+        if (customUploadImg && typeof customUploadImg === 'function') {
+            customUploadImg(resultFiles, this.insertLinkImg.bind(this));
+
+            // 阻止以下代码执行
             return;
         }
 
@@ -52077,7 +46561,7 @@ UploadImg.prototype = {
             return;
         }
 
-        // 显示 base64 格式
+        // ------------------------------ 显示 base64 格式 ------------------------------
         if (uploadImgShowBase64) {
             arrForEach(files, function (file) {
                 var _this = _this3;
@@ -52123,6 +46607,20 @@ Editor.prototype = {
         // _config 是默认配置，this.customConfig 是用户自定义配置，将它们 merge 之后再赋值
         var target = {};
         this.config = Object.assign(target, config, this.customConfig);
+
+        // 将语言配置，生成正则表达式
+        var langConfig = this.config.lang || {};
+        var langArgs = [];
+        objForEach(langConfig, function (key, val) {
+            // key 即需要生成正则表达式的规则，如“插入链接”
+            // val 即需要被替换成的语言，如“insert link”
+            langArgs.push({
+                reg: new RegExp(key, 'img'),
+                val: val
+
+            });
+        });
+        this.config.langArgs = langArgs;
     },
 
     // 初始化 DOM
@@ -52134,7 +46632,7 @@ Editor.prototype = {
         var textSelector = this.textSelector;
 
         var config$$1 = this.config;
-        var zIndex = config$$1.zIndex || '10000';
+        var zIndex = config$$1.zIndex;
 
         // 定义变量
         var $toolbarElem = void 0,
@@ -52226,7 +46724,7 @@ Editor.prototype = {
     },
 
     // 初始化选区，将光标定位到内容尾部
-    initSelection: function initSelection() {
+    initSelection: function initSelection(newLine) {
         var $textElem = this.$textElem;
         var $children = $textElem.children();
         if (!$children.length) {
@@ -52237,16 +46735,20 @@ Editor.prototype = {
         }
 
         var $last = $children.last();
-        var html = $last.html().toLowerCase();
-        var nodeName = $last.getNodeName();
-        if (html !== '<br>' && html !== '<br\/>' || nodeName !== 'P') {
-            // 最后一个元素不是 <p><br></p>，添加一个空行，重新设置选区
-            $textElem.append($('<p><br></p>'));
-            this.initSelection();
-            return;
+
+        if (newLine) {
+            // 新增一个空行
+            var html = $last.html().toLowerCase();
+            var nodeName = $last.getNodeName();
+            if (html !== '<br>' && html !== '<br\/>' || nodeName !== 'P') {
+                // 最后一个元素不是 <p><br></p>，添加一个空行，重新设置选区
+                $textElem.append($('<p><br></p>'));
+                this.initSelection();
+                return;
+            }
         }
 
-        this.selection.createRangeByElem($last, true);
+        this.selection.createRangeByElem($last, false, true);
         this.selection.restoreSelection();
     },
 
@@ -52306,7 +46808,7 @@ Editor.prototype = {
         this._initUploadImg();
 
         // 初始化选区，将光标定位到内容尾部
-        this.initSelection();
+        this.initSelection(true);
 
         // 绑定事件
         this._bindEvent();
@@ -52399,6 +46901,5584 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./node_modules/holderjs/holder.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+/*!
+
+Holder - client side image placeholders
+Version 2.9.4+cabil
+© 2016 Ivan Malopinsky - http://imsky.co
+
+Site:     http://holderjs.com
+Issues:   https://github.com/imsky/holder/issues
+License:  MIT
+
+*/
+(function (window) {
+  if (!window.document) return;
+  var document = window.document;
+
+  //https://github.com/inexorabletash/polyfill/blob/master/web.js
+    if (!document.querySelectorAll) {
+      document.querySelectorAll = function (selectors) {
+        var style = document.createElement('style'), elements = [], element;
+        document.documentElement.firstChild.appendChild(style);
+        document._qsa = [];
+
+        style.styleSheet.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}';
+        window.scrollBy(0, 0);
+        style.parentNode.removeChild(style);
+
+        while (document._qsa.length) {
+          element = document._qsa.shift();
+          element.style.removeAttribute('x-qsa');
+          elements.push(element);
+        }
+        document._qsa = null;
+        return elements;
+      };
+    }
+
+    if (!document.querySelector) {
+      document.querySelector = function (selectors) {
+        var elements = document.querySelectorAll(selectors);
+        return (elements.length) ? elements[0] : null;
+      };
+    }
+
+    if (!document.getElementsByClassName) {
+      document.getElementsByClassName = function (classNames) {
+        classNames = String(classNames).replace(/^|\s+/g, '.');
+        return document.querySelectorAll(classNames);
+      };
+    }
+
+  //https://github.com/inexorabletash/polyfill
+  // ES5 15.2.3.14 Object.keys ( O )
+  // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
+  if (!Object.keys) {
+    Object.keys = function (o) {
+      if (o !== Object(o)) { throw TypeError('Object.keys called on non-object'); }
+      var ret = [], p;
+      for (p in o) {
+        if (Object.prototype.hasOwnProperty.call(o, p)) {
+          ret.push(p);
+        }
+      }
+      return ret;
+    };
+  }
+
+  // ES5 15.4.4.18 Array.prototype.forEach ( callbackfn [ , thisArg ] )
+  // From https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/forEach
+  if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function (fun /*, thisp */) {
+      if (this === void 0 || this === null) { throw TypeError(); }
+
+      var t = Object(this);
+      var len = t.length >>> 0;
+      if (typeof fun !== "function") { throw TypeError(); }
+
+      var thisp = arguments[1], i;
+      for (i = 0; i < len; i++) {
+        if (i in t) {
+          fun.call(thisp, t[i], i, t);
+        }
+      }
+    };
+  }
+
+  //https://github.com/inexorabletash/polyfill/blob/master/web.js
+  (function (global) {
+    var B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    global.atob = global.atob || function (input) {
+      input = String(input);
+      var position = 0,
+          output = [],
+          buffer = 0, bits = 0, n;
+
+      input = input.replace(/\s/g, '');
+      if ((input.length % 4) === 0) { input = input.replace(/=+$/, ''); }
+      if ((input.length % 4) === 1) { throw Error('InvalidCharacterError'); }
+      if (/[^+/0-9A-Za-z]/.test(input)) { throw Error('InvalidCharacterError'); }
+
+      while (position < input.length) {
+        n = B64_ALPHABET.indexOf(input.charAt(position));
+        buffer = (buffer << 6) | n;
+        bits += 6;
+
+        if (bits === 24) {
+          output.push(String.fromCharCode((buffer >> 16) & 0xFF));
+          output.push(String.fromCharCode((buffer >>  8) & 0xFF));
+          output.push(String.fromCharCode(buffer & 0xFF));
+          bits = 0;
+          buffer = 0;
+        }
+        position += 1;
+      }
+
+      if (bits === 12) {
+        buffer = buffer >> 4;
+        output.push(String.fromCharCode(buffer & 0xFF));
+      } else if (bits === 18) {
+        buffer = buffer >> 2;
+        output.push(String.fromCharCode((buffer >> 8) & 0xFF));
+        output.push(String.fromCharCode(buffer & 0xFF));
+      }
+
+      return output.join('');
+    };
+
+    global.btoa = global.btoa || function (input) {
+      input = String(input);
+      var position = 0,
+          out = [],
+          o1, o2, o3,
+          e1, e2, e3, e4;
+
+      if (/[^\x00-\xFF]/.test(input)) { throw Error('InvalidCharacterError'); }
+
+      while (position < input.length) {
+        o1 = input.charCodeAt(position++);
+        o2 = input.charCodeAt(position++);
+        o3 = input.charCodeAt(position++);
+
+        // 111111 112222 222233 333333
+        e1 = o1 >> 2;
+        e2 = ((o1 & 0x3) << 4) | (o2 >> 4);
+        e3 = ((o2 & 0xf) << 2) | (o3 >> 6);
+        e4 = o3 & 0x3f;
+
+        if (position === input.length + 2) {
+          e3 = 64; e4 = 64;
+        }
+        else if (position === input.length + 1) {
+          e4 = 64;
+        }
+
+        out.push(B64_ALPHABET.charAt(e1),
+                 B64_ALPHABET.charAt(e2),
+                 B64_ALPHABET.charAt(e3),
+                 B64_ALPHABET.charAt(e4));
+      }
+
+      return out.join('');
+    };
+  }(window));
+
+  //https://gist.github.com/jimeh/332357
+  if (!Object.prototype.hasOwnProperty){
+      /*jshint -W001, -W103 */
+      Object.prototype.hasOwnProperty = function(prop) {
+      var proto = this.__proto__ || this.constructor.prototype;
+      return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
+    };
+      /*jshint +W001, +W103 */
+  }
+
+  // @license http://opensource.org/licenses/MIT
+  // copyright Paul Irish 2015
+
+
+  // Date.now() is supported everywhere except IE8. For IE8 we use the Date.now polyfill
+  //   github.com/Financial-Times/polyfill-service/blob/master/polyfills/Date.now/polyfill.js
+  // as Safari 6 doesn't have support for NavigationTiming, we use a Date.now() timestamp for relative values
+
+  // if you want values similar to what you'd get with real perf.now, place this towards the head of the page
+  // but in reality, you're just getting the delta between now() calls, so it's not terribly important where it's placed
+
+
+  (function(){
+
+    if ('performance' in window === false) {
+        window.performance = {};
+    }
+    
+    Date.now = (Date.now || function () {  // thanks IE8
+      return new Date().getTime();
+    });
+
+    if ('now' in window.performance === false){
+      
+      var nowOffset = Date.now();
+      
+      if (performance.timing && performance.timing.navigationStart){
+        nowOffset = performance.timing.navigationStart;
+      }
+
+      window.performance.now = function now(){
+        return Date.now() - nowOffset;
+      };
+    }
+
+  })();
+
+  //requestAnimationFrame polyfill for older Firefox/Chrome versions
+  if (!window.requestAnimationFrame) {
+    if (window.webkitRequestAnimationFrame && window.webkitCancelAnimationFrame) {
+    //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-webkit.js
+    (function (global) {
+      global.requestAnimationFrame = function (callback) {
+        return webkitRequestAnimationFrame(function () {
+          callback(global.performance.now());
+        });
+      };
+
+      global.cancelAnimationFrame = global.webkitCancelAnimationFrame;
+    }(window));
+    } else if (window.mozRequestAnimationFrame && window.mozCancelAnimationFrame) {
+      //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-moz.js
+    (function (global) {
+      global.requestAnimationFrame = function (callback) {
+        return mozRequestAnimationFrame(function () {
+          callback(global.performance.now());
+        });
+      };
+
+      global.cancelAnimationFrame = global.mozCancelAnimationFrame;
+    }(window));
+    } else {
+    (function (global) {
+      global.requestAnimationFrame = function (callback) {
+        return global.setTimeout(callback, 1000 / 60);
+      };
+
+      global.cancelAnimationFrame = global.clearTimeout;
+    })(window);
+    }
+  }
+})(this);
+
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(true)
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["Holder"] = factory();
+	else
+		root["Holder"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*
+	Holder.js - client side image placeholders
+	(c) 2012-2015 Ivan Malopinsky - http://imsky.co
+	*/
+
+	module.exports = __webpack_require__(1);
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {/*
+	Holder.js - client side image placeholders
+	(c) 2012-2016 Ivan Malopinsky - http://imsky.co
+	*/
+
+	//Libraries and functions
+	var onDomReady = __webpack_require__(2);
+	var querystring = __webpack_require__(3);
+
+	var SceneGraph = __webpack_require__(6);
+	var utils = __webpack_require__(7);
+	var SVG = __webpack_require__(8);
+	var DOM = __webpack_require__(9);
+	var Color = __webpack_require__(10);
+	var constants = __webpack_require__(11);
+
+	var svgRenderer = __webpack_require__(12);
+	var sgCanvasRenderer = __webpack_require__(15);
+
+	var extend = utils.extend;
+	var dimensionCheck = utils.dimensionCheck;
+
+	//Constants and definitions
+	var SVG_NS = constants.svg_ns;
+
+	var Holder = {
+	    version: constants.version,
+
+	    /**
+	     * Adds a theme to default settings
+	     *
+	     * @param {string} name Theme name
+	     * @param {Object} theme Theme object, with foreground, background, size, font, and fontweight properties.
+	     */
+	    addTheme: function(name, theme) {
+	        name != null && theme != null && (App.settings.themes[name] = theme);
+	        delete App.vars.cache.themeKeys;
+	        return this;
+	    },
+
+	    /**
+	     * Appends a placeholder to an element
+	     *
+	     * @param {string} src Placeholder URL string
+	     * @param el A selector or a reference to a DOM node
+	     */
+	    addImage: function(src, el) {
+	        //todo: use jquery fallback if available for all QSA references
+	        var nodes = DOM.getNodeArray(el);
+	        nodes.forEach(function (node) {
+	            var img = DOM.newEl('img');
+	            var domProps = {};
+	            domProps[App.setup.dataAttr] = src;
+	            DOM.setAttr(img, domProps);
+	            node.appendChild(img);
+	        });
+	        return this;
+	    },
+
+	    /**
+	     * Sets whether or not an image is updated on resize.
+	     * If an image is set to be updated, it is immediately rendered.
+	     *
+	     * @param {Object} el Image DOM element
+	     * @param {Boolean} value Resizable update flag value
+	     */
+	    setResizeUpdate: function(el, value) {
+	        if (el.holderData) {
+	            el.holderData.resizeUpdate = !!value;
+	            if (el.holderData.resizeUpdate) {
+	                updateResizableElements(el);
+	            }
+	        }
+	    },
+
+	    /**
+	     * Runs Holder with options. By default runs Holder on all images with "holder.js" in their source attributes.
+	     *
+	     * @param {Object} userOptions Options object, can contain domain, themes, images, and bgnodes properties
+	     */
+	    run: function(userOptions) {
+	        //todo: split processing into separate queues
+	        userOptions = userOptions || {};
+	        var engineSettings = {};
+	        var options = extend(App.settings, userOptions);
+
+	        App.vars.preempted = true;
+	        App.vars.dataAttr = options.dataAttr || App.setup.dataAttr;
+
+	        engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
+	        if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
+	            engineSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
+	        }
+
+	        var images = DOM.getNodeArray(options.images);
+	        var bgnodes = DOM.getNodeArray(options.bgnodes);
+	        var stylenodes = DOM.getNodeArray(options.stylenodes);
+	        var objects = DOM.getNodeArray(options.objects);
+
+	        engineSettings.stylesheets = [];
+	        engineSettings.svgXMLStylesheet = true;
+	        engineSettings.noFontFallback = !!options.noFontFallback;
+	        engineSettings.noBackgroundSize = !!options.noBackgroundSize;
+
+	        stylenodes.forEach(function (styleNode) {
+	            if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
+	                var href = styleNode.attributes.href.value;
+	                //todo: write isomorphic relative-to-absolute URL function
+	                var proxyLink = DOM.newEl('a');
+	                proxyLink.href = href;
+	                var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
+	                engineSettings.stylesheets.push(stylesheetURL);
+	            }
+	        });
+
+	        bgnodes.forEach(function (bgNode) {
+	            //Skip processing background nodes if getComputedStyle is unavailable, since only modern browsers would be able to use canvas or SVG to render to background
+	            if (!global.getComputedStyle) return;
+	            var backgroundImage = global.getComputedStyle(bgNode, null).getPropertyValue('background-image');
+	            var dataBackgroundImage = bgNode.getAttribute('data-background-src');
+	            var rawURL = dataBackgroundImage || backgroundImage;
+
+	            var holderURL = null;
+	            var holderString = options.domain + '/';
+	            var holderStringIndex = rawURL.indexOf(holderString);
+
+	            if (holderStringIndex === 0) {
+	                holderURL = rawURL;
+	            } else if (holderStringIndex === 1 && rawURL[0] === '?') {
+	                holderURL = rawURL.slice(1);
+	            } else {
+	                var fragment = rawURL.substr(holderStringIndex).match(/([^\"]*)"?\)/);
+	                if (fragment !== null) {
+	                    holderURL = fragment[1];
+	                } else if (rawURL.indexOf('url(') === 0) {
+	                    throw 'Holder: unable to parse background URL: ' + rawURL;
+	                }
+	            }
+
+	            if (holderURL) {
+	                var holderFlags = parseURL(holderURL, options);
+	                if (holderFlags) {
+	                    prepareDOMElement({
+	                        mode: 'background',
+	                        el: bgNode,
+	                        flags: holderFlags,
+	                        engineSettings: engineSettings
+	                    });
+	                }
+	            }
+	        });
+
+	        objects.forEach(function (object) {
+	            var objectAttr = {};
+
+	            try {
+	                objectAttr.data = object.getAttribute('data');
+	                objectAttr.dataSrc = object.getAttribute(App.vars.dataAttr);
+	            } catch (e) {}
+
+	            var objectHasSrcURL = objectAttr.data != null && objectAttr.data.indexOf(options.domain) === 0;
+	            var objectHasDataSrcURL = objectAttr.dataSrc != null && objectAttr.dataSrc.indexOf(options.domain) === 0;
+
+	            if (objectHasSrcURL) {
+	                prepareImageElement(options, engineSettings, objectAttr.data, object);
+	            } else if (objectHasDataSrcURL) {
+	                prepareImageElement(options, engineSettings, objectAttr.dataSrc, object);
+	            }
+	        });
+
+	        images.forEach(function (image) {
+	            var imageAttr = {};
+
+	            try {
+	                imageAttr.src = image.getAttribute('src');
+	                imageAttr.dataSrc = image.getAttribute(App.vars.dataAttr);
+	                imageAttr.rendered = image.getAttribute('data-holder-rendered');
+	            } catch (e) {}
+
+	            var imageHasSrc = imageAttr.src != null;
+	            var imageHasDataSrcURL = imageAttr.dataSrc != null && imageAttr.dataSrc.indexOf(options.domain) === 0;
+	            var imageRendered = imageAttr.rendered != null && imageAttr.rendered == 'true';
+
+	            if (imageHasSrc) {
+	                if (imageAttr.src.indexOf(options.domain) === 0) {
+	                    prepareImageElement(options, engineSettings, imageAttr.src, image);
+	                } else if (imageHasDataSrcURL) {
+	                    //Image has a valid data-src and an invalid src
+	                    if (imageRendered) {
+	                        //If the placeholder has already been render, re-render it
+	                        prepareImageElement(options, engineSettings, imageAttr.dataSrc, image);
+	                    } else {
+	                        //If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
+	                        (function(src, options, engineSettings, dataSrc, image) {
+	                            utils.imageExists(src, function(exists) {
+	                                if (!exists) {
+	                                    prepareImageElement(options, engineSettings, dataSrc, image);
+	                                }
+	                            });
+	                        })(imageAttr.src, options, engineSettings, imageAttr.dataSrc, image);
+	                    }
+	                }
+	            } else if (imageHasDataSrcURL) {
+	                prepareImageElement(options, engineSettings, imageAttr.dataSrc, image);
+	            }
+	        });
+
+	        return this;
+	    }
+	};
+
+	var App = {
+	    settings: {
+	        domain: 'holder.js',
+	        images: 'img',
+	        objects: 'object',
+	        bgnodes: 'body .holderjs',
+	        stylenodes: 'head link.holderjs',
+	        themes: {
+	            'gray': {
+	                bg: '#EEEEEE',
+	                fg: '#AAAAAA'
+	            },
+	            'social': {
+	                bg: '#3a5a97',
+	                fg: '#FFFFFF'
+	            },
+	            'industrial': {
+	                bg: '#434A52',
+	                fg: '#C2F200'
+	            },
+	            'sky': {
+	                bg: '#0D8FDB',
+	                fg: '#FFFFFF'
+	            },
+	            'vine': {
+	                bg: '#39DBAC',
+	                fg: '#1E292C'
+	            },
+	            'lava': {
+	                bg: '#F8591A',
+	                fg: '#1C2846'
+	            }
+	        }
+	    },
+	    defaults: {
+	        size: 10,
+	        units: 'pt',
+	        scale: 1 / 16
+	    }
+	};
+
+	/**
+	 * Processes provided source attribute and sets up the appropriate rendering workflow
+	 *
+	 * @private
+	 * @param options Instance options from Holder.run
+	 * @param renderSettings Instance configuration
+	 * @param src Image URL
+	 * @param el Image DOM element
+	 */
+	function prepareImageElement(options, engineSettings, src, el) {
+	    var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
+	    if (holderFlags) {
+	        prepareDOMElement({
+	            mode: null,
+	            el: el,
+	            flags: holderFlags,
+	            engineSettings: engineSettings
+	        });
+	    }
+	}
+
+	/**
+	 * Processes a Holder URL and extracts configuration from query string
+	 *
+	 * @private
+	 * @param url URL
+	 * @param instanceOptions Instance options from Holder.run
+	 */
+	function parseURL(url, instanceOptions) {
+	    var holder = {
+	        theme: extend(App.settings.themes.gray, null),
+	        stylesheets: instanceOptions.stylesheets,
+	        instanceOptions: instanceOptions
+	    };
+
+	    var firstQuestionMark = url.indexOf('?');
+	    var parts = [url];
+
+	    if (firstQuestionMark !== -1) {
+	        parts = [url.slice(0, firstQuestionMark), url.slice(firstQuestionMark + 1)];
+	    }
+
+	    var basics = parts[0].split('/');
+
+	    holder.holderURL = url;
+
+	    var dimensions = basics[1];
+	    var dimensionData = dimensions.match(/([\d]+p?)x([\d]+p?)/);
+
+	    if (!dimensionData) return false;
+
+	    holder.fluid = dimensions.indexOf('p') !== -1;
+
+	    holder.dimensions = {
+	        width: dimensionData[1].replace('p', '%'),
+	        height: dimensionData[2].replace('p', '%')
+	    };
+
+	    if (parts.length === 2) {
+	        var options = querystring.parse(parts[1]);
+
+	        // Dimensions
+
+	        if (utils.truthy(options.ratio)) {
+	            holder.fluid = true;
+	            var ratioWidth = parseFloat(holder.dimensions.width.replace('%', ''));
+	            var ratioHeight = parseFloat(holder.dimensions.height.replace('%', ''));
+
+	            ratioHeight = Math.floor(100 * (ratioHeight / ratioWidth));
+	            ratioWidth = 100;
+
+	            holder.dimensions.width = ratioWidth + '%';
+	            holder.dimensions.height = ratioHeight + '%';
+	        }
+
+	        holder.auto = utils.truthy(options.auto);
+
+	        // Colors
+
+	        if (options.bg) {
+	            holder.theme.bg = utils.parseColor(options.bg);
+	        }
+
+	        if (options.fg) {
+	            holder.theme.fg = utils.parseColor(options.fg);
+	        }
+
+	        //todo: add automatic foreground to themes without foreground
+	        if (options.bg && !options.fg) {
+	            holder.autoFg = true;
+	        }
+
+	        if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
+	            holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
+	        }
+
+	        // Text
+
+	        if (options.text) {
+	            holder.text = options.text;
+	        }
+
+	        if (options.textmode) {
+	            holder.textmode = options.textmode;
+	        }
+
+	        if (options.size) {
+	            holder.size = options.size;
+	        }
+
+	        if (options.font) {
+	            holder.font = options.font;
+	        }
+
+	        if (options.align) {
+	            holder.align = options.align;
+	        }
+
+	        if (options.lineWrap) {
+	            holder.lineWrap = options.lineWrap;
+	        }
+
+	        holder.nowrap = utils.truthy(options.nowrap);
+
+	        // Miscellaneous
+
+	        holder.outline = utils.truthy(options.outline);
+
+	        if (utils.truthy(options.random)) {
+	            App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
+	            var _theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
+	            holder.theme = extend(holder.instanceOptions.themes[_theme], null);
+	        }
+	    }
+
+	    return holder;
+	}
+
+	/**
+	 * Modifies the DOM to fit placeholders and sets up resizable image callbacks (for fluid and automatically sized placeholders)
+	 *
+	 * @private
+	 * @param settings DOM prep settings
+	 */
+	function prepareDOMElement(prepSettings) {
+	    var mode = prepSettings.mode;
+	    var el = prepSettings.el;
+	    var flags = prepSettings.flags;
+	    var _engineSettings = prepSettings.engineSettings;
+	    var dimensions = flags.dimensions,
+	        theme = flags.theme;
+	    var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
+	    mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
+	    var holderTemplateRe = /holder_([a-z]+)/g;
+	    var dimensionsInText = false;
+
+	    if (flags.text != null) {
+	        theme.text = flags.text;
+
+	        //<object> SVG embedding doesn't parse Unicode properly
+	        if (el.nodeName.toLowerCase() === 'object') {
+	            var textLines = theme.text.split('\\n');
+	            for (var k = 0; k < textLines.length; k++) {
+	                textLines[k] = utils.encodeHtmlEntity(textLines[k]);
+	            }
+	            theme.text = textLines.join('\\n');
+	        }
+	    }
+
+	    if (theme.text) {
+	        var holderTemplateMatches = theme.text.match(holderTemplateRe);
+
+	        if (holderTemplateMatches !== null) {
+	            //todo: optimize template replacement
+	            holderTemplateMatches.forEach(function (match) {
+	                if (match === 'holder_dimensions') {
+	                    theme.text = theme.text.replace(match, dimensionsCaption);
+	                }
+	            });
+	        }
+	    }
+
+	    var holderURL = flags.holderURL;
+	    var engineSettings = extend(_engineSettings, null);
+
+	    if (flags.font) {
+	        /*
+	        If external fonts are used in a <img> placeholder rendered with SVG, Holder falls back to canvas.
+
+	        This is done because Firefox and Chrome disallow embedded SVGs from referencing external assets.
+	        The workaround is either to change the placeholder tag from <img> to <object> or to use the canvas renderer.
+	        */
+	        theme.font = flags.font;
+	        if (!engineSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas && engineSettings.renderer === 'svg') {
+	            engineSettings = extend(engineSettings, {
+	                renderer: 'canvas'
+	            });
+	        }
+	    }
+
+	    //Chrome and Opera require a quick 10ms re-render if web fonts are used with canvas
+	    if (flags.font && engineSettings.renderer == 'canvas') {
+	        engineSettings.reRender = true;
+	    }
+
+	    if (mode == 'background') {
+	        if (el.getAttribute('data-background-src') == null) {
+	            DOM.setAttr(el, {
+	                'data-background-src': holderURL
+	            });
+	        }
+	    } else {
+	        var domProps = {};
+	        domProps[App.vars.dataAttr] = holderURL;
+	        DOM.setAttr(el, domProps);
+	    }
+
+	    flags.theme = theme;
+
+	    //todo consider using all renderSettings in holderData
+	    el.holderData = {
+	        flags: flags,
+	        engineSettings: engineSettings
+	    };
+
+	    if (mode == 'image' || mode == 'fluid') {
+	        DOM.setAttr(el, {
+	            'alt': theme.text ? (dimensionsInText ? theme.text : theme.text + ' [' + dimensionsCaption + ']') : dimensionsCaption
+	        });
+	    }
+
+	    var renderSettings = {
+	        mode: mode,
+	        el: el,
+	        holderSettings: {
+	            dimensions: dimensions,
+	            theme: theme,
+	            flags: flags
+	        },
+	        engineSettings: engineSettings
+	    };
+
+	    if (mode == 'image') {
+	        if (!flags.auto) {
+	            el.style.width = dimensions.width + 'px';
+	            el.style.height = dimensions.height + 'px';
+	        }
+
+	        if (engineSettings.renderer == 'html') {
+	            el.style.backgroundColor = theme.bg;
+	        } else {
+	            render(renderSettings);
+
+	            if (flags.textmode == 'exact') {
+	                el.holderData.resizeUpdate = true;
+	                App.vars.resizableImages.push(el);
+	                updateResizableElements(el);
+	            }
+	        }
+	    } else if (mode == 'background' && engineSettings.renderer != 'html') {
+	        render(renderSettings);
+	    } else if (mode == 'fluid') {
+	        el.holderData.resizeUpdate = true;
+
+	        if (dimensions.height.slice(-1) == '%') {
+	            el.style.height = dimensions.height;
+	        } else if (flags.auto == null || !flags.auto) {
+	            el.style.height = dimensions.height + 'px';
+	        }
+	        if (dimensions.width.slice(-1) == '%') {
+	            el.style.width = dimensions.width;
+	        } else if (flags.auto == null || !flags.auto) {
+	            el.style.width = dimensions.width + 'px';
+	        }
+	        if (el.style.display == 'inline' || el.style.display === '' || el.style.display == 'none') {
+	            el.style.display = 'block';
+	        }
+
+	        setInitialDimensions(el);
+
+	        if (engineSettings.renderer == 'html') {
+	            el.style.backgroundColor = theme.bg;
+	        } else {
+	            App.vars.resizableImages.push(el);
+	            updateResizableElements(el);
+	        }
+	    }
+	}
+
+	/**
+	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
+	 *
+	 * @private
+	 * @param renderSettings Renderer settings
+	 */
+	function render(renderSettings) {
+	    var image = null;
+	    var mode = renderSettings.mode;
+	    var el = renderSettings.el;
+	    var holderSettings = renderSettings.holderSettings;
+	    var engineSettings = renderSettings.engineSettings;
+
+	    switch (engineSettings.renderer) {
+	        case 'svg':
+	            if (!App.setup.supportsSVG) return;
+	            break;
+	        case 'canvas':
+	            if (!App.setup.supportsCanvas) return;
+	            break;
+	        default:
+	            return;
+	    }
+
+	    //todo: move generation of scene up to flag generation to reduce extra object creation
+	    var scene = {
+	        width: holderSettings.dimensions.width,
+	        height: holderSettings.dimensions.height,
+	        theme: holderSettings.theme,
+	        flags: holderSettings.flags
+	    };
+
+	    var sceneGraph = buildSceneGraph(scene);
+
+	    function getRenderedImage() {
+	        var image = null;
+	        switch (engineSettings.renderer) {
+	            case 'canvas':
+	                image = sgCanvasRenderer(sceneGraph, renderSettings);
+	                break;
+	            case 'svg':
+	                image = svgRenderer(sceneGraph, renderSettings);
+	                break;
+	            default:
+	                throw 'Holder: invalid renderer: ' + engineSettings.renderer;
+	        }
+
+	        return image;
+	    }
+
+	    image = getRenderedImage();
+
+	    if (image == null) {
+	        throw 'Holder: couldn\'t render placeholder';
+	    }
+
+	    //todo: add <object> canvas rendering
+	    if (mode == 'background') {
+	        el.style.backgroundImage = 'url(' + image + ')';
+
+	        if (!engineSettings.noBackgroundSize) {
+	            el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
+	        }
+	    } else {
+	        if (el.nodeName.toLowerCase() === 'img') {
+	            DOM.setAttr(el, {
+	                'src': image
+	            });
+	        } else if (el.nodeName.toLowerCase() === 'object') {
+	            DOM.setAttr(el, {
+	                'data': image,
+	                'type': 'image/svg+xml'
+	            });
+	        }
+	        if (engineSettings.reRender) {
+	            global.setTimeout(function () {
+	                var image = getRenderedImage();
+	                if (image == null) {
+	                    throw 'Holder: couldn\'t render placeholder';
+	                }
+	                //todo: refactor this code into a function
+	                if (el.nodeName.toLowerCase() === 'img') {
+	                    DOM.setAttr(el, {
+	                        'src': image
+	                    });
+	                } else if (el.nodeName.toLowerCase() === 'object') {
+	                    DOM.setAttr(el, {
+	                        'data': image,
+	                        'type': 'image/svg+xml'
+	                    });
+	                }
+	            }, 150);
+	        }
+	    }
+	    //todo: account for re-rendering
+	    DOM.setAttr(el, {
+	        'data-holder-rendered': true
+	    });
+	}
+
+	/**
+	 * Core function that takes a Holder scene description and builds a scene graph
+	 *
+	 * @private
+	 * @param scene Holder scene object
+	 */
+	//todo: make this function reusable
+	//todo: merge app defaults and setup properties into the scene argument
+	function buildSceneGraph(scene) {
+	    var fontSize = App.defaults.size;
+	    if (parseFloat(scene.theme.size)) {
+	        fontSize = scene.theme.size;
+	    } else if (parseFloat(scene.flags.size)) {
+	        fontSize = scene.flags.size;
+	    }
+
+	    scene.font = {
+	        family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
+	        size: textSize(scene.width, scene.height, fontSize, App.defaults.scale),
+	        units: scene.theme.units ? scene.theme.units : App.defaults.units,
+	        weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
+	    };
+
+	    scene.text = scene.theme.text || Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+	    scene.noWrap = scene.theme.nowrap || scene.flags.nowrap;
+
+	    scene.align = scene.theme.align || scene.flags.align || 'center';
+
+	    switch (scene.flags.textmode) {
+	        case 'literal':
+	            scene.text = scene.flags.dimensions.width + 'x' + scene.flags.dimensions.height;
+	            break;
+	        case 'exact':
+	            if (!scene.flags.exactDimensions) break;
+	            scene.text = Math.floor(scene.flags.exactDimensions.width) + 'x' + Math.floor(scene.flags.exactDimensions.height);
+	            break;
+	    }
+
+	    var lineWrap = scene.flags.lineWrap || App.setup.lineWrapRatio;
+	    var sceneMargin = scene.width * lineWrap;
+	    var maxLineWidth = sceneMargin;
+
+	    var sceneGraph = new SceneGraph({
+	        width: scene.width,
+	        height: scene.height
+	    });
+
+	    var Shape = sceneGraph.Shape;
+
+	    var holderBg = new Shape.Rect('holderBg', {
+	        fill: scene.theme.bg
+	    });
+
+	    holderBg.resize(scene.width, scene.height);
+	    sceneGraph.root.add(holderBg);
+
+	    if (scene.flags.outline) {
+	        var outlineColor = new Color(holderBg.properties.fill);
+	        outlineColor = outlineColor.lighten(outlineColor.lighterThan('7f7f7f') ? -0.1 : 0.1);
+	        holderBg.properties.outline = {
+	            fill: outlineColor.toHex(true),
+	            width: 2
+	        };
+	    }
+
+	    var holderTextColor = scene.theme.fg;
+
+	    if (scene.flags.autoFg) {
+	        var holderBgColor = new Color(holderBg.properties.fill);
+	        var lightColor = new Color('fff');
+	        var darkColor = new Color('000', {
+	            'alpha': 0.285714
+	        });
+
+	        holderTextColor = holderBgColor.blendAlpha(holderBgColor.lighterThan('7f7f7f') ? darkColor : lightColor).toHex(true);
+	    }
+
+	    var holderTextGroup = new Shape.Group('holderTextGroup', {
+	        text: scene.text,
+	        align: scene.align,
+	        font: scene.font,
+	        fill: holderTextColor
+	    });
+
+	    holderTextGroup.moveTo(null, null, 1);
+	    sceneGraph.root.add(holderTextGroup);
+
+	    var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
+	    if (!tpdata) {
+	        throw 'Holder: staging fallback not supported yet.';
+	    }
+	    holderTextGroup.properties.leading = tpdata.boundingBox.height;
+
+	    var textNode = null;
+	    var line = null;
+
+	    function finalizeLine(parent, line, width, height) {
+	        line.width = width;
+	        line.height = height;
+	        parent.width = Math.max(parent.width, line.width);
+	        parent.height += line.height;
+	    }
+
+	    if (tpdata.lineCount > 1) {
+	        var offsetX = 0;
+	        var offsetY = 0;
+	        var lineIndex = 0;
+	        var lineKey;
+	        line = new Shape.Group('line' + lineIndex);
+
+	        //Double margin so that left/right-aligned next is not flush with edge of image
+	        if (scene.align === 'left' || scene.align === 'right') {
+	            maxLineWidth = scene.width * (1 - (1 - lineWrap) * 2);
+	        }
+
+	        for (var i = 0; i < tpdata.words.length; i++) {
+	            var word = tpdata.words[i];
+	            textNode = new Shape.Text(word.text);
+	            var newline = word.text == '\\n';
+	            if (!scene.noWrap && (offsetX + word.width >= maxLineWidth || newline === true)) {
+	                finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+	                holderTextGroup.add(line);
+	                offsetX = 0;
+	                offsetY += holderTextGroup.properties.leading;
+	                lineIndex += 1;
+	                line = new Shape.Group('line' + lineIndex);
+	                line.y = offsetY;
+	            }
+	            if (newline === true) {
+	                continue;
+	            }
+	            textNode.moveTo(offsetX, 0);
+	            offsetX += tpdata.spaceWidth + word.width;
+	            line.add(textNode);
+	        }
+
+	        finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+	        holderTextGroup.add(line);
+
+	        if (scene.align === 'left') {
+	            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+	        } else if (scene.align === 'right') {
+	            for (lineKey in holderTextGroup.children) {
+	                line = holderTextGroup.children[lineKey];
+	                line.moveTo(scene.width - line.width, null, null);
+	            }
+
+	            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+	        } else {
+	            for (lineKey in holderTextGroup.children) {
+	                line = holderTextGroup.children[lineKey];
+	                line.moveTo((holderTextGroup.width - line.width) / 2, null, null);
+	            }
+
+	            holderTextGroup.moveTo((scene.width - holderTextGroup.width) / 2, null, null);
+	        }
+
+	        holderTextGroup.moveTo(null, (scene.height - holderTextGroup.height) / 2, null);
+
+	        //If the text exceeds vertical space, move it down so the first line is visible
+	        if ((scene.height - holderTextGroup.height) / 2 < 0) {
+	            holderTextGroup.moveTo(null, 0, null);
+	        }
+	    } else {
+	        textNode = new Shape.Text(scene.text);
+	        line = new Shape.Group('line0');
+	        line.add(textNode);
+	        holderTextGroup.add(line);
+
+	        if (scene.align === 'left') {
+	            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+	        } else if (scene.align === 'right') {
+	            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+	        } else {
+	            holderTextGroup.moveTo((scene.width - tpdata.boundingBox.width) / 2, null, null);
+	        }
+
+	        holderTextGroup.moveTo(null, (scene.height - tpdata.boundingBox.height) / 2, null);
+	    }
+
+	    //todo: renderlist
+	    return sceneGraph;
+	}
+
+	/**
+	 * Adaptive text sizing function
+	 *
+	 * @private
+	 * @param width Parent width
+	 * @param height Parent height
+	 * @param fontSize Requested text size
+	 * @param scale Proportional scale of text
+	 */
+	function textSize(width, height, fontSize, scale) {
+	    var stageWidth = parseInt(width, 10);
+	    var stageHeight = parseInt(height, 10);
+
+	    var bigSide = Math.max(stageWidth, stageHeight);
+	    var smallSide = Math.min(stageWidth, stageHeight);
+
+	    var newHeight = 0.8 * Math.min(smallSide, bigSide * scale);
+	    return Math.round(Math.max(fontSize, newHeight));
+	}
+
+	/**
+	 * Iterates over resizable (fluid or auto) placeholders and renders them
+	 *
+	 * @private
+	 * @param element Optional element selector, specified only if a specific element needs to be re-rendered
+	 */
+	function updateResizableElements(element) {
+	    var images;
+	    if (element == null || element.nodeType == null) {
+	        images = App.vars.resizableImages;
+	    } else {
+	        images = [element];
+	    }
+	    for (var i = 0, l = images.length; i < l; i++) {
+	        var el = images[i];
+	        if (el.holderData) {
+	            var flags = el.holderData.flags;
+	            var dimensions = dimensionCheck(el);
+	            if (dimensions) {
+	                if (!el.holderData.resizeUpdate) {
+	                    continue;
+	                }
+
+	                if (flags.fluid && flags.auto) {
+	                    var fluidConfig = el.holderData.fluidConfig;
+	                    switch (fluidConfig.mode) {
+	                        case 'width':
+	                            dimensions.height = dimensions.width / fluidConfig.ratio;
+	                            break;
+	                        case 'height':
+	                            dimensions.width = dimensions.height * fluidConfig.ratio;
+	                            break;
+	                    }
+	                }
+
+	                var settings = {
+	                    mode: 'image',
+	                    holderSettings: {
+	                        dimensions: dimensions,
+	                        theme: flags.theme,
+	                        flags: flags
+	                    },
+	                    el: el,
+	                    engineSettings: el.holderData.engineSettings
+	                };
+
+	                if (flags.textmode == 'exact') {
+	                    flags.exactDimensions = dimensions;
+	                    settings.holderSettings.dimensions = flags.dimensions;
+	                }
+
+	                render(settings);
+	            } else {
+	                setInvisible(el);
+	            }
+	        }
+	    }
+	}
+
+	/**
+	 * Sets up aspect ratio metadata for fluid placeholders, in order to preserve proportions when resizing
+	 *
+	 * @private
+	 * @param el Image DOM element
+	 */
+	function setInitialDimensions(el) {
+	    if (el.holderData) {
+	        var dimensions = dimensionCheck(el);
+	        if (dimensions) {
+	            var flags = el.holderData.flags;
+
+	            var fluidConfig = {
+	                fluidHeight: flags.dimensions.height.slice(-1) == '%',
+	                fluidWidth: flags.dimensions.width.slice(-1) == '%',
+	                mode: null,
+	                initialDimensions: dimensions
+	            };
+
+	            if (fluidConfig.fluidWidth && !fluidConfig.fluidHeight) {
+	                fluidConfig.mode = 'width';
+	                fluidConfig.ratio = fluidConfig.initialDimensions.width / parseFloat(flags.dimensions.height);
+	            } else if (!fluidConfig.fluidWidth && fluidConfig.fluidHeight) {
+	                fluidConfig.mode = 'height';
+	                fluidConfig.ratio = parseFloat(flags.dimensions.width) / fluidConfig.initialDimensions.height;
+	            }
+
+	            el.holderData.fluidConfig = fluidConfig;
+	        } else {
+	            setInvisible(el);
+	        }
+	    }
+	}
+
+	/**
+	 * Iterates through all current invisible images, and if they're visible, renders them and removes them from further checks. Runs every animation frame.
+	 *
+	 * @private
+	 */
+	function visibilityCheck() {
+	    var renderableImages = [];
+	    var keys = Object.keys(App.vars.invisibleImages);
+	    var el;
+
+	    keys.forEach(function (key) {
+	        el = App.vars.invisibleImages[key];
+	        if (dimensionCheck(el) && el.nodeName.toLowerCase() == 'img') {
+	            renderableImages.push(el);
+	            delete App.vars.invisibleImages[key];
+	        }
+	    });
+
+	    if (renderableImages.length) {
+	        Holder.run({
+	            images: renderableImages
+	        });
+	    }
+
+	    // Done to prevent 100% CPU usage via aggressive calling of requestAnimationFrame
+	    setTimeout(function () {
+	        global.requestAnimationFrame(visibilityCheck);
+	    }, 10);
+	}
+
+	/**
+	 * Starts checking for invisible placeholders if not doing so yet. Does nothing otherwise.
+	 *
+	 * @private
+	 */
+	function startVisibilityCheck() {
+	    if (!App.vars.visibilityCheckStarted) {
+	        global.requestAnimationFrame(visibilityCheck);
+	        App.vars.visibilityCheckStarted = true;
+	    }
+	}
+
+	/**
+	 * Sets a unique ID for an image detected to be invisible and adds it to the map of invisible images checked by visibilityCheck
+	 *
+	 * @private
+	 * @param el Invisible DOM element
+	 */
+	function setInvisible(el) {
+	    if (!el.holderData.invisibleId) {
+	        App.vars.invisibleId += 1;
+	        App.vars.invisibleImages['i' + App.vars.invisibleId] = el;
+	        el.holderData.invisibleId = App.vars.invisibleId;
+	    }
+	}
+
+	//todo: see if possible to convert stagingRenderer to use HTML only
+	var stagingRenderer = (function() {
+	    var svg = null,
+	        stagingText = null,
+	        stagingTextNode = null;
+	    return function(graph) {
+	        var rootNode = graph.root;
+	        if (App.setup.supportsSVG) {
+	            var firstTimeSetup = false;
+	            var tnode = function(text) {
+	                return document.createTextNode(text);
+	            };
+	            if (svg == null || svg.parentNode !== document.body) {
+	                firstTimeSetup = true;
+	            }
+
+	            svg = SVG.initSVG(svg, rootNode.properties.width, rootNode.properties.height);
+	            //Show staging element before staging
+	            svg.style.display = 'block';
+
+	            if (firstTimeSetup) {
+	                stagingText = DOM.newEl('text', SVG_NS);
+	                stagingTextNode = tnode(null);
+	                DOM.setAttr(stagingText, {
+	                    x: 0
+	                });
+	                stagingText.appendChild(stagingTextNode);
+	                svg.appendChild(stagingText);
+	                document.body.appendChild(svg);
+	                svg.style.visibility = 'hidden';
+	                svg.style.position = 'absolute';
+	                svg.style.top = '-100%';
+	                svg.style.left = '-100%';
+	                //todo: workaround for zero-dimension <svg> tag in Opera 12
+	                //svg.setAttribute('width', 0);
+	                //svg.setAttribute('height', 0);
+	            }
+
+	            var holderTextGroup = rootNode.children.holderTextGroup;
+	            var htgProps = holderTextGroup.properties;
+	            DOM.setAttr(stagingText, {
+	                'y': htgProps.font.size,
+	                'style': utils.cssProps({
+	                    'font-weight': htgProps.font.weight,
+	                    'font-size': htgProps.font.size + htgProps.font.units,
+	                    'font-family': htgProps.font.family
+	                })
+	            });
+
+	            //Get bounding box for the whole string (total width and height)
+	            stagingTextNode.nodeValue = htgProps.text;
+	            var stagingTextBBox = stagingText.getBBox();
+
+	            //Get line count and split the string into words
+	            var lineCount = Math.ceil(stagingTextBBox.width / rootNode.properties.width);
+	            var words = htgProps.text.split(' ');
+	            var newlines = htgProps.text.match(/\\n/g);
+	            lineCount += newlines == null ? 0 : newlines.length;
+
+	            //Get bounding box for the string with spaces removed
+	            stagingTextNode.nodeValue = htgProps.text.replace(/[ ]+/g, '');
+	            var computedNoSpaceLength = stagingText.getComputedTextLength();
+
+	            //Compute average space width
+	            var diffLength = stagingTextBBox.width - computedNoSpaceLength;
+	            var spaceWidth = Math.round(diffLength / Math.max(1, words.length - 1));
+
+	            //Get widths for every word with space only if there is more than one line
+	            var wordWidths = [];
+	            if (lineCount > 1) {
+	                stagingTextNode.nodeValue = '';
+	                for (var i = 0; i < words.length; i++) {
+	                    if (words[i].length === 0) continue;
+	                    stagingTextNode.nodeValue = utils.decodeHtmlEntity(words[i]);
+	                    var bbox = stagingText.getBBox();
+	                    wordWidths.push({
+	                        text: words[i],
+	                        width: bbox.width
+	                    });
+	                }
+	            }
+
+	            //Hide staging element after staging
+	            svg.style.display = 'none';
+
+	            return {
+	                spaceWidth: spaceWidth,
+	                lineCount: lineCount,
+	                boundingBox: stagingTextBBox,
+	                words: wordWidths
+	            };
+	        } else {
+	            //todo: canvas fallback for measuring text on android 2.3
+	            return false;
+	        }
+	    };
+	})();
+
+	//Helpers
+
+	/**
+	 * Prevents a function from being called too often, waits until a timer elapses to call it again
+	 *
+	 * @param fn Function to call
+	 */
+	function debounce(fn) {
+	    if (!App.vars.debounceTimer) fn.call(this);
+	    if (App.vars.debounceTimer) global.clearTimeout(App.vars.debounceTimer);
+	    App.vars.debounceTimer = global.setTimeout(function() {
+	        App.vars.debounceTimer = null;
+	        fn.call(this);
+	    }, App.setup.debounce);
+	}
+
+	/**
+	 * Holder-specific resize/orientation change callback, debounced to prevent excessive execution
+	 */
+	function resizeEvent() {
+	    debounce(function() {
+	        updateResizableElements(null);
+	    });
+	}
+
+	//Set up flags
+
+	for (var flag in App.flags) {
+	    if (!App.flags.hasOwnProperty(flag)) continue;
+	    App.flags[flag].match = function(val) {
+	        return val.match(this.regex);
+	    };
+	}
+
+	//Properties set once on setup
+
+	App.setup = {
+	    renderer: 'html',
+	    debounce: 100,
+	    ratio: 1,
+	    supportsCanvas: false,
+	    supportsSVG: false,
+	    lineWrapRatio: 0.9,
+	    dataAttr: 'data-src',
+	    renderers: ['html', 'canvas', 'svg']
+	};
+
+	//Properties modified during runtime
+
+	App.vars = {
+	    preempted: false,
+	    resizableImages: [],
+	    invisibleImages: {},
+	    invisibleId: 0,
+	    visibilityCheckStarted: false,
+	    debounceTimer: null,
+	    cache: {}
+	};
+
+	//Pre-flight
+
+	(function() {
+	    var canvas = DOM.newEl('canvas');
+
+	    if (canvas.getContext) {
+	        if (canvas.toDataURL('image/png').indexOf('data:image/png') != -1) {
+	            App.setup.renderer = 'canvas';
+	            App.setup.supportsCanvas = true;
+	        }
+	    }
+
+	    if (!!document.createElementNS && !!document.createElementNS(SVG_NS, 'svg').createSVGRect) {
+	        App.setup.renderer = 'svg';
+	        App.setup.supportsSVG = true;
+	    }
+	})();
+
+	//Starts checking for invisible placeholders
+	startVisibilityCheck();
+
+	if (onDomReady) {
+	    onDomReady(function() {
+	        if (!App.vars.preempted) {
+	            Holder.run();
+	        }
+	        if (global.addEventListener) {
+	            global.addEventListener('resize', resizeEvent, false);
+	            global.addEventListener('orientationchange', resizeEvent, false);
+	        } else {
+	            global.attachEvent('onresize', resizeEvent);
+	        }
+
+	        if (typeof global.Turbolinks == 'object') {
+	            global.document.addEventListener('page:change', function() {
+	                Holder.run();
+	            });
+	        }
+	    });
+	}
+
+	module.exports = Holder;
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	/*!
+	 * onDomReady.js 1.4.0 (c) 2013 Tubal Martin - MIT license
+	 *
+	 * Specially modified to work with Holder.js
+	 */
+
+	function _onDomReady(win) {
+	    //Lazy loading fix for Firefox < 3.6
+	    //http://webreflection.blogspot.com/2009/11/195-chars-to-help-lazy-loading.html
+	    if (document.readyState == null && document.addEventListener) {
+	        document.addEventListener("DOMContentLoaded", function DOMContentLoaded() {
+	            document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+	            document.readyState = "complete";
+	        }, false);
+	        document.readyState = "loading";
+	    }
+	    
+	    var doc = win.document,
+	        docElem = doc.documentElement,
+	    
+	        LOAD = "load",
+	        FALSE = false,
+	        ONLOAD = "on"+LOAD,
+	        COMPLETE = "complete",
+	        READYSTATE = "readyState",
+	        ATTACHEVENT = "attachEvent",
+	        DETACHEVENT = "detachEvent",
+	        ADDEVENTLISTENER = "addEventListener",
+	        DOMCONTENTLOADED = "DOMContentLoaded",
+	        ONREADYSTATECHANGE = "onreadystatechange",
+	        REMOVEEVENTLISTENER = "removeEventListener",
+	    
+	        // W3C Event model
+	        w3c = ADDEVENTLISTENER in doc,
+	        _top = FALSE,
+	    
+	        // isReady: Is the DOM ready to be used? Set to true once it occurs.
+	        isReady = FALSE,
+	    
+	        // Callbacks pending execution until DOM is ready
+	        callbacks = [];
+	    
+	    // Handle when the DOM is ready
+	    function ready( fn ) {
+	        if ( !isReady ) {
+	    
+	            // Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+	            if ( !doc.body ) {
+	                return defer( ready );
+	            }
+	    
+	            // Remember that the DOM is ready
+	            isReady = true;
+	    
+	            // Execute all callbacks
+	            while ( fn = callbacks.shift() ) {
+	                defer( fn );
+	            }
+	        }
+	    }
+	    
+	    // The ready event handler
+	    function completed( event ) {
+	        // readyState === "complete" is good enough for us to call the dom ready in oldIE
+	        if ( w3c || event.type === LOAD || doc[READYSTATE] === COMPLETE ) {
+	            detach();
+	            ready();
+	        }
+	    }
+	    
+	    // Clean-up method for dom ready events
+	    function detach() {
+	        if ( w3c ) {
+	            doc[REMOVEEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
+	            win[REMOVEEVENTLISTENER]( LOAD, completed, FALSE );
+	        } else {
+	            doc[DETACHEVENT]( ONREADYSTATECHANGE, completed );
+	            win[DETACHEVENT]( ONLOAD, completed );
+	        }
+	    }
+	    
+	    // Defers a function, scheduling it to run after the current call stack has cleared.
+	    function defer( fn, wait ) {
+	        // Allow 0 to be passed
+	        setTimeout( fn, +wait >= 0 ? wait : 1 );
+	    }
+	    
+	    // Attach the listeners:
+	    
+	    // Catch cases where onDomReady is called after the browser event has already occurred.
+	    // we once tried to use readyState "interactive" here, but it caused issues like the one
+	    // discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
+	    if ( doc[READYSTATE] === COMPLETE ) {
+	        // Handle it asynchronously to allow scripts the opportunity to delay ready
+	        defer( ready );
+	    
+	    // Standards-based browsers support DOMContentLoaded
+	    } else if ( w3c ) {
+	        // Use the handy event callback
+	        doc[ADDEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
+	    
+	        // A fallback to window.onload, that will always work
+	        win[ADDEVENTLISTENER]( LOAD, completed, FALSE );
+	    
+	    // If IE event model is used
+	    } else {
+	        // Ensure firing before onload, maybe late but safe also for iframes
+	        doc[ATTACHEVENT]( ONREADYSTATECHANGE, completed );
+	    
+	        // A fallback to window.onload, that will always work
+	        win[ATTACHEVENT]( ONLOAD, completed );
+	    
+	        // If IE and not a frame
+	        // continually check to see if the document is ready
+	        try {
+	            _top = win.frameElement == null && docElem;
+	        } catch(e) {}
+	    
+	        if ( _top && _top.doScroll ) {
+	            (function doScrollCheck() {
+	                if ( !isReady ) {
+	                    try {
+	                        // Use the trick by Diego Perini
+	                        // http://javascript.nwbox.com/IEContentLoaded/
+	                        _top.doScroll("left");
+	                    } catch(e) {
+	                        return defer( doScrollCheck, 50 );
+	                    }
+	    
+	                    // detach all dom ready events
+	                    detach();
+	    
+	                    // and execute any waiting functions
+	                    ready();
+	                }
+	            })();
+	        }
+	    }
+	    
+	    function onDomReady( fn ) {
+	        // If DOM is ready, execute the function (async), otherwise wait
+	        isReady ? defer( fn ) : callbacks.push( fn );
+	    }
+	    
+	    // Add version
+	    onDomReady.version = "1.4.0";
+	    // Add method to check if DOM is ready
+	    onDomReady.isReady = function(){
+	        return isReady;
+	    };
+
+	    return onDomReady;
+	}
+
+	module.exports = typeof window !== "undefined" && _onDomReady(window);
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//Modified version of component/querystring
+	//Changes: updated dependencies, dot notation parsing, JSHint fixes
+	//Fork at https://github.com/imsky/querystring
+
+	/**
+	 * Module dependencies.
+	 */
+
+	var encode = encodeURIComponent;
+	var decode = decodeURIComponent;
+	var trim = __webpack_require__(4);
+	var type = __webpack_require__(5);
+
+	var arrayRegex = /(\w+)\[(\d+)\]/;
+	var objectRegex = /\w+\.\w+/;
+
+	/**
+	 * Parse the given query `str`.
+	 *
+	 * @param {String} str
+	 * @return {Object}
+	 * @api public
+	 */
+
+	exports.parse = function(str){
+	  if ('string' !== typeof str) return {};
+
+	  str = trim(str);
+	  if ('' === str) return {};
+	  if ('?' === str.charAt(0)) str = str.slice(1);
+
+	  var obj = {};
+	  var pairs = str.split('&');
+	  for (var i = 0; i < pairs.length; i++) {
+	    var parts = pairs[i].split('=');
+	    var key = decode(parts[0]);
+	    var m, ctx, prop;
+
+	    if (m = arrayRegex.exec(key)) {
+	      obj[m[1]] = obj[m[1]] || [];
+	      obj[m[1]][m[2]] = decode(parts[1]);
+	      continue;
+	    }
+
+	    if (m = objectRegex.test(key)) {
+	      m = key.split('.');
+	      ctx = obj;
+	      
+	      while (m.length) {
+	        prop = m.shift();
+
+	        if (!prop.length) continue;
+
+	        if (!ctx[prop]) {
+	          ctx[prop] = {};
+	        } else if (ctx[prop] && typeof ctx[prop] !== 'object') {
+	          break;
+	        }
+
+	        if (!m.length) {
+	          ctx[prop] = decode(parts[1]);
+	        }
+
+	        ctx = ctx[prop];
+	      }
+
+	      continue;
+	    }
+
+	    obj[parts[0]] = null == parts[1] ? '' : decode(parts[1]);
+	  }
+
+	  return obj;
+	};
+
+	/**
+	 * Stringify the given `obj`.
+	 *
+	 * @param {Object} obj
+	 * @return {String}
+	 * @api public
+	 */
+
+	exports.stringify = function(obj){
+	  if (!obj) return '';
+	  var pairs = [];
+
+	  for (var key in obj) {
+	    var value = obj[key];
+
+	    if ('array' == type(value)) {
+	      for (var i = 0; i < value.length; ++i) {
+	        pairs.push(encode(key + '[' + i + ']') + '=' + encode(value[i]));
+	      }
+	      continue;
+	    }
+
+	    pairs.push(encode(key) + '=' + encode(obj[key]));
+	  }
+
+	  return pairs.join('&');
+	};
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	
+	exports = module.exports = trim;
+
+	function trim(str){
+	  return str.replace(/^\s*|\s*$/g, '');
+	}
+
+	exports.left = function(str){
+	  return str.replace(/^\s*/, '');
+	};
+
+	exports.right = function(str){
+	  return str.replace(/\s*$/, '');
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	/**
+	 * toString ref.
+	 */
+
+	var toString = Object.prototype.toString;
+
+	/**
+	 * Return the type of `val`.
+	 *
+	 * @param {Mixed} val
+	 * @return {String}
+	 * @api public
+	 */
+
+	module.exports = function(val){
+	  switch (toString.call(val)) {
+	    case '[object Date]': return 'date';
+	    case '[object RegExp]': return 'regexp';
+	    case '[object Arguments]': return 'arguments';
+	    case '[object Array]': return 'array';
+	    case '[object Error]': return 'error';
+	  }
+
+	  if (val === null) return 'null';
+	  if (val === undefined) return 'undefined';
+	  if (val !== val) return 'nan';
+	  if (val && val.nodeType === 1) return 'element';
+
+	  if (isBuffer(val)) return 'buffer';
+
+	  val = val.valueOf
+	    ? val.valueOf()
+	    : Object.prototype.valueOf.apply(val);
+
+	  return typeof val;
+	};
+
+	// code borrowed from https://github.com/feross/is-buffer/blob/master/index.js
+	function isBuffer(obj) {
+	  return !!(obj != null &&
+	    (obj._isBuffer || // For Safari 5-7 (missing Object.prototype.constructor)
+	      (obj.constructor &&
+	      typeof obj.constructor.isBuffer === 'function' &&
+	      obj.constructor.isBuffer(obj))
+	    ))
+	}
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	var SceneGraph = function(sceneProperties) {
+	    var nodeCount = 1;
+
+	    //todo: move merge to helpers section
+	    function merge(parent, child) {
+	        for (var prop in child) {
+	            parent[prop] = child[prop];
+	        }
+	        return parent;
+	    }
+
+	    var SceneNode = function(name) {
+	        nodeCount++;
+	        this.parent = null;
+	        this.children = {};
+	        this.id = nodeCount;
+	        this.name = 'n' + nodeCount;
+	        if (typeof name !== 'undefined') {
+	            this.name = name;
+	        }
+	        this.x = this.y = this.z = 0;
+	        this.width = this.height = 0;
+	    };
+
+	    SceneNode.prototype.resize = function(width, height) {
+	        if (width != null) {
+	            this.width = width;
+	        }
+	        if (height != null) {
+	            this.height = height;
+	        }
+	    };
+
+	    SceneNode.prototype.moveTo = function(x, y, z) {
+	        this.x = x != null ? x : this.x;
+	        this.y = y != null ? y : this.y;
+	        this.z = z != null ? z : this.z;
+	    };
+
+	    SceneNode.prototype.add = function(child) {
+	        var name = child.name;
+	        if (typeof this.children[name] === 'undefined') {
+	            this.children[name] = child;
+	            child.parent = this;
+	        } else {
+	            throw 'SceneGraph: child already exists: ' + name;
+	        }
+	    };
+
+	    var RootNode = function() {
+	        SceneNode.call(this, 'root');
+	        this.properties = sceneProperties;
+	    };
+
+	    RootNode.prototype = new SceneNode();
+
+	    var Shape = function(name, props) {
+	        SceneNode.call(this, name);
+	        this.properties = {
+	            'fill': '#000000'
+	        };
+	        if (typeof props !== 'undefined') {
+	            merge(this.properties, props);
+	        } else if (typeof name !== 'undefined' && typeof name !== 'string') {
+	            throw 'SceneGraph: invalid node name';
+	        }
+	    };
+
+	    Shape.prototype = new SceneNode();
+
+	    var Group = function() {
+	        Shape.apply(this, arguments);
+	        this.type = 'group';
+	    };
+
+	    Group.prototype = new Shape();
+
+	    var Rect = function() {
+	        Shape.apply(this, arguments);
+	        this.type = 'rect';
+	    };
+
+	    Rect.prototype = new Shape();
+
+	    var Text = function(text) {
+	        Shape.call(this);
+	        this.type = 'text';
+	        this.properties.text = text;
+	    };
+
+	    Text.prototype = new Shape();
+
+	    var root = new RootNode();
+
+	    this.Shape = {
+	        'Rect': Rect,
+	        'Text': Text,
+	        'Group': Group
+	    };
+
+	    this.root = root;
+	    return this;
+	};
+
+	module.exports = SceneGraph;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {/**
+	 * Shallow object clone and merge
+	 *
+	 * @param a Object A
+	 * @param b Object B
+	 * @returns {Object} New object with all of A's properties, and all of B's properties, overwriting A's properties
+	 */
+	exports.extend = function(a, b) {
+	    var c = {};
+	    for (var x in a) {
+	        if (a.hasOwnProperty(x)) {
+	            c[x] = a[x];
+	        }
+	    }
+	    if (b != null) {
+	        for (var y in b) {
+	            if (b.hasOwnProperty(y)) {
+	                c[y] = b[y];
+	            }
+	        }
+	    }
+	    return c;
+	};
+
+	/**
+	 * Takes a k/v list of CSS properties and returns a rule
+	 *
+	 * @param props CSS properties object
+	 */
+	exports.cssProps = function(props) {
+	    var ret = [];
+	    for (var p in props) {
+	        if (props.hasOwnProperty(p)) {
+	            ret.push(p + ':' + props[p]);
+	        }
+	    }
+	    return ret.join(';');
+	};
+
+	/**
+	 * Encodes HTML entities in a string
+	 *
+	 * @param str Input string
+	 */
+	exports.encodeHtmlEntity = function(str) {
+	    var buf = [];
+	    var charCode = 0;
+	    for (var i = str.length - 1; i >= 0; i--) {
+	        charCode = str.charCodeAt(i);
+	        if (charCode > 128) {
+	            buf.unshift(['&#', charCode, ';'].join(''));
+	        } else {
+	            buf.unshift(str[i]);
+	        }
+	    }
+	    return buf.join('');
+	};
+
+	/**
+	 * Checks if an image exists
+	 *
+	 * @param src URL of image
+	 * @param callback Callback to call once image status has been found
+	 */
+	exports.imageExists = function(src, callback) {
+	    var image = new Image();
+	    image.onerror = function() {
+	        callback.call(this, false);
+	    };
+	    image.onload = function() {
+	        callback.call(this, true);
+	    };
+	    image.src = src;
+	};
+
+	/**
+	 * Decodes HTML entities in a string
+	 *
+	 * @param str Input string
+	 */
+	exports.decodeHtmlEntity = function(str) {
+	    return str.replace(/&#(\d+);/g, function(match, dec) {
+	        return String.fromCharCode(dec);
+	    });
+	};
+
+
+	/**
+	 * Returns an element's dimensions if it's visible, `false` otherwise.
+	 *
+	 * @param el DOM element
+	 */
+	exports.dimensionCheck = function(el) {
+	    var dimensions = {
+	        height: el.clientHeight,
+	        width: el.clientWidth
+	    };
+
+	    if (dimensions.height && dimensions.width) {
+	        return dimensions;
+	    } else {
+	        return false;
+	    }
+	};
+
+
+	/**
+	 * Returns true if value is truthy or if it is "semantically truthy"
+	 * @param val
+	 */
+	exports.truthy = function(val) {
+	    if (typeof val === 'string') {
+	        return val === 'true' || val === 'yes' || val === '1' || val === 'on' || val === '✓';
+	    }
+	    return !!val;
+	};
+
+	/**
+	 * Parses input into a well-formed CSS color
+	 * @param val
+	 */
+	exports.parseColor = function(val) {
+	    var hexre = /(^(?:#?)[0-9a-f]{6}$)|(^(?:#?)[0-9a-f]{3}$)/i;
+	    var rgbre = /^rgb\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
+	    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0\.\d{1,}|1)\)$/;
+
+	    var match = val.match(hexre);
+	    var retval;
+
+	    if (match !== null) {
+	        retval = match[1] || match[2];
+	        if (retval[0] !== '#') {
+	            return '#' + retval;
+	        } else {
+	            return retval;
+	        }
+	    }
+
+	    match = val.match(rgbre);
+
+	    if (match !== null) {
+	        retval = 'rgb(' + match.slice(1).join(',') + ')';
+	        return retval;
+	    }
+
+	    match = val.match(rgbare);
+
+	    if (match !== null) {
+	        retval = 'rgba(' + match.slice(1).join(',') + ')';
+	        return retval;
+	    }
+
+	    return null;
+	};
+
+	/**
+	 * Provides the correct scaling ratio for canvas drawing operations on HiDPI screens (e.g. Retina displays)
+	 */
+	exports.canvasRatio = function () {
+	    var devicePixelRatio = 1;
+	    var backingStoreRatio = 1;
+
+	    if (global.document) {
+	        var canvas = global.document.createElement('canvas');
+	        if (canvas.getContext) {
+	            var ctx = canvas.getContext('2d');
+	            devicePixelRatio = global.devicePixelRatio || 1;
+	            backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+	        }
+	    }
+
+	    return devicePixelRatio / backingStoreRatio;
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var DOM = __webpack_require__(9);
+
+	var SVG_NS = 'http://www.w3.org/2000/svg';
+	var NODE_TYPE_COMMENT = 8;
+
+	/**
+	 * Generic SVG element creation function
+	 *
+	 * @param svg SVG context, set to null if new
+	 * @param width Document width
+	 * @param height Document height
+	 */
+	exports.initSVG = function(svg, width, height) {
+	    var defs, style, initialize = false;
+
+	    if (svg && svg.querySelector) {
+	        style = svg.querySelector('style');
+	        if (style === null) {
+	            initialize = true;
+	        }
+	    } else {
+	        svg = DOM.newEl('svg', SVG_NS);
+	        initialize = true;
+	    }
+
+	    if (initialize) {
+	        defs = DOM.newEl('defs', SVG_NS);
+	        style = DOM.newEl('style', SVG_NS);
+	        DOM.setAttr(style, {
+	            'type': 'text/css'
+	        });
+	        defs.appendChild(style);
+	        svg.appendChild(defs);
+	    }
+
+	    //IE throws an exception if this is set and Chrome requires it to be set
+	    if (svg.webkitMatchesSelector) {
+	        svg.setAttribute('xmlns', SVG_NS);
+	    }
+
+	    //Remove comment nodes
+	    for (var i = 0; i < svg.childNodes.length; i++) {
+	        if (svg.childNodes[i].nodeType === NODE_TYPE_COMMENT) {
+	            svg.removeChild(svg.childNodes[i]);
+	        }
+	    }
+
+	    //Remove CSS
+	    while (style.childNodes.length) {
+	        style.removeChild(style.childNodes[0]);
+	    }
+
+	    DOM.setAttr(svg, {
+	        'width': width,
+	        'height': height,
+	        'viewBox': '0 0 ' + width + ' ' + height,
+	        'preserveAspectRatio': 'none'
+	    });
+
+	    return svg;
+	};
+
+	/**
+	 * Converts serialized SVG to a string suitable for data URI use
+	 * @param svgString Serialized SVG string
+	 * @param [base64] Use base64 encoding for data URI
+	 */
+	exports.svgStringToDataURI = function() {
+	    var rawPrefix = 'data:image/svg+xml;charset=UTF-8,';
+	    var base64Prefix = 'data:image/svg+xml;charset=UTF-8;base64,';
+
+	    return function(svgString, base64) {
+	        if (base64) {
+	            return base64Prefix + btoa(global.unescape(encodeURIComponent(svgString)));
+	        } else {
+	            return rawPrefix + encodeURIComponent(svgString);
+	        }
+	    };
+	}();
+
+	/**
+	 * Returns serialized SVG with XML processing instructions
+	 *
+	 * @param svg SVG context
+	 * @param stylesheets CSS stylesheets to include
+	 */
+	exports.serializeSVG = function(svg, engineSettings) {
+	    if (!global.XMLSerializer) return;
+	    var serializer = new XMLSerializer();
+	    var svgCSS = '';
+	    var stylesheets = engineSettings.stylesheets;
+
+	    //External stylesheets: Processing Instruction method
+	    if (engineSettings.svgXMLStylesheet) {
+	        var xml = DOM.createXML();
+	        //Add <?xml-stylesheet ?> directives
+	        for (var i = stylesheets.length - 1; i >= 0; i--) {
+	            var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="' + stylesheets[i] + '" rel="stylesheet"');
+	            xml.insertBefore(csspi, xml.firstChild);
+	        }
+
+	        xml.removeChild(xml.documentElement);
+	        svgCSS = serializer.serializeToString(xml);
+	    }
+
+	    var svgText = serializer.serializeToString(svg);
+	    svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, '&$1');
+	    return svgCSS + svgText;
+	};
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {/**
+	 * Generic new DOM element function
+	 *
+	 * @param tag Tag to create
+	 * @param namespace Optional namespace value
+	 */
+	exports.newEl = function(tag, namespace) {
+	    if (!global.document) return;
+
+	    if (namespace == null) {
+	        return global.document.createElement(tag);
+	    } else {
+	        return global.document.createElementNS(namespace, tag);
+	    }
+	};
+
+	/**
+	 * Generic setAttribute function
+	 *
+	 * @param el Reference to DOM element
+	 * @param attrs Object with attribute keys and values
+	 */
+	exports.setAttr = function (el, attrs) {
+	    for (var a in attrs) {
+	        el.setAttribute(a, attrs[a]);
+	    }
+	};
+
+	/**
+	 * Creates a XML document
+	 * @private
+	 */
+	exports.createXML = function() {
+	    if (!global.DOMParser) return;
+	    return new DOMParser().parseFromString('<xml />', 'application/xml');
+	};
+
+	/**
+	 * Converts a value into an array of DOM nodes
+	 *
+	 * @param val A string, a NodeList, a Node, or an HTMLCollection
+	 */
+	exports.getNodeArray = function(val) {
+	    var retval = null;
+	    if (typeof(val) == 'string') {
+	        retval = document.querySelectorAll(val);
+	    } else if (global.NodeList && val instanceof global.NodeList) {
+	        retval = val;
+	    } else if (global.Node && val instanceof global.Node) {
+	        retval = [val];
+	    } else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
+	        retval = val;
+	    } else if (val instanceof Array) {
+	        retval = val;
+	    } else if (val === null) {
+	        retval = [];
+	    }
+
+	    retval = Array.prototype.slice.call(retval);
+
+	    return retval;
+	};
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	var Color = function(color, options) {
+	    //todo: support rgba, hsla, and rrggbbaa notation
+	    //todo: use CIELAB internally
+	    //todo: add clamp function (with sign)
+	    if (typeof color !== 'string') return;
+
+	    this.original = color;
+
+	    if (color.charAt(0) === '#') {
+	        color = color.slice(1);
+	    }
+
+	    if (/[^a-f0-9]+/i.test(color)) return;
+
+	    if (color.length === 3) {
+	        color = color.replace(/./g, '$&$&');
+	    }
+
+	    if (color.length !== 6) return;
+
+	    this.alpha = 1;
+
+	    if (options && options.alpha) {
+	        this.alpha = options.alpha;
+	    }
+
+	    this.set(parseInt(color, 16));
+	};
+
+	//todo: jsdocs
+	Color.rgb2hex = function(r, g, b) {
+	    function format (decimal) {
+	        var hex = (decimal | 0).toString(16);
+	        if (decimal < 16) {
+	            hex = '0' + hex;
+	        }
+	        return hex;
+	    }
+
+	    return [r, g, b].map(format).join('');
+	};
+
+	//todo: jsdocs
+	Color.hsl2rgb = function (h, s, l) {
+	    var H = h / 60;
+	    var C = (1 - Math.abs(2 * l - 1)) * s;
+	    var X = C * (1 - Math.abs(parseInt(H) % 2 - 1));
+	    var m = l - (C / 2);
+
+	    var r = 0, g = 0, b = 0;
+
+	    if (H >= 0 && H < 1) {
+	        r = C;
+	        g = X;
+	    } else if (H >= 1 && H < 2) {
+	        r = X;
+	        g = C;
+	    } else if (H >= 2 && H < 3) {
+	        g = C;
+	        b = X;
+	    } else if (H >= 3 && H < 4) {
+	        g = X;
+	        b = C;
+	    } else if (H >= 4 && H < 5) {
+	        r = X;
+	        b = C;
+	    } else if (H >= 5 && H < 6) {
+	        r = C;
+	        b = X;
+	    }
+
+	    r += m;
+	    g += m;
+	    b += m;
+
+	    r = parseInt(r * 255);
+	    g = parseInt(g * 255);
+	    b = parseInt(b * 255);
+
+	    return [r, g, b];
+	};
+
+	/**
+	 * Sets the color from a raw RGB888 integer
+	 * @param raw RGB888 representation of color
+	 */
+	//todo: refactor into a static method
+	//todo: factor out individual color spaces
+	//todo: add HSL, CIELAB, and CIELUV
+	Color.prototype.set = function (val) {
+	    this.raw = val;
+
+	    var r = (this.raw & 0xFF0000) >> 16;
+	    var g = (this.raw & 0x00FF00) >> 8;
+	    var b = (this.raw & 0x0000FF);
+
+	    // BT.709
+	    var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+	    var u = -0.09991 * r - 0.33609 * g + 0.436 * b;
+	    var v = 0.615 * r - 0.55861 * g - 0.05639 * b;
+
+	    this.rgb = {
+	        r: r,
+	        g: g,
+	        b: b
+	    };
+
+	    this.yuv = {
+	        y: y,
+	        u: u,
+	        v: v
+	    };
+
+	    return this;
+	};
+
+	/**
+	 * Lighten or darken a color
+	 * @param multiplier Amount to lighten or darken (-1 to 1)
+	 */
+	Color.prototype.lighten = function(multiplier) {
+	    var cm = Math.min(1, Math.max(0, Math.abs(multiplier))) * (multiplier < 0 ? -1 : 1);
+	    var bm = (255 * cm) | 0;
+	    var cr = Math.min(255, Math.max(0, this.rgb.r + bm));
+	    var cg = Math.min(255, Math.max(0, this.rgb.g + bm));
+	    var cb = Math.min(255, Math.max(0, this.rgb.b + bm));
+	    var hex = Color.rgb2hex(cr, cg, cb);
+	    return new Color(hex);
+	};
+
+	/**
+	 * Output color in hex format
+	 * @param addHash Add a hash character to the beginning of the output
+	 */
+	Color.prototype.toHex = function(addHash) {
+	    return (addHash ? '#' : '') + this.raw.toString(16);
+	};
+
+	/**
+	 * Returns whether or not current color is lighter than another color
+	 * @param color Color to compare against
+	 */
+	Color.prototype.lighterThan = function(color) {
+	    if (!(color instanceof Color)) {
+	        color = new Color(color);
+	    }
+
+	    return this.yuv.y > color.yuv.y;
+	};
+
+	/**
+	 * Returns the result of mixing current color with another color
+	 * @param color Color to mix with
+	 * @param multiplier How much to mix with the other color
+	 */
+	/*
+	Color.prototype.mix = function (color, multiplier) {
+	    if (!(color instanceof Color)) {
+	        color = new Color(color);
+	    }
+
+	    var r = this.rgb.r;
+	    var g = this.rgb.g;
+	    var b = this.rgb.b;
+	    var a = this.alpha;
+
+	    var m = typeof multiplier !== 'undefined' ? multiplier : 0.5;
+
+	    //todo: write a lerp function
+	    r = r + m * (color.rgb.r - r);
+	    g = g + m * (color.rgb.g - g);
+	    b = b + m * (color.rgb.b - b);
+	    a = a + m * (color.alpha - a);
+
+	    return new Color(Color.rgbToHex(r, g, b), {
+	        'alpha': a
+	    });
+	};
+	*/
+
+	/**
+	 * Returns the result of blending another color on top of current color with alpha
+	 * @param color Color to blend on top of current color, i.e. "Ca"
+	 */
+	//todo: see if .blendAlpha can be merged into .mix
+	Color.prototype.blendAlpha = function(color) {
+	    if (!(color instanceof Color)) {
+	        color = new Color(color);
+	    }
+
+	    var Ca = color;
+	    var Cb = this;
+
+	    //todo: write alpha blending function
+	    var r = Ca.alpha * Ca.rgb.r + (1 - Ca.alpha) * Cb.rgb.r;
+	    var g = Ca.alpha * Ca.rgb.g + (1 - Ca.alpha) * Cb.rgb.g;
+	    var b = Ca.alpha * Ca.rgb.b + (1 - Ca.alpha) * Cb.rgb.b;
+
+	    return new Color(Color.rgb2hex(r, g, b));
+	};
+
+	module.exports = Color;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  'version': '2.9.4',
+	  'svg_ns': 'http://www.w3.org/2000/svg'
+	};
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var shaven = __webpack_require__(13);
+
+	var SVG = __webpack_require__(8);
+	var constants = __webpack_require__(11);
+	var utils = __webpack_require__(7);
+
+	var SVG_NS = constants.svg_ns;
+
+	var templates = {
+	  'element': function (options) {
+	    var tag = options.tag;
+	    var content = options.content || '';
+	    delete options.tag;
+	    delete options.content;
+	    return  [tag, content, options];
+	  }
+	};
+
+	//todo: deprecate tag arg, infer tag from shape object
+	function convertShape (shape, tag) {
+	  return templates.element({
+	    'tag': tag,
+	    'width': shape.width,
+	    'height': shape.height,
+	    'fill': shape.properties.fill
+	  });
+	}
+
+	function textCss (properties) {
+	  return utils.cssProps({
+	    'fill': properties.fill,
+	    'font-weight': properties.font.weight,
+	    'font-family': properties.font.family + ', monospace',
+	    'font-size': properties.font.size + properties.font.units
+	  });
+	}
+
+	function outlinePath (bgWidth, bgHeight, outlineWidth) {
+	  var outlineOffsetWidth = outlineWidth / 2;
+
+	  return [
+	    'M', outlineOffsetWidth, outlineOffsetWidth,
+	    'H', bgWidth - outlineOffsetWidth,
+	    'V', bgHeight - outlineOffsetWidth,
+	    'H', outlineOffsetWidth,
+	    'V', 0,
+	    'M', 0, outlineOffsetWidth,
+	    'L', bgWidth, bgHeight - outlineOffsetWidth,
+	    'M', 0, bgHeight - outlineOffsetWidth,
+	    'L', bgWidth, outlineOffsetWidth
+	  ].join(' ');
+	}
+
+	module.exports = function (sceneGraph, renderSettings) {
+	  var engineSettings = renderSettings.engineSettings;
+	  var stylesheets = engineSettings.stylesheets;
+	  var stylesheetXml = stylesheets.map(function (stylesheet) {
+	    return '<?xml-stylesheet rel="stylesheet" href="' + stylesheet + '"?>';
+	  }).join('\n');
+
+	  var holderId = 'holder_' + Number(new Date()).toString(16);
+
+	  var root = sceneGraph.root;
+	  var textGroup = root.children.holderTextGroup;
+
+	  var css = '#' + holderId + ' text { ' + textCss(textGroup.properties) + ' } ';
+
+	  // push text down to be equally vertically aligned with canvas renderer
+	  textGroup.y += textGroup.textPositionData.boundingBox.height * 0.8;
+
+	  var wordTags = [];
+
+	  Object.keys(textGroup.children).forEach(function (lineKey) {
+	    var line = textGroup.children[lineKey];
+
+	    Object.keys(line.children).forEach(function (wordKey) {
+	      var word = line.children[wordKey];
+	      var x = textGroup.x + line.x + word.x;
+	      var y = textGroup.y + line.y + word.y;
+
+	      var wordTag = templates.element({
+	        'tag': 'text',
+	        'content': word.properties.text,
+	        'x': x,
+	        'y': y
+	      });
+
+	      wordTags.push(wordTag);
+	    });
+	  });
+
+	  var text = templates.element({
+	    'tag': 'g',
+	    'content': wordTags
+	  });
+
+	  var outline = null;
+
+	  if (root.children.holderBg.properties.outline) {
+	    var outlineProperties = root.children.holderBg.properties.outline;
+	    outline = templates.element({
+	      'tag': 'path',
+	      'd': outlinePath(root.children.holderBg.width, root.children.holderBg.height, outlineProperties.width),
+	      'stroke-width': outlineProperties.width,
+	      'stroke': outlineProperties.fill,
+	      'fill': 'none'
+	    });
+	  }
+
+	  var bg = convertShape(root.children.holderBg, 'rect');
+
+	  var sceneContent = [];
+
+	  sceneContent.push(bg);
+	  if (outlineProperties) {
+	    sceneContent.push(outline);
+	  }
+	  sceneContent.push(text);
+
+	  var scene = templates.element({
+	    'tag': 'g',
+	    'id': holderId,
+	    'content': sceneContent
+	  });
+
+	  var style = templates.element({
+	    'tag': 'style',
+	    //todo: figure out how to add CDATA directive
+	    'content': css,
+	    'type': 'text/css'
+	  });
+
+	  var defs = templates.element({
+	    'tag': 'defs',
+	    'content': style
+	  });
+
+	  var svg = templates.element({
+	    'tag': 'svg',
+	    'content': [defs, scene],
+	    'width': root.properties.width,
+	    'height': root.properties.height,
+	    'xmlns': SVG_NS,
+	    'viewBox': [0, 0, root.properties.width, root.properties.height].join(' '),
+	    'preserveAspectRatio': 'none'
+	  });
+
+	  var output = shaven(svg);
+	  
+	  output = stylesheetXml + output[0];
+
+	  var svgString = SVG.svgStringToDataURI(output, renderSettings.mode === 'background');
+	  return svgString;
+	};
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var escape = __webpack_require__(14)
+
+	// TODO: remove namespace
+
+	module.exports = function shaven (array, namespace, returnObject) {
+
+		'use strict'
+
+		var i = 1
+		var doesEscape = true
+		var HTMLString
+		var attributeKey
+		var callback
+		var key
+
+
+		returnObject = returnObject || {}
+
+
+		function createElement (sugarString) {
+
+			var tags = sugarString.match(/^[\w-]+/)
+			var element = {
+				tag: tags ? tags[0] : 'div',
+				attr: {},
+				children: []
+			}
+			var id = sugarString.match(/#([\w-]+)/)
+			var reference = sugarString.match(/\$([\w-]+)/)
+			var classNames = sugarString.match(/\.[\w-]+/g)
+
+
+			// Assign id if is set
+			if (id) {
+				element.attr.id = id[1]
+
+				// Add element to the return object
+				returnObject[id[1]] = element
+			}
+
+			if (reference)
+				returnObject[reference[1]] = element
+
+			if (classNames)
+				element.attr.class = classNames.join(' ').replace(/\./g, '')
+
+			if (sugarString.match(/&$/g))
+				doesEscape = false
+
+			return element
+		}
+
+		function replacer (key, value) {
+
+			if (value === null || value === false || value === undefined)
+				return
+
+			if (typeof value !== 'string' && typeof value !== 'object')
+				return String(value)
+
+			return value
+		}
+
+		function escapeAttribute (string) {
+			return (string || string === 0) ?
+				String(string)
+					.replace(/&/g, '&amp;')
+					.replace(/"/g, '&quot;') :
+				''
+		}
+
+		function escapeHTML (string) {
+			return String(string)
+				.replace(/&/g, '&amp;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&apos;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+		}
+
+
+		if (typeof array[0] === 'string')
+			array[0] = createElement(array[0])
+
+		else if (Array.isArray(array[0]))
+			i = 0
+
+		else
+			throw new Error(
+				'First element of array must be a string, ' +
+				'or an array and not ' + JSON.stringify(array[0])
+			)
+
+
+		for (; i < array.length; i++) {
+
+			// Don't render element if value is false or null
+			if (array[i] === false || array[i] === null) {
+				array[0] = false
+				break
+			}
+
+			// Continue with next array value if current value is undefined or true
+			else if (array[i] === undefined || array[i] === true) {
+				continue
+			}
+
+			else if (typeof array[i] === 'string') {
+				if (doesEscape)
+					array[i] = escapeHTML(array[i])
+
+				array[0].children.push(array[i])
+			}
+
+			else if (typeof array[i] === 'number') {
+
+				array[0].children.push(array[i])
+			}
+
+			else if (Array.isArray(array[i])) {
+
+				if (Array.isArray(array[i][0])) {
+					array[i].reverse().forEach(function (subArray) {
+						array.splice(i + 1, 0, subArray)
+					})
+
+					if (i !== 0)
+						continue
+					i++
+				}
+
+				shaven(array[i], namespace, returnObject)
+
+				if (array[i][0])
+					array[0].children.push(array[i][0])
+			}
+
+			else if (typeof array[i] === 'function')
+				callback = array[i]
+
+
+			else if (typeof array[i] === 'object') {
+				for (attributeKey in array[i])
+					if (array[i].hasOwnProperty(attributeKey))
+						if (array[i][attributeKey] !== null &&
+							array[i][attributeKey] !== false)
+							if (attributeKey === 'style' &&
+								typeof array[i][attributeKey] === 'object')
+								array[0].attr[attributeKey] = JSON
+									.stringify(array[i][attributeKey], replacer)
+									.slice(2, -2)
+									.replace(/","/g, ';')
+									.replace(/":"/g, ':')
+									.replace(/\\"/g, '\'')
+
+							else
+								array[0].attr[attributeKey] = array[i][attributeKey]
+			}
+
+			else
+				throw new TypeError('"' + array[i] + '" is not allowed as a value.')
+		}
+
+
+		if (array[0] !== false) {
+
+			HTMLString = '<' + array[0].tag
+
+			for (key in array[0].attr)
+				if (array[0].attr.hasOwnProperty(key))
+					HTMLString += ' ' + key + '="' +
+						escapeAttribute(array[0].attr[key]) + '"'
+
+			HTMLString += '>'
+
+			array[0].children.forEach(function (child) {
+				HTMLString += child
+			})
+
+			HTMLString += '</' + array[0].tag + '>'
+
+			array[0] = HTMLString
+		}
+
+		// Return root element on index 0
+		returnObject[0] = array[0]
+
+		if (callback)
+			callback(array[0])
+
+		// returns object containing all elements with an id and the root element
+		return returnObject
+	}
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	/*!
+	 * escape-html
+	 * Copyright(c) 2012-2013 TJ Holowaychuk
+	 * Copyright(c) 2015 Andreas Lubbe
+	 * Copyright(c) 2015 Tiancheng "Timothy" Gu
+	 * MIT Licensed
+	 */
+
+	'use strict';
+
+	/**
+	 * Module variables.
+	 * @private
+	 */
+
+	var matchHtmlRegExp = /["'&<>]/;
+
+	/**
+	 * Module exports.
+	 * @public
+	 */
+
+	module.exports = escapeHtml;
+
+	/**
+	 * Escape special characters in the given string of html.
+	 *
+	 * @param  {string} string The string to escape for inserting into HTML
+	 * @return {string}
+	 * @public
+	 */
+
+	function escapeHtml(string) {
+	  var str = '' + string;
+	  var match = matchHtmlRegExp.exec(str);
+
+	  if (!match) {
+	    return str;
+	  }
+
+	  var escape;
+	  var html = '';
+	  var index = 0;
+	  var lastIndex = 0;
+
+	  for (index = match.index; index < str.length; index++) {
+	    switch (str.charCodeAt(index)) {
+	      case 34: // "
+	        escape = '&quot;';
+	        break;
+	      case 38: // &
+	        escape = '&amp;';
+	        break;
+	      case 39: // '
+	        escape = '&#39;';
+	        break;
+	      case 60: // <
+	        escape = '&lt;';
+	        break;
+	      case 62: // >
+	        escape = '&gt;';
+	        break;
+	      default:
+	        continue;
+	    }
+
+	    if (lastIndex !== index) {
+	      html += str.substring(lastIndex, index);
+	    }
+
+	    lastIndex = index + 1;
+	    html += escape;
+	  }
+
+	  return lastIndex !== index
+	    ? html + str.substring(lastIndex, index)
+	    : html;
+	}
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var DOM = __webpack_require__(9);
+	var utils = __webpack_require__(7);
+
+	module.exports = (function() {
+	    var canvas = DOM.newEl('canvas');
+	    var ctx = null;
+
+	    return function(sceneGraph) {
+	        if (ctx == null) {
+	            ctx = canvas.getContext('2d');
+	        }
+
+	        var dpr = utils.canvasRatio();
+	        var root = sceneGraph.root;
+	        canvas.width = dpr * root.properties.width;
+	        canvas.height = dpr * root.properties.height ;
+	        ctx.textBaseline = 'middle';
+
+	        var bg = root.children.holderBg;
+	        var bgWidth = dpr * bg.width;
+	        var bgHeight = dpr * bg.height;
+	        //todo: parametrize outline width (e.g. in scene object)
+	        var outlineWidth = 2;
+	        var outlineOffsetWidth = outlineWidth / 2;
+
+	        ctx.fillStyle = bg.properties.fill;
+	        ctx.fillRect(0, 0, bgWidth, bgHeight);
+
+	        if (bg.properties.outline) {
+	            //todo: abstract this into a method
+	            ctx.strokeStyle = bg.properties.outline.fill;
+	            ctx.lineWidth = bg.properties.outline.width;
+	            ctx.moveTo(outlineOffsetWidth, outlineOffsetWidth);
+	            // TL, TR, BR, BL
+	            ctx.lineTo(bgWidth - outlineOffsetWidth, outlineOffsetWidth);
+	            ctx.lineTo(bgWidth - outlineOffsetWidth, bgHeight - outlineOffsetWidth);
+	            ctx.lineTo(outlineOffsetWidth, bgHeight - outlineOffsetWidth);
+	            ctx.lineTo(outlineOffsetWidth, outlineOffsetWidth);
+	            // Diagonals
+	            ctx.moveTo(0, outlineOffsetWidth);
+	            ctx.lineTo(bgWidth, bgHeight - outlineOffsetWidth);
+	            ctx.moveTo(0, bgHeight - outlineOffsetWidth);
+	            ctx.lineTo(bgWidth, outlineOffsetWidth);
+	            ctx.stroke();
+	        }
+
+	        var textGroup = root.children.holderTextGroup;
+	        ctx.font = textGroup.properties.font.weight + ' ' + (dpr * textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
+	        ctx.fillStyle = textGroup.properties.fill;
+
+	        for (var lineKey in textGroup.children) {
+	            var line = textGroup.children[lineKey];
+	            for (var wordKey in line.children) {
+	                var word = line.children[wordKey];
+	                var x = dpr * (textGroup.x + line.x + word.x);
+	                var y = dpr * (textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
+
+	                ctx.fillText(word.properties.text, x, y);
+	            }
+	        }
+
+	        return canvas.toDataURL('image/png');
+	    };
+	})();
+
+/***/ }
+/******/ ])
+});
+;
+(function(ctx, isMeteorPackage) {
+    if (isMeteorPackage) {
+        Holder = ctx.Holder;
+    }
+})(this, typeof Meteor !== 'undefined' && typeof Package !== 'undefined');
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-router/dist/vue-router.esm.js":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/**
+  * vue-router v2.6.0
+  * (c) 2017 Evan You
+  * @license MIT
+  */
+/*  */
+
+function assert (condition, message) {
+  if (!condition) {
+    throw new Error(("[vue-router] " + message))
+  }
+}
+
+function warn (condition, message) {
+  if ("development" !== 'production' && !condition) {
+    typeof console !== 'undefined' && console.warn(("[vue-router] " + message));
+  }
+}
+
+var View = {
+  name: 'router-view',
+  functional: true,
+  props: {
+    name: {
+      type: String,
+      default: 'default'
+    }
+  },
+  render: function render (_, ref) {
+    var props = ref.props;
+    var children = ref.children;
+    var parent = ref.parent;
+    var data = ref.data;
+
+    data.routerView = true;
+
+    // directly use parent context's createElement() function
+    // so that components rendered by router-view can resolve named slots
+    var h = parent.$createElement;
+    var name = props.name;
+    var route = parent.$route;
+    var cache = parent._routerViewCache || (parent._routerViewCache = {});
+
+    // determine current view depth, also check to see if the tree
+    // has been toggled inactive but kept-alive.
+    var depth = 0;
+    var inactive = false;
+    while (parent && parent._routerRoot !== parent) {
+      if (parent.$vnode && parent.$vnode.data.routerView) {
+        depth++;
+      }
+      if (parent._inactive) {
+        inactive = true;
+      }
+      parent = parent.$parent;
+    }
+    data.routerViewDepth = depth;
+
+    // render previous view if the tree is inactive and kept-alive
+    if (inactive) {
+      return h(cache[name], data, children)
+    }
+
+    var matched = route.matched[depth];
+    // render empty node if no matched route
+    if (!matched) {
+      cache[name] = null;
+      return h()
+    }
+
+    var component = cache[name] = matched.components[name];
+
+    // attach instance registration hook
+    // this will be called in the instance's injected lifecycle hooks
+    data.registerRouteInstance = function (vm, val) {
+      // val could be undefined for unregistration
+      var current = matched.instances[name];
+      if (
+        (val && current !== vm) ||
+        (!val && current === vm)
+      ) {
+        matched.instances[name] = val;
+      }
+    }
+
+    // also regiseter instance in prepatch hook
+    // in case the same component instance is reused across different routes
+    ;(data.hook || (data.hook = {})).prepatch = function (_, vnode) {
+      matched.instances[name] = vnode.componentInstance;
+    };
+
+    // resolve props
+    data.props = resolveProps(route, matched.props && matched.props[name]);
+
+    return h(component, data, children)
+  }
+};
+
+function resolveProps (route, config) {
+  switch (typeof config) {
+    case 'undefined':
+      return
+    case 'object':
+      return config
+    case 'function':
+      return config(route)
+    case 'boolean':
+      return config ? route.params : undefined
+    default:
+      if (true) {
+        warn(
+          false,
+          "props in \"" + (route.path) + "\" is a " + (typeof config) + ", " +
+          "expecting an object, function or boolean."
+        );
+      }
+  }
+}
+
+/*  */
+
+var encodeReserveRE = /[!'()*]/g;
+var encodeReserveReplacer = function (c) { return '%' + c.charCodeAt(0).toString(16); };
+var commaRE = /%2C/g;
+
+// fixed encodeURIComponent which is more conformant to RFC3986:
+// - escapes [!'()*]
+// - preserve commas
+var encode = function (str) { return encodeURIComponent(str)
+  .replace(encodeReserveRE, encodeReserveReplacer)
+  .replace(commaRE, ','); };
+
+var decode = decodeURIComponent;
+
+function resolveQuery (
+  query,
+  extraQuery,
+  _parseQuery
+) {
+  if ( extraQuery === void 0 ) extraQuery = {};
+
+  var parse = _parseQuery || parseQuery;
+  var parsedQuery;
+  try {
+    parsedQuery = parse(query || '');
+  } catch (e) {
+    "development" !== 'production' && warn(false, e.message);
+    parsedQuery = {};
+  }
+  for (var key in extraQuery) {
+    var val = extraQuery[key];
+    parsedQuery[key] = Array.isArray(val) ? val.slice() : val;
+  }
+  return parsedQuery
+}
+
+function parseQuery (query) {
+  var res = {};
+
+  query = query.trim().replace(/^(\?|#|&)/, '');
+
+  if (!query) {
+    return res
+  }
+
+  query.split('&').forEach(function (param) {
+    var parts = param.replace(/\+/g, ' ').split('=');
+    var key = decode(parts.shift());
+    var val = parts.length > 0
+      ? decode(parts.join('='))
+      : null;
+
+    if (res[key] === undefined) {
+      res[key] = val;
+    } else if (Array.isArray(res[key])) {
+      res[key].push(val);
+    } else {
+      res[key] = [res[key], val];
+    }
+  });
+
+  return res
+}
+
+function stringifyQuery (obj) {
+  var res = obj ? Object.keys(obj).map(function (key) {
+    var val = obj[key];
+
+    if (val === undefined) {
+      return ''
+    }
+
+    if (val === null) {
+      return encode(key)
+    }
+
+    if (Array.isArray(val)) {
+      var result = [];
+      val.forEach(function (val2) {
+        if (val2 === undefined) {
+          return
+        }
+        if (val2 === null) {
+          result.push(encode(key));
+        } else {
+          result.push(encode(key) + '=' + encode(val2));
+        }
+      });
+      return result.join('&')
+    }
+
+    return encode(key) + '=' + encode(val)
+  }).filter(function (x) { return x.length > 0; }).join('&') : null;
+  return res ? ("?" + res) : ''
+}
+
+/*  */
+
+
+var trailingSlashRE = /\/?$/;
+
+function createRoute (
+  record,
+  location,
+  redirectedFrom,
+  router
+) {
+  var stringifyQuery$$1 = router && router.options.stringifyQuery;
+  var route = {
+    name: location.name || (record && record.name),
+    meta: (record && record.meta) || {},
+    path: location.path || '/',
+    hash: location.hash || '',
+    query: location.query || {},
+    params: location.params || {},
+    fullPath: getFullPath(location, stringifyQuery$$1),
+    matched: record ? formatMatch(record) : []
+  };
+  if (redirectedFrom) {
+    route.redirectedFrom = getFullPath(redirectedFrom, stringifyQuery$$1);
+  }
+  return Object.freeze(route)
+}
+
+// the starting route that represents the initial state
+var START = createRoute(null, {
+  path: '/'
+});
+
+function formatMatch (record) {
+  var res = [];
+  while (record) {
+    res.unshift(record);
+    record = record.parent;
+  }
+  return res
+}
+
+function getFullPath (
+  ref,
+  _stringifyQuery
+) {
+  var path = ref.path;
+  var query = ref.query; if ( query === void 0 ) query = {};
+  var hash = ref.hash; if ( hash === void 0 ) hash = '';
+
+  var stringify = _stringifyQuery || stringifyQuery;
+  return (path || '/') + stringify(query) + hash
+}
+
+function isSameRoute (a, b) {
+  if (b === START) {
+    return a === b
+  } else if (!b) {
+    return false
+  } else if (a.path && b.path) {
+    return (
+      a.path.replace(trailingSlashRE, '') === b.path.replace(trailingSlashRE, '') &&
+      a.hash === b.hash &&
+      isObjectEqual(a.query, b.query)
+    )
+  } else if (a.name && b.name) {
+    return (
+      a.name === b.name &&
+      a.hash === b.hash &&
+      isObjectEqual(a.query, b.query) &&
+      isObjectEqual(a.params, b.params)
+    )
+  } else {
+    return false
+  }
+}
+
+function isObjectEqual (a, b) {
+  if ( a === void 0 ) a = {};
+  if ( b === void 0 ) b = {};
+
+  var aKeys = Object.keys(a);
+  var bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) {
+    return false
+  }
+  return aKeys.every(function (key) {
+    var aVal = a[key];
+    var bVal = b[key];
+    // check nested equality
+    if (typeof aVal === 'object' && typeof bVal === 'object') {
+      return isObjectEqual(aVal, bVal)
+    }
+    return String(aVal) === String(bVal)
+  })
+}
+
+function isIncludedRoute (current, target) {
+  return (
+    current.path.replace(trailingSlashRE, '/').indexOf(
+      target.path.replace(trailingSlashRE, '/')
+    ) === 0 &&
+    (!target.hash || current.hash === target.hash) &&
+    queryIncludes(current.query, target.query)
+  )
+}
+
+function queryIncludes (current, target) {
+  for (var key in target) {
+    if (!(key in current)) {
+      return false
+    }
+  }
+  return true
+}
+
+/*  */
+
+// work around weird flow bug
+var toTypes = [String, Object];
+var eventTypes = [String, Array];
+
+var Link = {
+  name: 'router-link',
+  props: {
+    to: {
+      type: toTypes,
+      required: true
+    },
+    tag: {
+      type: String,
+      default: 'a'
+    },
+    exact: Boolean,
+    append: Boolean,
+    replace: Boolean,
+    activeClass: String,
+    exactActiveClass: String,
+    event: {
+      type: eventTypes,
+      default: 'click'
+    }
+  },
+  render: function render (h) {
+    var this$1 = this;
+
+    var router = this.$router;
+    var current = this.$route;
+    var ref = router.resolve(this.to, current, this.append);
+    var location = ref.location;
+    var route = ref.route;
+    var href = ref.href;
+
+    var classes = {};
+    var globalActiveClass = router.options.linkActiveClass;
+    var globalExactActiveClass = router.options.linkExactActiveClass;
+    // Support global empty active class
+    var activeClassFallback = globalActiveClass == null
+            ? 'router-link-active'
+            : globalActiveClass;
+    var exactActiveClassFallback = globalExactActiveClass == null
+            ? 'router-link-exact-active'
+            : globalExactActiveClass;
+    var activeClass = this.activeClass == null
+            ? activeClassFallback
+            : this.activeClass;
+    var exactActiveClass = this.exactActiveClass == null
+            ? exactActiveClassFallback
+            : this.exactActiveClass;
+    var compareTarget = location.path
+      ? createRoute(null, location, null, router)
+      : route;
+
+    classes[exactActiveClass] = isSameRoute(current, compareTarget);
+    classes[activeClass] = this.exact
+      ? classes[exactActiveClass]
+      : isIncludedRoute(current, compareTarget);
+
+    var handler = function (e) {
+      if (guardEvent(e)) {
+        if (this$1.replace) {
+          router.replace(location);
+        } else {
+          router.push(location);
+        }
+      }
+    };
+
+    var on = { click: guardEvent };
+    if (Array.isArray(this.event)) {
+      this.event.forEach(function (e) { on[e] = handler; });
+    } else {
+      on[this.event] = handler;
+    }
+
+    var data = {
+      class: classes
+    };
+
+    if (this.tag === 'a') {
+      data.on = on;
+      data.attrs = { href: href };
+    } else {
+      // find the first <a> child and apply listener and href
+      var a = findAnchor(this.$slots.default);
+      if (a) {
+        // in case the <a> is a static node
+        a.isStatic = false;
+        var extend = _Vue.util.extend;
+        var aData = a.data = extend({}, a.data);
+        aData.on = on;
+        var aAttrs = a.data.attrs = extend({}, a.data.attrs);
+        aAttrs.href = href;
+      } else {
+        // doesn't have <a> child, apply listener to self
+        data.on = on;
+      }
+    }
+
+    return h(this.tag, data, this.$slots.default)
+  }
+};
+
+function guardEvent (e) {
+  // don't redirect with control keys
+  if (e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) { return }
+  // don't redirect when preventDefault called
+  if (e.defaultPrevented) { return }
+  // don't redirect on right click
+  if (e.button !== undefined && e.button !== 0) { return }
+  // don't redirect if `target="_blank"`
+  if (e.currentTarget && e.currentTarget.getAttribute) {
+    var target = e.currentTarget.getAttribute('target');
+    if (/\b_blank\b/i.test(target)) { return }
+  }
+  // this may be a Weex event which doesn't have this method
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+  return true
+}
+
+function findAnchor (children) {
+  if (children) {
+    var child;
+    for (var i = 0; i < children.length; i++) {
+      child = children[i];
+      if (child.tag === 'a') {
+        return child
+      }
+      if (child.children && (child = findAnchor(child.children))) {
+        return child
+      }
+    }
+  }
+}
+
+var _Vue;
+
+function install (Vue) {
+  if (install.installed) { return }
+  install.installed = true;
+
+  _Vue = Vue;
+
+  var isDef = function (v) { return v !== undefined; };
+
+  var registerInstance = function (vm, callVal) {
+    var i = vm.$options._parentVnode;
+    if (isDef(i) && isDef(i = i.data) && isDef(i = i.registerRouteInstance)) {
+      i(vm, callVal);
+    }
+  };
+
+  Vue.mixin({
+    beforeCreate: function beforeCreate () {
+      if (isDef(this.$options.router)) {
+        this._routerRoot = this;
+        this._router = this.$options.router;
+        this._router.init(this);
+        Vue.util.defineReactive(this, '_route', this._router.history.current);
+      } else {
+        this._routerRoot = (this.$parent && this.$parent._routerRoot) || this;
+      }
+      registerInstance(this, this);
+    },
+    destroyed: function destroyed () {
+      registerInstance(this);
+    }
+  });
+
+  Object.defineProperty(Vue.prototype, '$router', {
+    get: function get () { return this._routerRoot._router }
+  });
+
+  Object.defineProperty(Vue.prototype, '$route', {
+    get: function get () { return this._routerRoot._route }
+  });
+
+  Vue.component('router-view', View);
+  Vue.component('router-link', Link);
+
+  var strats = Vue.config.optionMergeStrategies;
+  // use the same hook merging strategy for route hooks
+  strats.beforeRouteEnter = strats.beforeRouteLeave = strats.created;
+}
+
+/*  */
+
+var inBrowser = typeof window !== 'undefined';
+
+/*  */
+
+function resolvePath (
+  relative,
+  base,
+  append
+) {
+  var firstChar = relative.charAt(0);
+  if (firstChar === '/') {
+    return relative
+  }
+
+  if (firstChar === '?' || firstChar === '#') {
+    return base + relative
+  }
+
+  var stack = base.split('/');
+
+  // remove trailing segment if:
+  // - not appending
+  // - appending to trailing slash (last segment is empty)
+  if (!append || !stack[stack.length - 1]) {
+    stack.pop();
+  }
+
+  // resolve relative path
+  var segments = relative.replace(/^\//, '').split('/');
+  for (var i = 0; i < segments.length; i++) {
+    var segment = segments[i];
+    if (segment === '..') {
+      stack.pop();
+    } else if (segment !== '.') {
+      stack.push(segment);
+    }
+  }
+
+  // ensure leading slash
+  if (stack[0] !== '') {
+    stack.unshift('');
+  }
+
+  return stack.join('/')
+}
+
+function parsePath (path) {
+  var hash = '';
+  var query = '';
+
+  var hashIndex = path.indexOf('#');
+  if (hashIndex >= 0) {
+    hash = path.slice(hashIndex);
+    path = path.slice(0, hashIndex);
+  }
+
+  var queryIndex = path.indexOf('?');
+  if (queryIndex >= 0) {
+    query = path.slice(queryIndex + 1);
+    path = path.slice(0, queryIndex);
+  }
+
+  return {
+    path: path,
+    query: query,
+    hash: hash
+  }
+}
+
+function cleanPath (path) {
+  return path.replace(/\/\//g, '/')
+}
+
+var index$1 = Array.isArray || function (arr) {
+  return Object.prototype.toString.call(arr) == '[object Array]';
+};
+
+/**
+ * Expose `pathToRegexp`.
+ */
+var index = pathToRegexp;
+var parse_1 = parse;
+var compile_1 = compile;
+var tokensToFunction_1 = tokensToFunction;
+var tokensToRegExp_1 = tokensToRegExp;
+
+/**
+ * The main path matching regexp utility.
+ *
+ * @type {RegExp}
+ */
+var PATH_REGEXP = new RegExp([
+  // Match escaped characters that would otherwise appear in future matches.
+  // This allows the user to escape special characters that won't transform.
+  '(\\\\.)',
+  // Match Express-style parameters and un-named parameters with a prefix
+  // and optional suffixes. Matches appear as:
+  //
+  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
+  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
+  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
+  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))'
+].join('|'), 'g');
+
+/**
+ * Parse a string for the raw tokens.
+ *
+ * @param  {string}  str
+ * @param  {Object=} options
+ * @return {!Array}
+ */
+function parse (str, options) {
+  var tokens = [];
+  var key = 0;
+  var index = 0;
+  var path = '';
+  var defaultDelimiter = options && options.delimiter || '/';
+  var res;
+
+  while ((res = PATH_REGEXP.exec(str)) != null) {
+    var m = res[0];
+    var escaped = res[1];
+    var offset = res.index;
+    path += str.slice(index, offset);
+    index = offset + m.length;
+
+    // Ignore already escaped sequences.
+    if (escaped) {
+      path += escaped[1];
+      continue
+    }
+
+    var next = str[index];
+    var prefix = res[2];
+    var name = res[3];
+    var capture = res[4];
+    var group = res[5];
+    var modifier = res[6];
+    var asterisk = res[7];
+
+    // Push the current path onto the tokens.
+    if (path) {
+      tokens.push(path);
+      path = '';
+    }
+
+    var partial = prefix != null && next != null && next !== prefix;
+    var repeat = modifier === '+' || modifier === '*';
+    var optional = modifier === '?' || modifier === '*';
+    var delimiter = res[2] || defaultDelimiter;
+    var pattern = capture || group;
+
+    tokens.push({
+      name: name || key++,
+      prefix: prefix || '',
+      delimiter: delimiter,
+      optional: optional,
+      repeat: repeat,
+      partial: partial,
+      asterisk: !!asterisk,
+      pattern: pattern ? escapeGroup(pattern) : (asterisk ? '.*' : '[^' + escapeString(delimiter) + ']+?')
+    });
+  }
+
+  // Match any characters still remaining.
+  if (index < str.length) {
+    path += str.substr(index);
+  }
+
+  // If the path exists, push it onto the end.
+  if (path) {
+    tokens.push(path);
+  }
+
+  return tokens
+}
+
+/**
+ * Compile a string to a template function for the path.
+ *
+ * @param  {string}             str
+ * @param  {Object=}            options
+ * @return {!function(Object=, Object=)}
+ */
+function compile (str, options) {
+  return tokensToFunction(parse(str, options))
+}
+
+/**
+ * Prettier encoding of URI path segments.
+ *
+ * @param  {string}
+ * @return {string}
+ */
+function encodeURIComponentPretty (str) {
+  return encodeURI(str).replace(/[\/?#]/g, function (c) {
+    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+  })
+}
+
+/**
+ * Encode the asterisk parameter. Similar to `pretty`, but allows slashes.
+ *
+ * @param  {string}
+ * @return {string}
+ */
+function encodeAsterisk (str) {
+  return encodeURI(str).replace(/[?#]/g, function (c) {
+    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+  })
+}
+
+/**
+ * Expose a method for transforming tokens into the path function.
+ */
+function tokensToFunction (tokens) {
+  // Compile all the tokens into regexps.
+  var matches = new Array(tokens.length);
+
+  // Compile all the patterns before compilation.
+  for (var i = 0; i < tokens.length; i++) {
+    if (typeof tokens[i] === 'object') {
+      matches[i] = new RegExp('^(?:' + tokens[i].pattern + ')$');
+    }
+  }
+
+  return function (obj, opts) {
+    var path = '';
+    var data = obj || {};
+    var options = opts || {};
+    var encode = options.pretty ? encodeURIComponentPretty : encodeURIComponent;
+
+    for (var i = 0; i < tokens.length; i++) {
+      var token = tokens[i];
+
+      if (typeof token === 'string') {
+        path += token;
+
+        continue
+      }
+
+      var value = data[token.name];
+      var segment;
+
+      if (value == null) {
+        if (token.optional) {
+          // Prepend partial segment prefixes.
+          if (token.partial) {
+            path += token.prefix;
+          }
+
+          continue
+        } else {
+          throw new TypeError('Expected "' + token.name + '" to be defined')
+        }
+      }
+
+      if (index$1(value)) {
+        if (!token.repeat) {
+          throw new TypeError('Expected "' + token.name + '" to not repeat, but received `' + JSON.stringify(value) + '`')
+        }
+
+        if (value.length === 0) {
+          if (token.optional) {
+            continue
+          } else {
+            throw new TypeError('Expected "' + token.name + '" to not be empty')
+          }
+        }
+
+        for (var j = 0; j < value.length; j++) {
+          segment = encode(value[j]);
+
+          if (!matches[i].test(segment)) {
+            throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received `' + JSON.stringify(segment) + '`')
+          }
+
+          path += (j === 0 ? token.prefix : token.delimiter) + segment;
+        }
+
+        continue
+      }
+
+      segment = token.asterisk ? encodeAsterisk(value) : encode(value);
+
+      if (!matches[i].test(segment)) {
+        throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
+      }
+
+      path += token.prefix + segment;
+    }
+
+    return path
+  }
+}
+
+/**
+ * Escape a regular expression string.
+ *
+ * @param  {string} str
+ * @return {string}
+ */
+function escapeString (str) {
+  return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, '\\$1')
+}
+
+/**
+ * Escape the capturing group by escaping special characters and meaning.
+ *
+ * @param  {string} group
+ * @return {string}
+ */
+function escapeGroup (group) {
+  return group.replace(/([=!:$\/()])/g, '\\$1')
+}
+
+/**
+ * Attach the keys as a property of the regexp.
+ *
+ * @param  {!RegExp} re
+ * @param  {Array}   keys
+ * @return {!RegExp}
+ */
+function attachKeys (re, keys) {
+  re.keys = keys;
+  return re
+}
+
+/**
+ * Get the flags for a regexp from the options.
+ *
+ * @param  {Object} options
+ * @return {string}
+ */
+function flags (options) {
+  return options.sensitive ? '' : 'i'
+}
+
+/**
+ * Pull out keys from a regexp.
+ *
+ * @param  {!RegExp} path
+ * @param  {!Array}  keys
+ * @return {!RegExp}
+ */
+function regexpToRegexp (path, keys) {
+  // Use a negative lookahead to match only capturing groups.
+  var groups = path.source.match(/\((?!\?)/g);
+
+  if (groups) {
+    for (var i = 0; i < groups.length; i++) {
+      keys.push({
+        name: i,
+        prefix: null,
+        delimiter: null,
+        optional: false,
+        repeat: false,
+        partial: false,
+        asterisk: false,
+        pattern: null
+      });
+    }
+  }
+
+  return attachKeys(path, keys)
+}
+
+/**
+ * Transform an array into a regexp.
+ *
+ * @param  {!Array}  path
+ * @param  {Array}   keys
+ * @param  {!Object} options
+ * @return {!RegExp}
+ */
+function arrayToRegexp (path, keys, options) {
+  var parts = [];
+
+  for (var i = 0; i < path.length; i++) {
+    parts.push(pathToRegexp(path[i], keys, options).source);
+  }
+
+  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options));
+
+  return attachKeys(regexp, keys)
+}
+
+/**
+ * Create a path regexp from string input.
+ *
+ * @param  {string}  path
+ * @param  {!Array}  keys
+ * @param  {!Object} options
+ * @return {!RegExp}
+ */
+function stringToRegexp (path, keys, options) {
+  return tokensToRegExp(parse(path, options), keys, options)
+}
+
+/**
+ * Expose a function for taking tokens and returning a RegExp.
+ *
+ * @param  {!Array}          tokens
+ * @param  {(Array|Object)=} keys
+ * @param  {Object=}         options
+ * @return {!RegExp}
+ */
+function tokensToRegExp (tokens, keys, options) {
+  if (!index$1(keys)) {
+    options = /** @type {!Object} */ (keys || options);
+    keys = [];
+  }
+
+  options = options || {};
+
+  var strict = options.strict;
+  var end = options.end !== false;
+  var route = '';
+
+  // Iterate over the tokens and create our regexp string.
+  for (var i = 0; i < tokens.length; i++) {
+    var token = tokens[i];
+
+    if (typeof token === 'string') {
+      route += escapeString(token);
+    } else {
+      var prefix = escapeString(token.prefix);
+      var capture = '(?:' + token.pattern + ')';
+
+      keys.push(token);
+
+      if (token.repeat) {
+        capture += '(?:' + prefix + capture + ')*';
+      }
+
+      if (token.optional) {
+        if (!token.partial) {
+          capture = '(?:' + prefix + '(' + capture + '))?';
+        } else {
+          capture = prefix + '(' + capture + ')?';
+        }
+      } else {
+        capture = prefix + '(' + capture + ')';
+      }
+
+      route += capture;
+    }
+  }
+
+  var delimiter = escapeString(options.delimiter || '/');
+  var endsWithDelimiter = route.slice(-delimiter.length) === delimiter;
+
+  // In non-strict mode we allow a slash at the end of match. If the path to
+  // match already ends with a slash, we remove it for consistency. The slash
+  // is valid at the end of a path match, not in the middle. This is important
+  // in non-ending mode, where "/test/" shouldn't match "/test//route".
+  if (!strict) {
+    route = (endsWithDelimiter ? route.slice(0, -delimiter.length) : route) + '(?:' + delimiter + '(?=$))?';
+  }
+
+  if (end) {
+    route += '$';
+  } else {
+    // In non-ending mode, we need the capturing groups to match as much as
+    // possible by using a positive lookahead to the end or next path segment.
+    route += strict && endsWithDelimiter ? '' : '(?=' + delimiter + '|$)';
+  }
+
+  return attachKeys(new RegExp('^' + route, flags(options)), keys)
+}
+
+/**
+ * Normalize the given path string, returning a regular expression.
+ *
+ * An empty array can be passed in for the keys, which will hold the
+ * placeholder key descriptions. For example, using `/user/:id`, `keys` will
+ * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
+ *
+ * @param  {(string|RegExp|Array)} path
+ * @param  {(Array|Object)=}       keys
+ * @param  {Object=}               options
+ * @return {!RegExp}
+ */
+function pathToRegexp (path, keys, options) {
+  if (!index$1(keys)) {
+    options = /** @type {!Object} */ (keys || options);
+    keys = [];
+  }
+
+  options = options || {};
+
+  if (path instanceof RegExp) {
+    return regexpToRegexp(path, /** @type {!Array} */ (keys))
+  }
+
+  if (index$1(path)) {
+    return arrayToRegexp(/** @type {!Array} */ (path), /** @type {!Array} */ (keys), options)
+  }
+
+  return stringToRegexp(/** @type {string} */ (path), /** @type {!Array} */ (keys), options)
+}
+
+index.parse = parse_1;
+index.compile = compile_1;
+index.tokensToFunction = tokensToFunction_1;
+index.tokensToRegExp = tokensToRegExp_1;
+
+/*  */
+
+var regexpCompileCache = Object.create(null);
+
+function fillParams (
+  path,
+  params,
+  routeMsg
+) {
+  try {
+    var filler =
+      regexpCompileCache[path] ||
+      (regexpCompileCache[path] = index.compile(path));
+    return filler(params || {}, { pretty: true })
+  } catch (e) {
+    if (true) {
+      warn(false, ("missing param for " + routeMsg + ": " + (e.message)));
+    }
+    return ''
+  }
+}
+
+/*  */
+
+function createRouteMap (
+  routes,
+  oldPathList,
+  oldPathMap,
+  oldNameMap
+) {
+  // the path list is used to control path matching priority
+  var pathList = oldPathList || [];
+  var pathMap = oldPathMap || Object.create(null);
+  var nameMap = oldNameMap || Object.create(null);
+
+  routes.forEach(function (route) {
+    addRouteRecord(pathList, pathMap, nameMap, route);
+  });
+
+  // ensure wildcard routes are always at the end
+  for (var i = 0, l = pathList.length; i < l; i++) {
+    if (pathList[i] === '*') {
+      pathList.push(pathList.splice(i, 1)[0]);
+      l--;
+      i--;
+    }
+  }
+
+  return {
+    pathList: pathList,
+    pathMap: pathMap,
+    nameMap: nameMap
+  }
+}
+
+function addRouteRecord (
+  pathList,
+  pathMap,
+  nameMap,
+  route,
+  parent,
+  matchAs
+) {
+  var path = route.path;
+  var name = route.name;
+  if (true) {
+    assert(path != null, "\"path\" is required in a route configuration.");
+    assert(
+      typeof route.component !== 'string',
+      "route config \"component\" for path: " + (String(path || name)) + " cannot be a " +
+      "string id. Use an actual component instead."
+    );
+  }
+
+  var normalizedPath = normalizePath(path, parent);
+  var pathToRegexpOptions = route.pathToRegexpOptions || {};
+
+  if (typeof route.caseSensitive === 'boolean') {
+    pathToRegexpOptions.sensitive = route.caseSensitive;
+  }
+
+  var record = {
+    path: normalizedPath,
+    regex: compileRouteRegex(normalizedPath, pathToRegexpOptions),
+    components: route.components || { default: route.component },
+    instances: {},
+    name: name,
+    parent: parent,
+    matchAs: matchAs,
+    redirect: route.redirect,
+    beforeEnter: route.beforeEnter,
+    meta: route.meta || {},
+    props: route.props == null
+      ? {}
+      : route.components
+        ? route.props
+        : { default: route.props }
+  };
+
+  if (route.children) {
+    // Warn if route is named, does not redirect and has a default child route.
+    // If users navigate to this route by name, the default child will
+    // not be rendered (GH Issue #629)
+    if (true) {
+      if (route.name && !route.redirect && route.children.some(function (child) { return /^\/?$/.test(child.path); })) {
+        warn(
+          false,
+          "Named Route '" + (route.name) + "' has a default child route. " +
+          "When navigating to this named route (:to=\"{name: '" + (route.name) + "'\"), " +
+          "the default child route will not be rendered. Remove the name from " +
+          "this route and use the name of the default child route for named " +
+          "links instead."
+        );
+      }
+    }
+    route.children.forEach(function (child) {
+      var childMatchAs = matchAs
+        ? cleanPath((matchAs + "/" + (child.path)))
+        : undefined;
+      addRouteRecord(pathList, pathMap, nameMap, child, record, childMatchAs);
+    });
+  }
+
+  if (route.alias !== undefined) {
+    var aliases = Array.isArray(route.alias)
+      ? route.alias
+      : [route.alias];
+
+    aliases.forEach(function (alias) {
+      var aliasRoute = {
+        path: alias,
+        children: route.children
+      };
+      addRouteRecord(
+        pathList,
+        pathMap,
+        nameMap,
+        aliasRoute,
+        parent,
+        record.path || '/' // matchAs
+      );
+    });
+  }
+
+  if (!pathMap[record.path]) {
+    pathList.push(record.path);
+    pathMap[record.path] = record;
+  }
+
+  if (name) {
+    if (!nameMap[name]) {
+      nameMap[name] = record;
+    } else if ("development" !== 'production' && !matchAs) {
+      warn(
+        false,
+        "Duplicate named routes definition: " +
+        "{ name: \"" + name + "\", path: \"" + (record.path) + "\" }"
+      );
+    }
+  }
+}
+
+function compileRouteRegex (path, pathToRegexpOptions) {
+  var regex = index(path, [], pathToRegexpOptions);
+  if (true) {
+    var keys = {};
+    regex.keys.forEach(function (key) {
+      warn(!keys[key.name], ("Duplicate param keys in route with path: \"" + path + "\""));
+      keys[key.name] = true;
+    });
+  }
+  return regex
+}
+
+function normalizePath (path, parent) {
+  path = path.replace(/\/$/, '');
+  if (path[0] === '/') { return path }
+  if (parent == null) { return path }
+  return cleanPath(((parent.path) + "/" + path))
+}
+
+/*  */
+
+
+function normalizeLocation (
+  raw,
+  current,
+  append,
+  router
+) {
+  var next = typeof raw === 'string' ? { path: raw } : raw;
+  // named target
+  if (next.name || next._normalized) {
+    return next
+  }
+
+  // relative params
+  if (!next.path && next.params && current) {
+    next = assign({}, next);
+    next._normalized = true;
+    var params = assign(assign({}, current.params), next.params);
+    if (current.name) {
+      next.name = current.name;
+      next.params = params;
+    } else if (current.matched.length) {
+      var rawPath = current.matched[current.matched.length - 1].path;
+      next.path = fillParams(rawPath, params, ("path " + (current.path)));
+    } else if (true) {
+      warn(false, "relative params navigation requires a current route.");
+    }
+    return next
+  }
+
+  var parsedPath = parsePath(next.path || '');
+  var basePath = (current && current.path) || '/';
+  var path = parsedPath.path
+    ? resolvePath(parsedPath.path, basePath, append || next.append)
+    : basePath;
+
+  var query = resolveQuery(
+    parsedPath.query,
+    next.query,
+    router && router.options.parseQuery
+  );
+
+  var hash = next.hash || parsedPath.hash;
+  if (hash && hash.charAt(0) !== '#') {
+    hash = "#" + hash;
+  }
+
+  return {
+    _normalized: true,
+    path: path,
+    query: query,
+    hash: hash
+  }
+}
+
+function assign (a, b) {
+  for (var key in b) {
+    a[key] = b[key];
+  }
+  return a
+}
+
+/*  */
+
+
+function createMatcher (
+  routes,
+  router
+) {
+  var ref = createRouteMap(routes);
+  var pathList = ref.pathList;
+  var pathMap = ref.pathMap;
+  var nameMap = ref.nameMap;
+
+  function addRoutes (routes) {
+    createRouteMap(routes, pathList, pathMap, nameMap);
+  }
+
+  function match (
+    raw,
+    currentRoute,
+    redirectedFrom
+  ) {
+    var location = normalizeLocation(raw, currentRoute, false, router);
+    var name = location.name;
+
+    if (name) {
+      var record = nameMap[name];
+      if (true) {
+        warn(record, ("Route with name '" + name + "' does not exist"));
+      }
+      if (!record) { return _createRoute(null, location) }
+      var paramNames = record.regex.keys
+        .filter(function (key) { return !key.optional; })
+        .map(function (key) { return key.name; });
+
+      if (typeof location.params !== 'object') {
+        location.params = {};
+      }
+
+      if (currentRoute && typeof currentRoute.params === 'object') {
+        for (var key in currentRoute.params) {
+          if (!(key in location.params) && paramNames.indexOf(key) > -1) {
+            location.params[key] = currentRoute.params[key];
+          }
+        }
+      }
+
+      if (record) {
+        location.path = fillParams(record.path, location.params, ("named route \"" + name + "\""));
+        return _createRoute(record, location, redirectedFrom)
+      }
+    } else if (location.path) {
+      location.params = {};
+      for (var i = 0; i < pathList.length; i++) {
+        var path = pathList[i];
+        var record$1 = pathMap[path];
+        if (matchRoute(record$1.regex, location.path, location.params)) {
+          return _createRoute(record$1, location, redirectedFrom)
+        }
+      }
+    }
+    // no match
+    return _createRoute(null, location)
+  }
+
+  function redirect (
+    record,
+    location
+  ) {
+    var originalRedirect = record.redirect;
+    var redirect = typeof originalRedirect === 'function'
+        ? originalRedirect(createRoute(record, location, null, router))
+        : originalRedirect;
+
+    if (typeof redirect === 'string') {
+      redirect = { path: redirect };
+    }
+
+    if (!redirect || typeof redirect !== 'object') {
+      if (true) {
+        warn(
+          false, ("invalid redirect option: " + (JSON.stringify(redirect)))
+        );
+      }
+      return _createRoute(null, location)
+    }
+
+    var re = redirect;
+    var name = re.name;
+    var path = re.path;
+    var query = location.query;
+    var hash = location.hash;
+    var params = location.params;
+    query = re.hasOwnProperty('query') ? re.query : query;
+    hash = re.hasOwnProperty('hash') ? re.hash : hash;
+    params = re.hasOwnProperty('params') ? re.params : params;
+
+    if (name) {
+      // resolved named direct
+      var targetRecord = nameMap[name];
+      if (true) {
+        assert(targetRecord, ("redirect failed: named route \"" + name + "\" not found."));
+      }
+      return match({
+        _normalized: true,
+        name: name,
+        query: query,
+        hash: hash,
+        params: params
+      }, undefined, location)
+    } else if (path) {
+      // 1. resolve relative redirect
+      var rawPath = resolveRecordPath(path, record);
+      // 2. resolve params
+      var resolvedPath = fillParams(rawPath, params, ("redirect route with path \"" + rawPath + "\""));
+      // 3. rematch with existing query and hash
+      return match({
+        _normalized: true,
+        path: resolvedPath,
+        query: query,
+        hash: hash
+      }, undefined, location)
+    } else {
+      if (true) {
+        warn(false, ("invalid redirect option: " + (JSON.stringify(redirect))));
+      }
+      return _createRoute(null, location)
+    }
+  }
+
+  function alias (
+    record,
+    location,
+    matchAs
+  ) {
+    var aliasedPath = fillParams(matchAs, location.params, ("aliased route with path \"" + matchAs + "\""));
+    var aliasedMatch = match({
+      _normalized: true,
+      path: aliasedPath
+    });
+    if (aliasedMatch) {
+      var matched = aliasedMatch.matched;
+      var aliasedRecord = matched[matched.length - 1];
+      location.params = aliasedMatch.params;
+      return _createRoute(aliasedRecord, location)
+    }
+    return _createRoute(null, location)
+  }
+
+  function _createRoute (
+    record,
+    location,
+    redirectedFrom
+  ) {
+    if (record && record.redirect) {
+      return redirect(record, redirectedFrom || location)
+    }
+    if (record && record.matchAs) {
+      return alias(record, location, record.matchAs)
+    }
+    return createRoute(record, location, redirectedFrom, router)
+  }
+
+  return {
+    match: match,
+    addRoutes: addRoutes
+  }
+}
+
+function matchRoute (
+  regex,
+  path,
+  params
+) {
+  var m = path.match(regex);
+
+  if (!m) {
+    return false
+  } else if (!params) {
+    return true
+  }
+
+  for (var i = 1, len = m.length; i < len; ++i) {
+    var key = regex.keys[i - 1];
+    var val = typeof m[i] === 'string' ? decodeURIComponent(m[i]) : m[i];
+    if (key) {
+      params[key.name] = val;
+    }
+  }
+
+  return true
+}
+
+function resolveRecordPath (path, record) {
+  return resolvePath(path, record.parent ? record.parent.path : '/', true)
+}
+
+/*  */
+
+
+var positionStore = Object.create(null);
+
+function setupScroll () {
+  window.addEventListener('popstate', function (e) {
+    saveScrollPosition();
+    if (e.state && e.state.key) {
+      setStateKey(e.state.key);
+    }
+  });
+}
+
+function handleScroll (
+  router,
+  to,
+  from,
+  isPop
+) {
+  if (!router.app) {
+    return
+  }
+
+  var behavior = router.options.scrollBehavior;
+  if (!behavior) {
+    return
+  }
+
+  if (true) {
+    assert(typeof behavior === 'function', "scrollBehavior must be a function");
+  }
+
+  // wait until re-render finishes before scrolling
+  router.app.$nextTick(function () {
+    var position = getScrollPosition();
+    var shouldScroll = behavior(to, from, isPop ? position : null);
+    if (!shouldScroll) {
+      return
+    }
+    var isObject = typeof shouldScroll === 'object';
+    if (isObject && typeof shouldScroll.selector === 'string') {
+      var el = document.querySelector(shouldScroll.selector);
+      if (el) {
+        var offset = shouldScroll.offset && typeof shouldScroll.offset === 'object' ? shouldScroll.offset : {};
+        offset = normalizeOffset(offset);
+        position = getElementPosition(el, offset);
+      } else if (isValidPosition(shouldScroll)) {
+        position = normalizePosition(shouldScroll);
+      }
+    } else if (isObject && isValidPosition(shouldScroll)) {
+      position = normalizePosition(shouldScroll);
+    }
+
+    if (position) {
+      window.scrollTo(position.x, position.y);
+    }
+  });
+}
+
+function saveScrollPosition () {
+  var key = getStateKey();
+  if (key) {
+    positionStore[key] = {
+      x: window.pageXOffset,
+      y: window.pageYOffset
+    };
+  }
+}
+
+function getScrollPosition () {
+  var key = getStateKey();
+  if (key) {
+    return positionStore[key]
+  }
+}
+
+function getElementPosition (el, offset) {
+  var docEl = document.documentElement;
+  var docRect = docEl.getBoundingClientRect();
+  var elRect = el.getBoundingClientRect();
+  return {
+    x: elRect.left - docRect.left - offset.x,
+    y: elRect.top - docRect.top - offset.y
+  }
+}
+
+function isValidPosition (obj) {
+  return isNumber(obj.x) || isNumber(obj.y)
+}
+
+function normalizePosition (obj) {
+  return {
+    x: isNumber(obj.x) ? obj.x : window.pageXOffset,
+    y: isNumber(obj.y) ? obj.y : window.pageYOffset
+  }
+}
+
+function normalizeOffset (obj) {
+  return {
+    x: isNumber(obj.x) ? obj.x : 0,
+    y: isNumber(obj.y) ? obj.y : 0
+  }
+}
+
+function isNumber (v) {
+  return typeof v === 'number'
+}
+
+/*  */
+
+var supportsPushState = inBrowser && (function () {
+  var ua = window.navigator.userAgent;
+
+  if (
+    (ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
+    ua.indexOf('Mobile Safari') !== -1 &&
+    ua.indexOf('Chrome') === -1 &&
+    ua.indexOf('Windows Phone') === -1
+  ) {
+    return false
+  }
+
+  return window.history && 'pushState' in window.history
+})();
+
+// use User Timing api (if present) for more accurate key precision
+var Time = inBrowser && window.performance && window.performance.now
+  ? window.performance
+  : Date;
+
+var _key = genKey();
+
+function genKey () {
+  return Time.now().toFixed(3)
+}
+
+function getStateKey () {
+  return _key
+}
+
+function setStateKey (key) {
+  _key = key;
+}
+
+function pushState (url, replace) {
+  saveScrollPosition();
+  // try...catch the pushState call to get around Safari
+  // DOM Exception 18 where it limits to 100 pushState calls
+  var history = window.history;
+  try {
+    if (replace) {
+      history.replaceState({ key: _key }, '', url);
+    } else {
+      _key = genKey();
+      history.pushState({ key: _key }, '', url);
+    }
+  } catch (e) {
+    window.location[replace ? 'replace' : 'assign'](url);
+  }
+}
+
+function replaceState (url) {
+  pushState(url, true);
+}
+
+/*  */
+
+function runQueue (queue, fn, cb) {
+  var step = function (index) {
+    if (index >= queue.length) {
+      cb();
+    } else {
+      if (queue[index]) {
+        fn(queue[index], function () {
+          step(index + 1);
+        });
+      } else {
+        step(index + 1);
+      }
+    }
+  };
+  step(0);
+}
+
+/*  */
+
+var History = function History (router, base) {
+  this.router = router;
+  this.base = normalizeBase(base);
+  // start with a route object that stands for "nowhere"
+  this.current = START;
+  this.pending = null;
+  this.ready = false;
+  this.readyCbs = [];
+  this.readyErrorCbs = [];
+  this.errorCbs = [];
+};
+
+History.prototype.listen = function listen (cb) {
+  this.cb = cb;
+};
+
+History.prototype.onReady = function onReady (cb, errorCb) {
+  if (this.ready) {
+    cb();
+  } else {
+    this.readyCbs.push(cb);
+    if (errorCb) {
+      this.readyErrorCbs.push(errorCb);
+    }
+  }
+};
+
+History.prototype.onError = function onError (errorCb) {
+  this.errorCbs.push(errorCb);
+};
+
+History.prototype.transitionTo = function transitionTo (location, onComplete, onAbort) {
+    var this$1 = this;
+
+  var route = this.router.match(location, this.current);
+  this.confirmTransition(route, function () {
+    this$1.updateRoute(route);
+    onComplete && onComplete(route);
+    this$1.ensureURL();
+
+    // fire ready cbs once
+    if (!this$1.ready) {
+      this$1.ready = true;
+      this$1.readyCbs.forEach(function (cb) { cb(route); });
+    }
+  }, function (err) {
+    if (onAbort) {
+      onAbort(err);
+    }
+    if (err && !this$1.ready) {
+      this$1.ready = true;
+      this$1.readyErrorCbs.forEach(function (cb) { cb(err); });
+    }
+  });
+};
+
+History.prototype.confirmTransition = function confirmTransition (route, onComplete, onAbort) {
+    var this$1 = this;
+
+  var current = this.current;
+  var abort = function (err) {
+    if (isError(err)) {
+      if (this$1.errorCbs.length) {
+        this$1.errorCbs.forEach(function (cb) { cb(err); });
+      } else {
+        warn(false, 'uncaught error during route navigation:');
+        console.error(err);
+      }
+    }
+    onAbort && onAbort(err);
+  };
+  if (
+    isSameRoute(route, current) &&
+    // in the case the route map has been dynamically appended to
+    route.matched.length === current.matched.length
+  ) {
+    this.ensureURL();
+    return abort()
+  }
+
+  var ref = resolveQueue(this.current.matched, route.matched);
+    var updated = ref.updated;
+    var deactivated = ref.deactivated;
+    var activated = ref.activated;
+
+  var queue = [].concat(
+    // in-component leave guards
+    extractLeaveGuards(deactivated),
+    // global before hooks
+    this.router.beforeHooks,
+    // in-component update hooks
+    extractUpdateHooks(updated),
+    // in-config enter guards
+    activated.map(function (m) { return m.beforeEnter; }),
+    // async components
+    resolveAsyncComponents(activated)
+  );
+
+  this.pending = route;
+  var iterator = function (hook, next) {
+    if (this$1.pending !== route) {
+      return abort()
+    }
+    try {
+      hook(route, current, function (to) {
+        if (to === false || isError(to)) {
+          // next(false) -> abort navigation, ensure current URL
+          this$1.ensureURL(true);
+          abort(to);
+        } else if (
+          typeof to === 'string' ||
+          (typeof to === 'object' && (
+            typeof to.path === 'string' ||
+            typeof to.name === 'string'
+          ))
+        ) {
+          // next('/') or next({ path: '/' }) -> redirect
+          abort();
+          if (typeof to === 'object' && to.replace) {
+            this$1.replace(to);
+          } else {
+            this$1.push(to);
+          }
+        } else {
+          // confirm transition and pass on the value
+          next(to);
+        }
+      });
+    } catch (e) {
+      abort(e);
+    }
+  };
+
+  runQueue(queue, iterator, function () {
+    var postEnterCbs = [];
+    var isValid = function () { return this$1.current === route; };
+    // wait until async components are resolved before
+    // extracting in-component enter guards
+    var enterGuards = extractEnterGuards(activated, postEnterCbs, isValid);
+    var queue = enterGuards.concat(this$1.router.resolveHooks);
+    runQueue(queue, iterator, function () {
+      if (this$1.pending !== route) {
+        return abort()
+      }
+      this$1.pending = null;
+      onComplete(route);
+      if (this$1.router.app) {
+        this$1.router.app.$nextTick(function () {
+          postEnterCbs.forEach(function (cb) { cb(); });
+        });
+      }
+    });
+  });
+};
+
+History.prototype.updateRoute = function updateRoute (route) {
+  var prev = this.current;
+  this.current = route;
+  this.cb && this.cb(route);
+  this.router.afterHooks.forEach(function (hook) {
+    hook && hook(route, prev);
+  });
+};
+
+function normalizeBase (base) {
+  if (!base) {
+    if (inBrowser) {
+      // respect <base> tag
+      var baseEl = document.querySelector('base');
+      base = (baseEl && baseEl.getAttribute('href')) || '/';
+      // strip full URL origin
+      base = base.replace(/^https?:\/\/[^\/]+/, '');
+    } else {
+      base = '/';
+    }
+  }
+  // make sure there's the starting slash
+  if (base.charAt(0) !== '/') {
+    base = '/' + base;
+  }
+  // remove trailing slash
+  return base.replace(/\/$/, '')
+}
+
+function resolveQueue (
+  current,
+  next
+) {
+  var i;
+  var max = Math.max(current.length, next.length);
+  for (i = 0; i < max; i++) {
+    if (current[i] !== next[i]) {
+      break
+    }
+  }
+  return {
+    updated: next.slice(0, i),
+    activated: next.slice(i),
+    deactivated: current.slice(i)
+  }
+}
+
+function extractGuards (
+  records,
+  name,
+  bind,
+  reverse
+) {
+  var guards = flatMapComponents(records, function (def, instance, match, key) {
+    var guard = extractGuard(def, name);
+    if (guard) {
+      return Array.isArray(guard)
+        ? guard.map(function (guard) { return bind(guard, instance, match, key); })
+        : bind(guard, instance, match, key)
+    }
+  });
+  return flatten(reverse ? guards.reverse() : guards)
+}
+
+function extractGuard (
+  def,
+  key
+) {
+  if (typeof def !== 'function') {
+    // extend now so that global mixins are applied.
+    def = _Vue.extend(def);
+  }
+  return def.options[key]
+}
+
+function extractLeaveGuards (deactivated) {
+  return extractGuards(deactivated, 'beforeRouteLeave', bindGuard, true)
+}
+
+function extractUpdateHooks (updated) {
+  return extractGuards(updated, 'beforeRouteUpdate', bindGuard)
+}
+
+function bindGuard (guard, instance) {
+  if (instance) {
+    return function boundRouteGuard () {
+      return guard.apply(instance, arguments)
+    }
+  }
+}
+
+function extractEnterGuards (
+  activated,
+  cbs,
+  isValid
+) {
+  return extractGuards(activated, 'beforeRouteEnter', function (guard, _, match, key) {
+    return bindEnterGuard(guard, match, key, cbs, isValid)
+  })
+}
+
+function bindEnterGuard (
+  guard,
+  match,
+  key,
+  cbs,
+  isValid
+) {
+  return function routeEnterGuard (to, from, next) {
+    return guard(to, from, function (cb) {
+      next(cb);
+      if (typeof cb === 'function') {
+        cbs.push(function () {
+          // #750
+          // if a router-view is wrapped with an out-in transition,
+          // the instance may not have been registered at this time.
+          // we will need to poll for registration until current route
+          // is no longer valid.
+          poll(cb, match.instances, key, isValid);
+        });
+      }
+    })
+  }
+}
+
+function poll (
+  cb, // somehow flow cannot infer this is a function
+  instances,
+  key,
+  isValid
+) {
+  if (instances[key]) {
+    cb(instances[key]);
+  } else if (isValid()) {
+    setTimeout(function () {
+      poll(cb, instances, key, isValid);
+    }, 16);
+  }
+}
+
+function resolveAsyncComponents (matched) {
+  return function (to, from, next) {
+    var hasAsync = false;
+    var pending = 0;
+    var error = null;
+
+    flatMapComponents(matched, function (def, _, match, key) {
+      // if it's a function and doesn't have cid attached,
+      // assume it's an async component resolve function.
+      // we are not using Vue's default async resolving mechanism because
+      // we want to halt the navigation until the incoming component has been
+      // resolved.
+      if (typeof def === 'function' && def.cid === undefined) {
+        hasAsync = true;
+        pending++;
+
+        var resolve = once(function (resolvedDef) {
+          // save resolved on async factory in case it's used elsewhere
+          def.resolved = typeof resolvedDef === 'function'
+            ? resolvedDef
+            : _Vue.extend(resolvedDef);
+          match.components[key] = resolvedDef;
+          pending--;
+          if (pending <= 0) {
+            next();
+          }
+        });
+
+        var reject = once(function (reason) {
+          var msg = "Failed to resolve async component " + key + ": " + reason;
+          "development" !== 'production' && warn(false, msg);
+          if (!error) {
+            error = isError(reason)
+              ? reason
+              : new Error(msg);
+            next(error);
+          }
+        });
+
+        var res;
+        try {
+          res = def(resolve, reject);
+        } catch (e) {
+          reject(e);
+        }
+        if (res) {
+          if (typeof res.then === 'function') {
+            res.then(resolve, reject);
+          } else {
+            // new syntax in Vue 2.3
+            var comp = res.component;
+            if (comp && typeof comp.then === 'function') {
+              comp.then(resolve, reject);
+            }
+          }
+        }
+      }
+    });
+
+    if (!hasAsync) { next(); }
+  }
+}
+
+function flatMapComponents (
+  matched,
+  fn
+) {
+  return flatten(matched.map(function (m) {
+    return Object.keys(m.components).map(function (key) { return fn(
+      m.components[key],
+      m.instances[key],
+      m, key
+    ); })
+  }))
+}
+
+function flatten (arr) {
+  return Array.prototype.concat.apply([], arr)
+}
+
+// in Webpack 2, require.ensure now also returns a Promise
+// so the resolve/reject functions may get called an extra time
+// if the user uses an arrow function shorthand that happens to
+// return that Promise.
+function once (fn) {
+  var called = false;
+  return function () {
+    var args = [], len = arguments.length;
+    while ( len-- ) args[ len ] = arguments[ len ];
+
+    if (called) { return }
+    called = true;
+    return fn.apply(this, args)
+  }
+}
+
+function isError (err) {
+  return Object.prototype.toString.call(err).indexOf('Error') > -1
+}
+
+/*  */
+
+
+var HTML5History = (function (History$$1) {
+  function HTML5History (router, base) {
+    var this$1 = this;
+
+    History$$1.call(this, router, base);
+
+    var expectScroll = router.options.scrollBehavior;
+
+    if (expectScroll) {
+      setupScroll();
+    }
+
+    window.addEventListener('popstate', function (e) {
+      var current = this$1.current;
+      this$1.transitionTo(getLocation(this$1.base), function (route) {
+        if (expectScroll) {
+          handleScroll(router, route, current, true);
+        }
+      });
+    });
+  }
+
+  if ( History$$1 ) HTML5History.__proto__ = History$$1;
+  HTML5History.prototype = Object.create( History$$1 && History$$1.prototype );
+  HTML5History.prototype.constructor = HTML5History;
+
+  HTML5History.prototype.go = function go (n) {
+    window.history.go(n);
+  };
+
+  HTML5History.prototype.push = function push (location, onComplete, onAbort) {
+    var this$1 = this;
+
+    var ref = this;
+    var fromRoute = ref.current;
+    this.transitionTo(location, function (route) {
+      pushState(cleanPath(this$1.base + route.fullPath));
+      handleScroll(this$1.router, route, fromRoute, false);
+      onComplete && onComplete(route);
+    }, onAbort);
+  };
+
+  HTML5History.prototype.replace = function replace (location, onComplete, onAbort) {
+    var this$1 = this;
+
+    var ref = this;
+    var fromRoute = ref.current;
+    this.transitionTo(location, function (route) {
+      replaceState(cleanPath(this$1.base + route.fullPath));
+      handleScroll(this$1.router, route, fromRoute, false);
+      onComplete && onComplete(route);
+    }, onAbort);
+  };
+
+  HTML5History.prototype.ensureURL = function ensureURL (push) {
+    if (getLocation(this.base) !== this.current.fullPath) {
+      var current = cleanPath(this.base + this.current.fullPath);
+      push ? pushState(current) : replaceState(current);
+    }
+  };
+
+  HTML5History.prototype.getCurrentLocation = function getCurrentLocation () {
+    return getLocation(this.base)
+  };
+
+  return HTML5History;
+}(History));
+
+function getLocation (base) {
+  var path = window.location.pathname;
+  if (base && path.indexOf(base) === 0) {
+    path = path.slice(base.length);
+  }
+  return (path || '/') + window.location.search + window.location.hash
+}
+
+/*  */
+
+
+var HashHistory = (function (History$$1) {
+  function HashHistory (router, base, fallback) {
+    History$$1.call(this, router, base);
+    // check history fallback deeplinking
+    if (fallback && checkFallback(this.base)) {
+      return
+    }
+    ensureSlash();
+  }
+
+  if ( History$$1 ) HashHistory.__proto__ = History$$1;
+  HashHistory.prototype = Object.create( History$$1 && History$$1.prototype );
+  HashHistory.prototype.constructor = HashHistory;
+
+  // this is delayed until the app mounts
+  // to avoid the hashchange listener being fired too early
+  HashHistory.prototype.setupListeners = function setupListeners () {
+    var this$1 = this;
+
+    window.addEventListener('hashchange', function () {
+      if (!ensureSlash()) {
+        return
+      }
+      this$1.transitionTo(getHash(), function (route) {
+        replaceHash(route.fullPath);
+      });
+    });
+  };
+
+  HashHistory.prototype.push = function push (location, onComplete, onAbort) {
+    this.transitionTo(location, function (route) {
+      pushHash(route.fullPath);
+      onComplete && onComplete(route);
+    }, onAbort);
+  };
+
+  HashHistory.prototype.replace = function replace (location, onComplete, onAbort) {
+    this.transitionTo(location, function (route) {
+      replaceHash(route.fullPath);
+      onComplete && onComplete(route);
+    }, onAbort);
+  };
+
+  HashHistory.prototype.go = function go (n) {
+    window.history.go(n);
+  };
+
+  HashHistory.prototype.ensureURL = function ensureURL (push) {
+    var current = this.current.fullPath;
+    if (getHash() !== current) {
+      push ? pushHash(current) : replaceHash(current);
+    }
+  };
+
+  HashHistory.prototype.getCurrentLocation = function getCurrentLocation () {
+    return getHash()
+  };
+
+  return HashHistory;
+}(History));
+
+function checkFallback (base) {
+  var location = getLocation(base);
+  if (!/^\/#/.test(location)) {
+    window.location.replace(
+      cleanPath(base + '/#' + location)
+    );
+    return true
+  }
+}
+
+function ensureSlash () {
+  var path = getHash();
+  if (path.charAt(0) === '/') {
+    return true
+  }
+  replaceHash('/' + path);
+  return false
+}
+
+function getHash () {
+  // We can't use window.location.hash here because it's not
+  // consistent across browsers - Firefox will pre-decode it!
+  var href = window.location.href;
+  var index = href.indexOf('#');
+  return index === -1 ? '' : href.slice(index + 1)
+}
+
+function pushHash (path) {
+  window.location.hash = path;
+}
+
+function replaceHash (path) {
+  var href = window.location.href;
+  var i = href.indexOf('#');
+  var base = i >= 0 ? href.slice(0, i) : href;
+  window.location.replace((base + "#" + path));
+}
+
+/*  */
+
+
+var AbstractHistory = (function (History$$1) {
+  function AbstractHistory (router, base) {
+    History$$1.call(this, router, base);
+    this.stack = [];
+    this.index = -1;
+  }
+
+  if ( History$$1 ) AbstractHistory.__proto__ = History$$1;
+  AbstractHistory.prototype = Object.create( History$$1 && History$$1.prototype );
+  AbstractHistory.prototype.constructor = AbstractHistory;
+
+  AbstractHistory.prototype.push = function push (location, onComplete, onAbort) {
+    var this$1 = this;
+
+    this.transitionTo(location, function (route) {
+      this$1.stack = this$1.stack.slice(0, this$1.index + 1).concat(route);
+      this$1.index++;
+      onComplete && onComplete(route);
+    }, onAbort);
+  };
+
+  AbstractHistory.prototype.replace = function replace (location, onComplete, onAbort) {
+    var this$1 = this;
+
+    this.transitionTo(location, function (route) {
+      this$1.stack = this$1.stack.slice(0, this$1.index).concat(route);
+      onComplete && onComplete(route);
+    }, onAbort);
+  };
+
+  AbstractHistory.prototype.go = function go (n) {
+    var this$1 = this;
+
+    var targetIndex = this.index + n;
+    if (targetIndex < 0 || targetIndex >= this.stack.length) {
+      return
+    }
+    var route = this.stack[targetIndex];
+    this.confirmTransition(route, function () {
+      this$1.index = targetIndex;
+      this$1.updateRoute(route);
+    });
+  };
+
+  AbstractHistory.prototype.getCurrentLocation = function getCurrentLocation () {
+    var current = this.stack[this.stack.length - 1];
+    return current ? current.fullPath : '/'
+  };
+
+  AbstractHistory.prototype.ensureURL = function ensureURL () {
+    // noop
+  };
+
+  return AbstractHistory;
+}(History));
+
+/*  */
+
+var VueRouter = function VueRouter (options) {
+  if ( options === void 0 ) options = {};
+
+  this.app = null;
+  this.apps = [];
+  this.options = options;
+  this.beforeHooks = [];
+  this.resolveHooks = [];
+  this.afterHooks = [];
+  this.matcher = createMatcher(options.routes || [], this);
+
+  var mode = options.mode || 'hash';
+  this.fallback = mode === 'history' && !supportsPushState && options.fallback !== false;
+  if (this.fallback) {
+    mode = 'hash';
+  }
+  if (!inBrowser) {
+    mode = 'abstract';
+  }
+  this.mode = mode;
+
+  switch (mode) {
+    case 'history':
+      this.history = new HTML5History(this, options.base);
+      break
+    case 'hash':
+      this.history = new HashHistory(this, options.base, this.fallback);
+      break
+    case 'abstract':
+      this.history = new AbstractHistory(this, options.base);
+      break
+    default:
+      if (true) {
+        assert(false, ("invalid mode: " + mode));
+      }
+  }
+};
+
+var prototypeAccessors = { currentRoute: {} };
+
+VueRouter.prototype.match = function match (
+  raw,
+  current,
+  redirectedFrom
+) {
+  return this.matcher.match(raw, current, redirectedFrom)
+};
+
+prototypeAccessors.currentRoute.get = function () {
+  return this.history && this.history.current
+};
+
+VueRouter.prototype.init = function init (app /* Vue component instance */) {
+    var this$1 = this;
+
+  "development" !== 'production' && assert(
+    install.installed,
+    "not installed. Make sure to call `Vue.use(VueRouter)` " +
+    "before creating root instance."
+  );
+
+  this.apps.push(app);
+
+  // main app already initialized.
+  if (this.app) {
+    return
+  }
+
+  this.app = app;
+
+  var history = this.history;
+
+  if (history instanceof HTML5History) {
+    history.transitionTo(history.getCurrentLocation());
+  } else if (history instanceof HashHistory) {
+    var setupHashListener = function () {
+      history.setupListeners();
+    };
+    history.transitionTo(
+      history.getCurrentLocation(),
+      setupHashListener,
+      setupHashListener
+    );
+  }
+
+  history.listen(function (route) {
+    this$1.apps.forEach(function (app) {
+      app._route = route;
+    });
+  });
+};
+
+VueRouter.prototype.beforeEach = function beforeEach (fn) {
+  return registerHook(this.beforeHooks, fn)
+};
+
+VueRouter.prototype.beforeResolve = function beforeResolve (fn) {
+  return registerHook(this.resolveHooks, fn)
+};
+
+VueRouter.prototype.afterEach = function afterEach (fn) {
+  return registerHook(this.afterHooks, fn)
+};
+
+VueRouter.prototype.onReady = function onReady (cb, errorCb) {
+  this.history.onReady(cb, errorCb);
+};
+
+VueRouter.prototype.onError = function onError (errorCb) {
+  this.history.onError(errorCb);
+};
+
+VueRouter.prototype.push = function push (location, onComplete, onAbort) {
+  this.history.push(location, onComplete, onAbort);
+};
+
+VueRouter.prototype.replace = function replace (location, onComplete, onAbort) {
+  this.history.replace(location, onComplete, onAbort);
+};
+
+VueRouter.prototype.go = function go (n) {
+  this.history.go(n);
+};
+
+VueRouter.prototype.back = function back () {
+  this.go(-1);
+};
+
+VueRouter.prototype.forward = function forward () {
+  this.go(1);
+};
+
+VueRouter.prototype.getMatchedComponents = function getMatchedComponents (to) {
+  var route = to
+    ? to.matched
+      ? to
+      : this.resolve(to).route
+    : this.currentRoute;
+  if (!route) {
+    return []
+  }
+  return [].concat.apply([], route.matched.map(function (m) {
+    return Object.keys(m.components).map(function (key) {
+      return m.components[key]
+    })
+  }))
+};
+
+VueRouter.prototype.resolve = function resolve (
+  to,
+  current,
+  append
+) {
+  var location = normalizeLocation(
+    to,
+    current || this.history.current,
+    append,
+    this
+  );
+  var route = this.match(location, current);
+  var fullPath = route.redirectedFrom || route.fullPath;
+  var base = this.history.base;
+  var href = createHref(base, fullPath, this.mode);
+  return {
+    location: location,
+    route: route,
+    href: href,
+    // for backwards compat
+    normalizedTo: location,
+    resolved: route
+  }
+};
+
+VueRouter.prototype.addRoutes = function addRoutes (routes) {
+  this.matcher.addRoutes(routes);
+  if (this.history.current !== START) {
+    this.history.transitionTo(this.history.getCurrentLocation());
+  }
+};
+
+Object.defineProperties( VueRouter.prototype, prototypeAccessors );
+
+function registerHook (list, fn) {
+  list.push(fn);
+  return function () {
+    var i = list.indexOf(fn);
+    if (i > -1) { list.splice(i, 1); }
+  }
+}
+
+function createHref (base, fullPath, mode) {
+  var path = mode === 'hash' ? '#' + fullPath : fullPath;
+  return base ? cleanPath(base + '/' + path) : path
+}
+
+VueRouter.install = install;
+VueRouter.version = '2.6.0';
+
+if (inBrowser && window.Vue) {
+  window.Vue.use(VueRouter);
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (VueRouter);
+
+
+/***/ }),
+
 /***/ "./resources/assets/js/app.js":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -52422,7 +52502,7 @@ __webpack_require__("./resources/assets/js/bootstrap.js");
 //Vue
 window.Vue = __webpack_require__("./node_modules/_vue@2.3.4@vue/dist/vue.common.js");
 //富文本编辑器
-window.E = __webpack_require__("./node_modules/_wangeditor@3.0.3@wangeditor/release/wangEditor.js");
+window.E = __webpack_require__("./node_modules/_wangeditor@3.0.4@wangeditor/release/wangEditor.js");
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -52548,13 +52628,13 @@ var app = new Vue({
                 });
             }
         }, 1000),
-        onToggleComment: function onToggleComment(key) {
+        onToggleComment: function onToggleComment(key, isQuetion) {
             if (key instanceof Object) {
                 this.$refs.question.toggleShow('question');
             } else if (key === 'topAnswer') {
                 this.$refs.topAnswer.toggleShow('answer');
-            } else {
-                this.$refs[key].toggleShow('answer');
+            } else if (isQuetion === 'question') {
+                this.$refs[key].toggleShow('question');
             }
         },
         onGetFollower: function onGetFollower(type) {
@@ -52609,7 +52689,7 @@ try {
   window.$ = window.jQuery = __webpack_require__("./node_modules/_jquery@3.2.1@jquery/dist/jquery.js");
 
   __webpack_require__("./node_modules/_bootstrap-sass@3.3.7@bootstrap-sass/assets/javascripts/bootstrap.js");
-  __webpack_require__("./node_modules/_holderjs@2.9.4@holderjs/holder.js");
+  __webpack_require__("./node_modules/holderjs/holder.js");
 } catch (e) {}
 
 /**
@@ -52659,21 +52739,21 @@ if (token) {
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-d8285ce6\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/comment-list.vue")
+  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-309f0200\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/comment-list.vue")
 }
 var Component = __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/component-normalizer.js")(
   /* script */
   __webpack_require__("./node_modules/_babel-loader@7.1.0@babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]]}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/components/comment-list.vue"),
   /* template */
-  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-d8285ce6\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/comment-list.vue"),
+  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-309f0200\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/comment-list.vue"),
   /* styles */
   injectStyle,
   /* scopeId */
-  "data-v-d8285ce6",
+  "data-v-309f0200",
   /* moduleIdentifier (server only) */
   null
 )
-Component.options.__file = "C:\\Users\\Angry\\Code\\laravel\\resources\\assets\\js\\components\\comment-list.vue"
+Component.options.__file = "D:\\xampp\\htdocs\\qwe\\zhihu-php179\\resources\\assets\\js\\components\\comment-list.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] comment-list.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -52684,9 +52764,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-d8285ce6", Component.options)
+    hotAPI.createRecord("data-v-309f0200", Component.options)
   } else {
-    hotAPI.reload("data-v-d8285ce6", Component.options)
+    hotAPI.reload("data-v-309f0200", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -52704,21 +52784,21 @@ module.exports = Component.exports
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-0067a07c\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/follower-list.vue")
+  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2538a169\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/follower-list.vue")
 }
 var Component = __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/component-normalizer.js")(
   /* script */
   __webpack_require__("./node_modules/_babel-loader@7.1.0@babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]]}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/components/follower-list.vue"),
   /* template */
-  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-0067a07c\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/follower-list.vue"),
+  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-2538a169\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/follower-list.vue"),
   /* styles */
   injectStyle,
   /* scopeId */
-  "data-v-0067a07c",
+  "data-v-2538a169",
   /* moduleIdentifier (server only) */
   null
 )
-Component.options.__file = "C:\\Users\\Angry\\Code\\laravel\\resources\\assets\\js\\components\\follower-list.vue"
+Component.options.__file = "D:\\xampp\\htdocs\\qwe\\zhihu-php179\\resources\\assets\\js\\components\\follower-list.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] follower-list.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -52729,9 +52809,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-0067a07c", Component.options)
+    hotAPI.createRecord("data-v-2538a169", Component.options)
   } else {
-    hotAPI.reload("data-v-0067a07c", Component.options)
+    hotAPI.reload("data-v-2538a169", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -52749,21 +52829,21 @@ module.exports = Component.exports
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-749b7bc0\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_content.vue")
+  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-c3bdf39a\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_content.vue")
 }
 var Component = __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/component-normalizer.js")(
   /* script */
   __webpack_require__("./node_modules/_babel-loader@7.1.0@babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]]}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/components/search-view/_content.vue"),
   /* template */
-  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-749b7bc0\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_content.vue"),
+  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-c3bdf39a\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_content.vue"),
   /* styles */
   injectStyle,
   /* scopeId */
-  "data-v-749b7bc0",
+  "data-v-c3bdf39a",
   /* moduleIdentifier (server only) */
   null
 )
-Component.options.__file = "C:\\Users\\Angry\\Code\\laravel\\resources\\assets\\js\\components\\search-view\\_content.vue"
+Component.options.__file = "D:\\xampp\\htdocs\\qwe\\zhihu-php179\\resources\\assets\\js\\components\\search-view\\_content.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] _content.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -52774,9 +52854,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-749b7bc0", Component.options)
+    hotAPI.createRecord("data-v-c3bdf39a", Component.options)
   } else {
-    hotAPI.reload("data-v-749b7bc0", Component.options)
+    hotAPI.reload("data-v-c3bdf39a", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -52794,21 +52874,21 @@ module.exports = Component.exports
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4555aad0\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_people.vue")
+  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-5a8b05c5\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_people.vue")
 }
 var Component = __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/component-normalizer.js")(
   /* script */
   __webpack_require__("./node_modules/_babel-loader@7.1.0@babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]]}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/components/search-view/_people.vue"),
   /* template */
-  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-4555aad0\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_people.vue"),
+  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-5a8b05c5\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_people.vue"),
   /* styles */
   injectStyle,
   /* scopeId */
-  "data-v-4555aad0",
+  "data-v-5a8b05c5",
   /* moduleIdentifier (server only) */
   null
 )
-Component.options.__file = "C:\\Users\\Angry\\Code\\laravel\\resources\\assets\\js\\components\\search-view\\_people.vue"
+Component.options.__file = "D:\\xampp\\htdocs\\qwe\\zhihu-php179\\resources\\assets\\js\\components\\search-view\\_people.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] _people.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -52819,9 +52899,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-4555aad0", Component.options)
+    hotAPI.createRecord("data-v-5a8b05c5", Component.options)
   } else {
-    hotAPI.reload("data-v-4555aad0", Component.options)
+    hotAPI.reload("data-v-5a8b05c5", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -52839,21 +52919,21 @@ module.exports = Component.exports
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-4d4e4936\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_topic.vue")
+  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-1789d469\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js?indentedSyntax!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/_topic.vue")
 }
 var Component = __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/component-normalizer.js")(
   /* script */
   __webpack_require__("./node_modules/_babel-loader@7.1.0@babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]]}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/components/search-view/_topic.vue"),
   /* template */
-  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-4d4e4936\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_topic.vue"),
+  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-1789d469\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/preprocessor.js?engine=pug!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/_topic.vue"),
   /* styles */
   injectStyle,
   /* scopeId */
-  "data-v-4d4e4936",
+  "data-v-1789d469",
   /* moduleIdentifier (server only) */
   null
 )
-Component.options.__file = "C:\\Users\\Angry\\Code\\laravel\\resources\\assets\\js\\components\\search-view\\_topic.vue"
+Component.options.__file = "D:\\xampp\\htdocs\\qwe\\zhihu-php179\\resources\\assets\\js\\components\\search-view\\_topic.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] _topic.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -52864,9 +52944,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-4d4e4936", Component.options)
+    hotAPI.createRecord("data-v-1789d469", Component.options)
   } else {
-    hotAPI.reload("data-v-4d4e4936", Component.options)
+    hotAPI.reload("data-v-1789d469", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -52884,21 +52964,21 @@ module.exports = Component.exports
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-633a38d8\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/search-view.vue")
+  __webpack_require__("./node_modules/_vue-style-loader@3.0.1@vue-style-loader/index.js!./node_modules/_css-loader@0.28.4@css-loader/index.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-8ca53f7e\",\"scoped\":true,\"hasInlineConfig\":true}!./node_modules/_sass-loader@6.0.6@sass-loader/lib/loader.js!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=styles&index=0!./resources/assets/js/components/search-view/search-view.vue")
 }
 var Component = __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/component-normalizer.js")(
   /* script */
   __webpack_require__("./node_modules/_babel-loader@7.1.0@babel-loader/lib/index.js?{\"cacheDirectory\":true,\"presets\":[[\"env\",{\"modules\":false,\"targets\":{\"browsers\":[\"> 2%\"],\"uglify\":true}}]]}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=script&index=0!./resources/assets/js/components/search-view/search-view.vue"),
   /* template */
-  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-633a38d8\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/search-view.vue"),
+  __webpack_require__("./node_modules/_vue-loader@12.2.1@vue-loader/lib/template-compiler/index.js?{\"id\":\"data-v-8ca53f7e\"}!./node_modules/_vue-loader@12.2.1@vue-loader/lib/selector.js?type=template&index=0!./resources/assets/js/components/search-view/search-view.vue"),
   /* styles */
   injectStyle,
   /* scopeId */
-  "data-v-633a38d8",
+  "data-v-8ca53f7e",
   /* moduleIdentifier (server only) */
   null
 )
-Component.options.__file = "C:\\Users\\Angry\\Code\\laravel\\resources\\assets\\js\\components\\search-view\\search-view.vue"
+Component.options.__file = "D:\\xampp\\htdocs\\qwe\\zhihu-php179\\resources\\assets\\js\\components\\search-view\\search-view.vue"
 if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key.substr(0, 2) !== "__"})) {console.error("named exports are not supported in *.vue files.")}
 if (Component.options.functional) {console.error("[vue-loader] search-view.vue: functional components are not supported with templates, they should use render functions.")}
 
@@ -52909,9 +52989,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-633a38d8", Component.options)
+    hotAPI.createRecord("data-v-8ca53f7e", Component.options)
   } else {
-    hotAPI.reload("data-v-633a38d8", Component.options)
+    hotAPI.reload("data-v-8ca53f7e", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -52920,6 +53000,35 @@ if (false) {(function () {
 
 module.exports = Component.exports
 
+
+/***/ }),
+
+/***/ "./resources/assets/js/router/search.js":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__("./node_modules/_vue@2.3.4@vue/dist/vue.common.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_router__ = __webpack_require__("./node_modules/vue-router/dist/vue-router.esm.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_components_search_view_content_vue__ = __webpack_require__("./resources/assets/js/components/search-view/_content.vue");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_components_search_view_content_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_components_search_view_content_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_components_search_view_people_vue__ = __webpack_require__("./resources/assets/js/components/search-view/_people.vue");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_components_search_view_people_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_components_search_view_people_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_components_search_view_topic_vue__ = __webpack_require__("./resources/assets/js/components/search-view/_topic.vue");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_components_search_view_topic_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_components_search_view_topic_vue__);
+
+
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_1_vue_router__["a" /* default */]);
+
+
+
+
+
+var routes = [{ path: '/', redirect: '/content' }, { path: '/content', component: __WEBPACK_IMPORTED_MODULE_2_components_search_view_content_vue___default.a }, { path: '/people', component: __WEBPACK_IMPORTED_MODULE_3_components_search_view_people_vue___default.a }, { path: '/topic', component: __WEBPACK_IMPORTED_MODULE_4_components_search_view_topic_vue___default.a }];
+
+/* harmony default export */ __webpack_exports__["a"] = (new __WEBPACK_IMPORTED_MODULE_1_vue_router__["a" /* default */]({
+    routes: routes
+}));
 
 /***/ }),
 

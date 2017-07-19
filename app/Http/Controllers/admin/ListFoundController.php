@@ -68,40 +68,40 @@ class ListFoundController extends Controller
      *  
      * @return \Illuminate\Http\Response
      */
-    public function ajax(Request $request)
-    {
-         // 删除旧得图片
-        $id=$request->id;
-        $qus = questions::find($id);
-        // echo $qus->qs_img;die;
-        if(!(empty($qus->qs_img) || $qus->qs_img=='/img/avatar04.png')){
-        unlink('./'.$qus->qs_img);
-            // echo '222';
-        }
+    // public function ajax(Request $request)
+    // {
+    //      // 删除旧得图片
+    //     $id=$request->id;
+    //     $qus = questions::find($id);
+    //     // echo $qus->qs_img;die;
+    //     if(!(empty($qus->qs_img) || $qus->qs_img=='/img/avatar04.png')){
+    //     unlink('./'.$qus->qs_img);
+    //         // echo '222';
+    //     }
 
-        if($request->hasFile('qs_img')) {
-            //创建文件的名字
-            $filename = time().rand(10000,99999);
-            //获取文件的后缀
-            $suffix = $request->file('qs_img')->getClientOriginalExtension();
-            //文件夹
-            $dirname = './uploads/qs/';
-            //文件名
-            $file = $filename .'.'. $suffix;
-            //移动
-            $request->file('qs_img')->move($dirname,$file);
-            //修改图片属性
-            $qus->qs_img = $dirname.$file;
-            // 上传数据
-            // echo ('/uploads/qs/'.$filename);
-            if($qus->save()){
-                echo ('/uploads/qs/'.$file);
-            }else{
-                echo '图片上传失败';
-            }
-        }
+    //     if($request->hasFile('qs_img')) {
+    //         //创建文件的名字
+    //         $filename = time().rand(10000,99999);
+    //         //获取文件的后缀
+    //         $suffix = $request->file('qs_img')->getClientOriginalExtension();
+    //         //文件夹
+    //         $dirname = './uploads/qs/';
+    //         //文件名
+    //         $file = $filename .'.'. $suffix;
+    //         //移动
+    //         $request->file('qs_img')->move($dirname,$file);
+    //         //修改图片属性
+    //         $qus->qs_img = $dirname.$file;
+    //         // 上传数据
+    //         // echo ('/uploads/qs/'.$filename);
+    //         if($qus->save()){
+    //             echo ('/uploads/qs/'.$file);
+    //         }else{
+    //             echo '图片上传失败';
+    //         }
+    //     }
 
-    }
+    // }
     /**
      * 后台模块中的发现列表数据的编辑执行
      *  
@@ -113,19 +113,16 @@ class ListFoundController extends Controller
         $this->validate($request, [
             'title' => 'required',
             'created_at' => 'required',
-            'topic' =>'required',
             ],[
             'title.required' => 'sorry！您还未写下您的问题',
             'title.unique' => 'sorry！您的问题已存在',
             'create_at.required' => 'sorry！您需要给定一个提问时间',
-            'topic.required' => 'sorry！您需要给您的问题选一个类别'
             ]);
 
         $questions = questions::findOrFail($request->id);
         $questions -> title = $request->title;
         $questions -> updated_at = time();
         $questions -> created_at = $request->created_at;
-        $questions -> topic = $request->topic;
         $questions -> describe = $request->describe;
         // 更新数据库
         // dd($request->pag);

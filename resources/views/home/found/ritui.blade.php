@@ -30,7 +30,7 @@
 					@endif
 				 </a>
 				<span> . </span>
-				<a class="comment" rel="popover"  v-on:click="onToggleComment({{ $key }})"><i class="fa fa-commenting-o" aria-hidden="true"></i> <span>106</span>条评论 </a>
+				<a class="comment" rel="popover"  v-on:click="onToggleComment({{ $key }}, 'question')"><i class="fa fa-commenting-o" aria-hidden="true"></i> 评论 </a>
 				<span> . </span>
 
 				<div class="lizi_hide">

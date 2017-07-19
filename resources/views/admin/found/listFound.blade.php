@@ -24,7 +24,7 @@
                     <div class="widget-body  am-fr">
                         <div class="am-u-sm-12 am-u-md-6 am-u-lg-6">
                             <div class="am-form-group">
-                                <div id="info">
+                                <div id="info" class=" am-form-message am-success am-bg-success">
                                 {{Session::get('info')}}
                                 </div>
                             </div>

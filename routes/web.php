@@ -119,6 +119,8 @@ Route::post('admin/AD','admin\ListAdvertisementController@editAjax');//ajax更�
 Route::post('admin/ad/ajax','admin\ListAdvertisementController@ajax');// ajax更新图片
 Route::get('admin/listAD','admin\ListAdvertisementController@index')->name('listAD');
 Route::get('admin/adDel/{id}','admin\ListAdvertisementController@del');
+Route::get('admin/adEdit/{id}','admin\ListAdvertisementController@adEdit')->name('adEdit');
+Route::post('admin/doAdEdit','admin\ListAdvertisementController@doAdEdit')->name('doAdEdit');
 
 //问题页
 Route::get('question/{id}', 'QuestionController@show')->middleware('auth')->name('question.show');

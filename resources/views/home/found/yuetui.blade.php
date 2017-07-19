@@ -4,7 +4,7 @@
 <li role="presentation" class="active"><a href="/found/yuetui" >本月最热</a></li>
 @stop
 @section('record')
-@foreach ($monthHot as $v)
+@foreach ($monthHot as $key => $v)
 <div class="lizi">
 	<a href="#" >
 		<h5>{{$v->title}}</h5>
@@ -30,7 +30,7 @@
 					@endif
 				 </a>
 				<span> . </span>
-				<a class="comment" rel="popover"><i class="fa fa-commenting-o" aria-hidden="true"></i> <span>106</span>条评论 </a>
+				<a class="comment" rel="popover"  v-on:click="onToggleComment({{ $key }}, 'question')"><i class="fa fa-commenting-o" aria-hidden="true"></i> 评论 </a>
 				<span> . </span>
 
 				<div class="lizi_hide">
@@ -55,6 +55,9 @@
 		</div>
 	</div>
 </div>
+<!-- 评论 start -->
+<comment-list parent-id="{{ $v->id }}" ref="{{ $key }}"></comment-list>
+<!-- 评论 end -->
 @endforeach
 {{ $monthHot->links() }}
 @stop
