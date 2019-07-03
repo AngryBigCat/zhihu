@@ -1,5 +1,5 @@
 # zhihu-php179
-this is lampbrother179 class second phase project
+like zhihu.com project
 
 ## Installation
 You can clone the project using git:
