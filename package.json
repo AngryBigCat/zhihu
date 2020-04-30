@@ -18,7 +18,7 @@
     "font-awesome": "^4.7.0",
     "holderjs": "^2.9.4",
     "jade": "^1.11.0",
-    "jquery": "^3.1.1",
+    "jquery": "^3.5.0",
     "jstransformer-markdown-it": "^2.0.0",
     "laravel-mix": "^1.0",
     "lodash": "^4.17.4",
